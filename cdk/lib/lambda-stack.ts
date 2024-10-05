@@ -7,6 +7,7 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 
 export class LambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, envs: Record<string, string>, props?: cdk.StackProps) {
@@ -21,6 +22,15 @@ export class LambdaStack extends cdk.Stack {
     const webBucket = s3.Bucket.fromBucketArn(this, envs.WEB_BUCKET, webBucketArn);
 
     const repository = ecr.Repository.fromRepositoryName(this, `${envs.APP_NAME}-ecr`, envs.APP_NAME);
+
+    // 创建一个 DynamoDB 表
+    new dynamodb.Table(this, envs.USER_TBL, {
+      tableName: envs.USER_TBL,
+      partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST, // 按需计费模式
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // 销毁堆栈时销毁表
+    });
 
     const serverLambda = new lambda.Function(this, `${envs.APP_NAME}-server-${envs.ENV}`, {
       functionName: `${envs.APP_NAME}-server-${envs.ENV}`,

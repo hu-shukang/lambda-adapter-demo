@@ -1,6 +1,8 @@
 import { vitePlugin as remix } from '@remix-run/dev';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import tailwindcss from 'tailwindcss';
+import autoprefixer from 'autoprefixer';
 
 declare module '@remix-run/server-runtime' {
   interface Future {
@@ -14,8 +16,13 @@ export default defineConfig({
       future: {
         unstable_singleFetch: true,
       },
-      ignoredRouteFiles: ['"**/*.{css,js,png,jpg,jpeg,gif,svg,webp,ico,woff,woff2,ttf,eot,json}"'],
+      // ignoredRouteFiles: ['"**/*.{css,js,png,jpg,jpeg,gif,svg,webp,ico,woff,woff2,ttf,eot,json}"'],
     }),
     tsconfigPaths(),
   ],
+  css: {
+    postcss: {
+      plugins: [tailwindcss, autoprefixer],
+    },
+  },
 });
