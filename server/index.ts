@@ -1,7 +1,7 @@
-import process from "node:process";
-import { remixFastify } from "@mcansh/remix-fastify";
-import { fastify } from "fastify";
-import sourceMapSupport from "source-map-support";
+import process from 'node:process';
+import { remixFastify } from '@mcansh/remix-fastify';
+import { fastify } from 'fastify';
+import sourceMapSupport from 'source-map-support';
 
 sourceMapSupport.install();
 
@@ -11,5 +11,5 @@ await app.register(remixFastify);
 
 const desiredPort = Number(process.env.PORT) || 3000;
 
-let address = await app.listen({ port: desiredPort, host: "0.0.0.0" });
+let address = await app.listen({ port: desiredPort, host: '0.0.0.0' });
 console.log(`app ready: ${address}`);
