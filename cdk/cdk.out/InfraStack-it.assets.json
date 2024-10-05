@@ -1,0 +1,19 @@
+{
+  "version": "38.0.1",
+  "files": {
+    "66e3ac1676900375e1b4c45a2d566eff95169bdbe3200d456fb49e298ba7d7b1": {
+      "source": {
+        "path": "InfraStack-it.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "471112651100-ap-northeast-1": {
+          "bucketName": "hsk-cdk",
+          "objectKey": "lambda-adapter-demo-cdk66e3ac1676900375e1b4c45a2d566eff95169bdbe3200d456fb49e298ba7d7b1.json",
+          "region": "ap-northeast-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

@@ -1,0 +1,249 @@
+{
+ "Resources": {
+  "lambdaadapterdemoassetit3A5F100C": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketName": "lambda-adapter-demo-asset-it"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "InfraStack-it/lambda-adapter-demo-asset-it/Resource"
+   }
+  },
+  "lambdaadapterdemowebit99A671FD": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketName": "lambda-adapter-demo-web-it"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "InfraStack-it/lambda-adapter-demo-web-it/Resource"
+   }
+  },
+  "lambdaadapterdemobuilditF1A68490": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "EncryptionKey": "alias/aws/s3",
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "EnvironmentVariables": [
+      {
+       "Name": "APP_NAME",
+       "Type": "PLAINTEXT",
+       "Value": "lambda-adapter-demo"
+      },
+      {
+       "Name": "ENV",
+       "Type": "PLAINTEXT",
+       "Value": "it"
+      },
+      {
+       "Name": "SYNTH_TEMPLETE",
+       "Type": "PLAINTEXT",
+       "Value": "lambda-adapter-demo-synth-template-it.yaml"
+      },
+      {
+       "Name": "WEB_BUCKET",
+       "Type": "PLAINTEXT",
+       "Value": {
+        "Ref": "lambdaadapterdemowebit99A671FD"
+       }
+      },
+      {
+       "Name": "ASSET_BUCKET",
+       "Type": "PLAINTEXT",
+       "Value": {
+        "Ref": "lambdaadapterdemoassetit3A5F100C"
+       }
+      }
+     ],
+     "Image": "aws/codebuild/amazonlinux2-x86_64-standard:5.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "Name": "lambda-adapter-demo-build-it",
+    "QueuedTimeoutInMinutes": 30,
+    "ServiceRole": "arn:aws:iam::471112651100:role/CodePipelineRole",
+    "Source": {
+     "BuildSpec": "buildspec.yml",
+     "Type": "CODEPIPELINE"
+    },
+    "TimeoutInMinutes": 30
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfraStack-it/lambda-adapter-demo-build-it/Resource"
+   }
+  },
+  "lambdaadapterdemopipelineitE64F37B6": {
+   "Type": "AWS::CodePipeline::Pipeline",
+   "Properties": {
+    "ArtifactStore": {
+     "Location": {
+      "Ref": "lambdaadapterdemoassetit3A5F100C"
+     },
+     "Type": "S3"
+    },
+    "Name": "lambda-adapter-demo-pipeline-it",
+    "PipelineType": "V1",
+    "RoleArn": "arn:aws:iam::471112651100:role/CodePipelineRole",
+    "Stages": [
+     {
+      "Actions": [
+       {
+        "ActionTypeId": {
+         "Category": "Source",
+         "Owner": "ThirdParty",
+         "Provider": "GitHub",
+         "Version": "1"
+        },
+        "Configuration": {
+         "Owner": "hu-shukang",
+         "Repo": "lambda-adapter-demo",
+         "Branch": "it",
+         "OAuthToken": "{{resolve:secretsmanager:github-token:SecretString:oauthToken::}}",
+         "PollForSourceChanges": false
+        },
+        "Name": "GitHub_Source",
+        "OutputArtifacts": [
+         {
+          "Name": "Artifact_Source_GitHub_Source"
+         }
+        ],
+        "RunOrder": 1
+       }
+      ],
+      "Name": "Source"
+     },
+     {
+      "Actions": [
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "lambdaadapterdemobuilditF1A68490"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "Artifact_Source_GitHub_Source"
+         }
+        ],
+        "Name": "Build",
+        "OutputArtifacts": [
+         {
+          "Name": "Artifact_Build_Build"
+         }
+        ],
+        "RoleArn": "arn:aws:iam::471112651100:role/CodePipelineRole",
+        "RunOrder": 2
+       }
+      ],
+      "Name": "Build"
+     },
+     {
+      "Actions": [
+       {
+        "ActionTypeId": {
+         "Category": "Deploy",
+         "Owner": "AWS",
+         "Provider": "CloudFormation",
+         "Version": "1"
+        },
+        "Configuration": {
+         "StackName": "lambda-adapter-demo-it",
+         "Capabilities": "CAPABILITY_NAMED_IAM",
+         "RoleArn": "arn:aws:iam::471112651100:role/CodePipelineRole",
+         "ActionMode": "REPLACE_ON_FAILURE",
+         "TemplatePath": "Artifact_Build_Build::lambda-adapter-demo-synth-template-it.yaml"
+        },
+        "InputArtifacts": [
+         {
+          "Name": "Artifact_Build_Build"
+         }
+        ],
+        "Name": "CloudFormation-CreateUpdateStack",
+        "RoleArn": "arn:aws:iam::471112651100:role/CodePipelineRole",
+        "RunOrder": 3
+       }
+      ],
+      "Name": "Deploy"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfraStack-it/lambda-adapter-demo-pipeline-it/Resource"
+   }
+  },
+  "lambdaadapterdemopipelineitSourceGitHubSourceWebhookResource950AB196": {
+   "Type": "AWS::CodePipeline::Webhook",
+   "Properties": {
+    "Authentication": "GITHUB_HMAC",
+    "AuthenticationConfiguration": {
+     "SecretToken": "{{resolve:secretsmanager:github-token:SecretString:oauthToken::}}"
+    },
+    "Filters": [
+     {
+      "JsonPath": "$.ref",
+      "MatchEquals": "refs/heads/{Branch}"
+     }
+    ],
+    "RegisterWithThirdParty": true,
+    "TargetAction": "GitHub_Source",
+    "TargetPipeline": {
+     "Ref": "lambdaadapterdemopipelineitE64F37B6"
+    },
+    "TargetPipelineVersion": 1
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfraStack-it/lambda-adapter-demo-pipeline-it/Source/GitHub_Source/WebhookResource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/02OywrCMBBFv8V9MtYKglv9AEtduJQ2GXGamJQ8dBHy78a2oqs5wz1cbg2bXQXVqnt5LqTimnpI59AJxVr0NjqBrGTX5LeQDlEoDOx4MzNlJqzEPpKWkBoaUZPBxtkBxWQtOGvjkv/MSfnjC/Z3a1XOn+cUwxinlu+OzEypgcGvn3UF+zJ68ETcRRPogdDO9w1s6MDg0QAAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfraStack-it/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "lambdaadapterdemoassetitarn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "lambdaadapterdemoassetit3A5F100C",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "lambda-adapter-demo-asset-it-arn"
+   }
+  },
+  "lambdaadapterdemowebitarn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "lambdaadapterdemowebit99A671FD",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "lambda-adapter-demo-web-it-arn"
+   }
+  }
+ }
+}

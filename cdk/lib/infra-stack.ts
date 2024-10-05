@@ -5,6 +5,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as codepipeline from "aws-cdk-lib/aws-codepipeline";
 import * as codepipeline_actions from "aws-cdk-lib/aws-codepipeline-actions";
 import * as codebuild from "aws-cdk-lib/aws-codebuild";
+import * as ecr from "aws-cdk-lib/aws-ecr";
 
 export class InfraStack extends cdk.Stack {
   constructor(
@@ -64,6 +65,10 @@ export class InfraStack extends cdk.Stack {
             ASSET_BUCKET: {
               type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
               value: assetBucket.bucketName,
+            },
+            ECR_REPOSITORY_URI: {
+              type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
+              value: envs.ECR_REPOSITORY_URI,
             },
           },
         },
