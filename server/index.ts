@@ -8,5 +8,5 @@ const app = fastify();
 
 await app.register(remixFastify);
 
-let address = await app.listen({ port: 80, host: "0.0.0.0" });
+let address = await app.listen({ port: 3000, host: "0.0.0.0" });
 console.log(`app ready: ${address}`);
