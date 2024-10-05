@@ -14,6 +14,7 @@ export default defineConfig({
       future: {
         unstable_singleFetch: true,
       },
+      ignoredRouteFiles: ['"**/*.{css,js,png,jpg,jpeg,gif,svg,webp,ico,woff,woff2,ttf,eot,json}"'],
     }),
     tsconfigPaths(),
   ],
