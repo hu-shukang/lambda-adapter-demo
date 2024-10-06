@@ -1,8 +1,8 @@
 import type { FastifyInstance } from 'fastify';
 import { schema } from './schema';
-import { DB } from 'server/utils/dynamodb.util';
+import { DB } from '@/utils/dynamodb.util';
 import { GetCommand } from '@aws-sdk/lib-dynamodb';
-import type { UserIdModel } from 'server/models/user.model';
+import type { UserIdModel } from '@/models/user.model';
 
 export default async function (fastify: FastifyInstance) {
   fastify.get<{ Params: UserIdModel }>('/user/:id', { schema }, async (request, reply) => {

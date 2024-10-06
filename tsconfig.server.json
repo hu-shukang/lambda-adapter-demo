@@ -6,5 +6,8 @@
   "compilerOptions": {
     "noEmit": false,
     "outDir": "./fastify-server-build"
+  },
+  "tsc-alias": {
+    "resolveFullPaths": true
   }
 }

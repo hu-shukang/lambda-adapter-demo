@@ -1,9 +1,9 @@
 import type { FastifyInstance } from 'fastify';
 import { schema } from './schema';
-import { DB } from 'server/utils/dynamodb.util';
+import { DB } from '@/utils/dynamodb.util';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 } from 'uuid';
-import type { UserInfoModel } from 'server/models/user.model';
+import type { UserInfoModel } from '@/models/user.model';
 
 export default async function (fastify: FastifyInstance) {
   fastify.post<{ Body: UserInfoModel }>('/user', { schema }, async (request, reply) => {
