@@ -5,3 +5,4 @@ node_modules
 /public/build
 server/index.js
 cdk.out/*
+/fastify-server-build

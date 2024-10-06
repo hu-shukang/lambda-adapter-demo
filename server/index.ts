@@ -12,10 +12,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 await app.register(remixFastify);
-app.register(autoload, {
+await app.register(autoload, {
   dir: path.join(__dirname, 'routes'),
-  prefix: '/api',
   dirNameRoutePrefix: false,
+  matchFilter: (path) => path.includes('index'),
+  options: { prefix: '/api' },
 });
 const desiredPort = Number(process.env.PORT) || 3000;
 let address = await app.listen({ port: desiredPort, host: '0.0.0.0' });
