@@ -2,23 +2,17 @@ import { useLoaderData, Link } from '@remix-run/react';
 import { json } from '@remix-run/node';
 import type { LoaderFunction } from '@remix-run/node';
 import { Button } from '~/components/ui/button';
+import { ScanCommand } from '@aws-sdk/lib-dynamodb';
+import { DB } from '~/lib/dynamodb.util';
 
 type User = { pk: string; sk: string; name: string; address: string };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  try {
-    const url = new URL(request.url);
-    console.log(`url: ${url}`);
-    const response = await fetch(`${url.origin}/api/user`);
-    if (!response.ok) {
-      throw new Error('获取用户数据失败');
-    }
-    const users: User[] = await response.json();
-    return json(users);
-  } catch (error) {
-    console.error('加载用户时出错:', error);
-    return json({ error: '获取用户数据时发生错误' }, { status: 500 });
-  }
+  const command = new ScanCommand({
+    TableName: process.env.USER_TBL,
+  });
+  const result = await DB.client.send(command);
+  return json(result.Items);
 };
 
 export default function Users() {
@@ -30,6 +24,7 @@ export default function Users() {
       <Link to="/users/new">
         <Button>添加用户</Button>
       </Link>
+      <div>user count: {users.length}</div>
       <ul className="mt-4">
         {users.map((user) => (
           <li key={user.pk} className="border-b p-2">
