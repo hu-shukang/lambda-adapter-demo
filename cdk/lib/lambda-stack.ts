@@ -84,6 +84,7 @@ export class LambdaStack extends cdk.Stack {
       additionalBehaviors: {
         '/assets/*': staticBehavior,
         'favicon.ico': staticBehavior,
+        '*.png': staticBehavior,
       },
     });
   }

@@ -2,7 +2,4 @@ node_modules
 
 /.cache
 /build
-/public/build
-server/index.js
-cdk.out/*
-/fastify-server-build
+.env

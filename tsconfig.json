@@ -12,23 +12,21 @@
     "types": ["@remix-run/node", "vite/client"],
     "isolatedModules": true,
     "esModuleInterop": true,
-    "module": "ESNext",
     "jsx": "react-jsx",
+    "module": "ESNext",
     "moduleResolution": "Bundler",
-    "moduleDetection": "force",
     "resolveJsonModule": true,
     "target": "ES2022",
-    "skipLibCheck": true,
     "strict": true,
     "allowJs": true,
+    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./app/*"],
-      "@/*": ["./server/*"]
+      "~/*": ["./app/*"]
     },
 
-    // Remix takes care of building everything in `remix build`.
+    // Vite takes care of building everything, not tsc.
     "noEmit": true
   }
 }
