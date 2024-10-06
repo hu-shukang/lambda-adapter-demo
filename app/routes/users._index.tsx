@@ -7,8 +7,7 @@ type User = { pk: string; sk: string; name: string; address: string };
 
 export const loader: LoaderFunction = async ({ request }) => {
   try {
-    const url = new URL('/api/user', request.url);
-    const response = await fetch(url.toString());
+    const response = await fetch('/api/user');
     if (!response.ok) {
       throw new Error('获取用户数据失败');
     }

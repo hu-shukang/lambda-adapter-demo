@@ -8,10 +8,9 @@ export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
   const name = formData.get('name');
   const address = formData.get('address');
-  const url = new URL(`/api/user`, request.url);
 
   try {
-    const response = await fetch(url, {
+    const response = await fetch(`/api/user`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

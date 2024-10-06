@@ -10,8 +10,7 @@ type User = { pk: string; sk: string; name: string; address: string };
 export const loader: LoaderFunction = async ({ params, request }) => {
   const { userId } = params;
   try {
-    const url = new URL(`/api/user/${userId}`, request.url);
-    const response = await fetch(url.toString());
+    const response = await fetch(`/api/user/${userId}`);
     if (!response.ok) {
       throw new Error('获取用户数据失败');
     }
@@ -28,9 +27,8 @@ export const action: ActionFunction = async ({ request, params }) => {
   const formData = await request.formData();
   const name = formData.get('name');
   const address = formData.get('address');
-  const url = new URL(`/api/user/${userId}`, request.url);
   try {
-    const response = await fetch(url, {
+    const response = await fetch(`/api/user/${userId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
