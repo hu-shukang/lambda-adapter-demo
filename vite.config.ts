@@ -14,6 +14,11 @@ export default defineConfig({
         process.env.NODE_ENV === 'production'
           ? ['**/*.{css,js,png,jpg,jpeg,gif,svg,webp,ico,woff,woff2,ttf,eot,json}']
           : [],
+      routes: async (defineRoutes) => {
+        return defineRoutes((route) => {
+          route('/api/*', '/apis');
+        });
+      },
     }),
     tsconfigPaths(),
   ],

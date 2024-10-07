@@ -1,4 +1,4 @@
-import { useLoaderData, Link } from '@remix-run/react';
+import { useLoaderData, Link, useFetcher } from '@remix-run/react';
 import { json } from '@remix-run/node';
 import type { LoaderFunction } from '@remix-run/node';
 import { ScanCommand } from '@aws-sdk/lib-dynamodb';
@@ -17,6 +17,14 @@ export const loader: LoaderFunction = async () => {
 
 export default function Users() {
   const users = useLoaderData<User[]>();
+  const fetcher = useFetcher();
+
+  const handleDelete = (pk: string) => {
+    fetcher.submit(null, {
+      method: 'post',
+      action: `/api/users/${pk}/delete`,
+    });
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -33,6 +41,7 @@ export default function Users() {
             <TableHead>SK</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Address</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -46,6 +55,9 @@ export default function Users() {
               <TableCell>{user.sk}</TableCell>
               <TableCell>{user.name}</TableCell>
               <TableCell>{user.address}</TableCell>
+              <TableCell>
+                <Button onClick={() => handleDelete(user.pk)}>删除</Button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

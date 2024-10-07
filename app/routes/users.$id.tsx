@@ -21,8 +21,7 @@ export const loader: LoaderFunction = async (args) => {
   });
   const result = await DB.client.send(command);
   if (!result.Item) {
-    redirect('/users');
-    return;
+    return redirect('/users');
   }
   return json(result.Item);
 };
@@ -49,7 +48,7 @@ export const action: ActionFunction = async ({ request, params }) => {
     },
   });
   await DB.client.send(command);
-  redirect('/users');
+  return redirect('/users');
 };
 
 export default function UserDetail() {
