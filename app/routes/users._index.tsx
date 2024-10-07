@@ -4,6 +4,8 @@ import type { LoaderFunction } from '@remix-run/node';
 import { ScanCommand } from '@aws-sdk/lib-dynamodb';
 import { DB } from '~/.server/utils/dynamodb.util';
 import { User } from '~/models/user.model';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table';
+import { Button } from '~/components/ui/button';
 
 export const loader: LoaderFunction = async () => {
   const command = new ScanCommand({
@@ -20,18 +22,34 @@ export default function Users() {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">用户列表</h1>
       <Link to="/users/new">
-        <button>添加用户</button>
+        <Button>添加用户</Button>
       </Link>
       <div>user count: {users.length}</div>
-      <ul className="mt-4">
-        {users.map((user) => (
-          <li key={user.pk} className="border-b p-2">
-            <Link to={`/users/${user.pk}`} className="text-blue-500 hover:underline">
-              {user.name} ({user.address})
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <Table>
+        <TableCaption>A list of your recent invoices.</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[100px]">PK</TableHead>
+            <TableHead>SK</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Address</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {users.map((user) => (
+            <TableRow key={user.pk}>
+              <TableCell className="font-medium">
+                <Link to={`/users/${user.pk}`} className="text-blue-500 hover:underline">
+                  {user.pk}
+                </Link>
+              </TableCell>
+              <TableCell>{user.sk}</TableCell>
+              <TableCell>{user.name}</TableCell>
+              <TableCell>{user.address}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }

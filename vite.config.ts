@@ -17,5 +17,4 @@ export default defineConfig({
     }),
     tsconfigPaths(),
   ],
-  envDir: 'env',
 });
