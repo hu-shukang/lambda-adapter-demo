@@ -6,12 +6,12 @@ import { Input } from '~/components/ui/input';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { DB } from '~/.server/utils/dynamodb.util';
 import { v7 } from 'uuid';
-import { RequestWrapper } from '~/lib/request.util';
-import { User } from '~/models/user.model';
+import { RequestWrapper } from '~/.server/utils/request.util';
+import { userInfoSchema } from '~/.server/model/user.model';
 
 export const action: ActionFunction = async (args) => {
   const wrapper = new RequestWrapper(args);
-  const user = await wrapper.data<User>();
+  const user = await wrapper.data(userInfoSchema);
   const command = new PutCommand({
     TableName: process.env.USER_TBL,
     Item: {

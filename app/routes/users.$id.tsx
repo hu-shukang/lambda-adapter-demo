@@ -6,11 +6,12 @@ import { Button } from '~/components/ui/button';
 import { GetCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { DB } from '~/.server/utils/dynamodb.util';
 import { User } from '~/models/user.model';
-import { RequestWrapper } from '~/lib/request.util';
+import { RequestWrapper } from '~/.server/utils/request.util';
+import { idSchema } from '~/.server/model/user.model';
 
 export const loader: LoaderFunction = async (args) => {
   const requestWrapper = new RequestWrapper(args);
-  const { id } = requestWrapper.params<{ id: string }>();
+  const { id } = requestWrapper.params(idSchema);
   const command = new GetCommand({
     TableName: process.env.USER_TBL,
     Key: {
