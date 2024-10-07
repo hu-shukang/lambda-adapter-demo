@@ -29,7 +29,7 @@ export default function Users() {
         <TableCaption>A list of your recent invoices.</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[100px]">PK</TableHead>
+            <TableHead>PK</TableHead>
             <TableHead>SK</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Address</TableHead>
