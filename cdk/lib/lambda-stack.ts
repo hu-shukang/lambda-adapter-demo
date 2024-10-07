@@ -79,6 +79,8 @@ export class LambdaStack extends cdk.Stack {
           protocolPolicy: cloudfront.OriginProtocolPolicy.HTTPS_ONLY,
         }),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS, // 强制 HTTPS
+        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+        responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.SECURITY_HEADERS,
       },
       // 添加针对静态文件的行为，指向 S3
       additionalBehaviors: {

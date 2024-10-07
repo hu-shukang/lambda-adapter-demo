@@ -34,7 +34,7 @@ export default function NewUser() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">添加用户</h1>
-      <Form method="post" action="/users/new" className="space-y-4">
+      <Form method="post" className="space-y-4">
         <Input name="name" placeholder="Name" />
         <Input name="address" placeholder="Address" />
         {actionData?.error && <p className="text-red-500">{actionData.error}</p>}
