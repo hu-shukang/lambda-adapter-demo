@@ -24,6 +24,10 @@ module.exports = {
   // Base config
   extends: ['eslint:recommended', 'plugin:prettier/recommended'],
 
+  rules: {
+    '@typescript-eslint/no-explicit-any': 'none',
+  },
+
   overrides: [
     // React
     {

@@ -6,18 +6,18 @@ import { Input } from '~/components/ui/input';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { DB } from '~/.server/utils/dynamodb.util';
 import { v7 } from 'uuid';
+import { RequestWrapper } from '~/lib/request.util';
+import { User } from '~/models/user.model';
 
-export const action: ActionFunction = async ({ request }) => {
-  const formData = await request.formData();
-  const name = formData.get('name');
-  const address = formData.get('address');
+export const action: ActionFunction = async (args) => {
+  const wrapper = new RequestWrapper(args);
+  const user = await wrapper.data<User>();
   const command = new PutCommand({
     TableName: process.env.USER_TBL,
     Item: {
+      ...user,
       pk: v7(),
       sk: 'USER_INFO',
-      name: name,
-      address: address,
     },
   });
   try {
