@@ -5,6 +5,7 @@ import { UserEntity } from '~/models/user.model';
 
 export default function Users() {
   const users = useRouteLoaderData<UserEntity[]>('routes/api.users.query');
+  console.log(users);
   const fetcher = useFetcher();
 
   const handleDelete = (pk: string) => {
@@ -20,6 +21,7 @@ export default function Users() {
       <Link to="/users/new">
         <Button>添加用户</Button>
       </Link>
+      {users?.toString()}
       <div>user count: {users?.length ?? 0}</div>
       {users && (
         <Table>
