@@ -1,18 +1,10 @@
 import { Link, useFetcher, useRouteLoaderData } from '@remix-run/react';
-import { json } from '@remix-run/node';
-import type { LoaderFunction } from '@remix-run/node';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table';
 import { Button } from '~/components/ui/button';
-import { userService } from '~/.server/services/user.service';
 import { UserEntity } from '~/models/user.model';
 
-export const loader: LoaderFunction = async () => {
-  const result = await userService.getAll();
-  return json(result);
-};
-
 export default function Users() {
-  const users = useRouteLoaderData<UserEntity[]>('routes/api.users.$id.detail');
+  const users = useRouteLoaderData<UserEntity[]>('routes/api.users.query');
   const fetcher = useFetcher();
 
   const handleDelete = (pk: string) => {

@@ -1,4 +1,4 @@
-import { useLoaderData, Form, useParams } from '@remix-run/react';
+import { Form, useParams, useRouteLoaderData } from '@remix-run/react';
 import { json } from '@remix-run/node';
 import type { LoaderFunction } from '@remix-run/node';
 import { Input } from '~/components/ui/input';
@@ -18,17 +18,19 @@ export const loader: LoaderFunction = async (args) => {
 };
 
 export default function UserDetail() {
-  const user = useLoaderData<UserEntity>();
+  const user = useRouteLoaderData<UserEntity>('routes/api.users.$id.detail');
   const { id } = useParams();
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">用户详情</h1>
-      <Form method="post" className="space-y-4" action={`/api/users/${id}/update`}>
-        <Input name="name" defaultValue={user.name} />
-        <Input name="address" defaultValue={user.address} />
-        <Button type="submit">更新用户</Button>
-      </Form>
+      {user && (
+        <Form method="post" className="space-y-4" action={`/api/users/${id}/update`}>
+          <Input name="name" defaultValue={user.name} />
+          <Input name="address" defaultValue={user.address} />
+          <Button type="submit">更新用户</Button>
+        </Form>
+      )}
     </div>
   );
 }
