@@ -38,6 +38,13 @@ export class LambdaStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY, // 销毁堆栈时销毁表
     });
 
+    const commonLayer = new lambda.LayerVersion(this, `${envs.APP_NAME}-common-layer-${envs.ENV}`, {
+      layerVersionName: `${envs.APP_NAME}-common-layer-${envs.ENV}`,
+      code: lambda.Code.fromBucket(assetBucket, `common-layer-${timestamp}.zip`),
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
+    });
+
     const lambdaProps = {
       role: lambdaRole,
       timeout: cdk.Duration.minutes(15),
@@ -56,6 +63,7 @@ export class LambdaStack extends cdk.Stack {
         code: lambda.Code.fromBucket(assetBucket, `post-confirmation-${timestamp}.zip`),
         handler: 'index.handler',
         runtime: lambda.Runtime.NODEJS_20_X,
+        layers: [commonLayer],
         ...lambdaProps,
       },
     );
@@ -66,6 +74,7 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromBucket(assetBucket, `pre-signup-${timestamp}.zip`),
       handler: 'index.handler',
       runtime: lambda.Runtime.NODEJS_20_X,
+      layers: [commonLayer],
       ...lambdaProps,
     });
 
