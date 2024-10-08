@@ -1,4 +1,4 @@
-import { Form, useParams, useRouteLoaderData } from '@remix-run/react';
+import { Form, useLoaderData, useParams } from '@remix-run/react';
 import { json } from '@remix-run/node';
 import type { LoaderFunction } from '@remix-run/node';
 import { Input } from '~/components/ui/input';
@@ -18,7 +18,7 @@ export const loader: LoaderFunction = async (args) => {
 };
 
 export default function UserDetail() {
-  const user = useRouteLoaderData<UserEntity>('routes/api.users.$id.detail');
+  const user = useLoaderData<UserEntity>();
   const { id } = useParams();
 
   return (
