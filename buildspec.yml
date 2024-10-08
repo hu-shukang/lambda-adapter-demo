@@ -24,12 +24,12 @@ phases:
       - npm run build:lambda
       # post-confirmation lambda
       - echo "sync post-confirmation..."
-      - cd ${CODEBUILD_SRC_DIR}/lambda/dist/cognito-triggers/post-confirmation
+      - cd ${CODEBUILD_SRC_DIR}/lambda/dist/post-confirmation
       - zip -rq post-confirmation-${TIMESTAMP}.zip .
       - aws s3 sync post-confirmation-${TIMESTAMP}.zip s3://$ASSET_BUCKET/post-confirmation-${TIMESTAMP}.zip --acl bucket-owner-full-control
       # post-confirmation lambda
       - echo "sync pre-signup..."
-      - cd ${CODEBUILD_SRC_DIR}/lambda/dist/cognito-triggers/pre-signup
+      - cd ${CODEBUILD_SRC_DIR}/lambda/dist/pre-signup
       - zip -rq pre-signup-${TIMESTAMP}.zip .
       - aws s3 sync pre-signup-${TIMESTAMP}.zip s3://$ASSET_BUCKET/pre-signup-${TIMESTAMP}.zip --acl bucket-owner-full-control
       # layer
