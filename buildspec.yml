@@ -18,6 +18,9 @@ phases:
       # 打包静态文件
       - echo "Upload Static Files..."
       - aws s3 sync build/client s3://$WEB_BUCKET/ --delete --acl bucket-owner-full-control
+      # build lambda
+      - echo "Build post-confirmation..."
+      - aws s3 sync build/client s3://$WEB_BUCKET/ --delete --acl bucket-owner-full-control
       # Build Docker Image
       - echo "Building the Docker image..."
       - docker build -t ${ECR_REPOSITORY_URI}:latest .
