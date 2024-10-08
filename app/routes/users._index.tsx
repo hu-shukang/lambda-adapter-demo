@@ -1,4 +1,4 @@
-import { useLoaderData, Link, useFetcher } from '@remix-run/react';
+import { Link, useFetcher, useRouteLoaderData } from '@remix-run/react';
 import { json } from '@remix-run/node';
 import type { LoaderFunction } from '@remix-run/node';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table';
@@ -12,7 +12,7 @@ export const loader: LoaderFunction = async () => {
 };
 
 export default function Users() {
-  const users = useLoaderData<UserEntity[]>();
+  const users = useRouteLoaderData<UserEntity[]>('routes/api.users.$id.detail');
   const fetcher = useFetcher();
 
   const handleDelete = (pk: string) => {
@@ -28,36 +28,38 @@ export default function Users() {
       <Link to="/users/new">
         <Button>添加用户</Button>
       </Link>
-      <div>user count: {users.length}</div>
-      <Table>
-        <TableCaption>A list of your recent invoices.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>PK</TableHead>
-            <TableHead>SK</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Address</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.map((user) => (
-            <TableRow key={user.pk}>
-              <TableCell className="font-medium">
-                <Link to={`/users/${user.pk}`} className="text-blue-500 hover:underline">
-                  {user.pk}
-                </Link>
-              </TableCell>
-              <TableCell>{user.sk}</TableCell>
-              <TableCell>{user.name}</TableCell>
-              <TableCell>{user.address}</TableCell>
-              <TableCell>
-                <Button onClick={() => handleDelete(user.pk)}>删除</Button>
-              </TableCell>
+      <div>user count: {users?.length ?? 0}</div>
+      {users && (
+        <Table>
+          <TableCaption>A list of your recent invoices.</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>PK</TableHead>
+              <TableHead>SK</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Address</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {users.map((user) => (
+              <TableRow key={user.pk}>
+                <TableCell className="font-medium">
+                  <Link to={`/users/${user.pk}`} className="text-blue-500 hover:underline">
+                    {user.pk}
+                  </Link>
+                </TableCell>
+                <TableCell>{user.sk}</TableCell>
+                <TableCell>{user.name}</TableCell>
+                <TableCell>{user.address}</TableCell>
+                <TableCell>
+                  <Button onClick={() => handleDelete(user.pk)}>删除</Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
     </div>
   );
 }
