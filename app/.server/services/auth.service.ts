@@ -1,6 +1,11 @@
-import { SigninInput, SignupInput } from '~/models/user.model';
+import { SigninInput, SignupConfirm, SignupInput } from '~/models/user.model';
 import { Cognito } from '../utils/cognito.util';
-import { SignUpCommand, InitiateAuthCommand, AuthFlowType } from '@aws-sdk/client-cognito-identity-provider';
+import {
+  SignUpCommand,
+  InitiateAuthCommand,
+  AuthFlowType,
+  ConfirmSignUpCommand,
+} from '@aws-sdk/client-cognito-identity-provider';
 
 class AuthService {
   public async signin(data: SigninInput) {
@@ -32,6 +37,16 @@ class AuthService {
           Value: data.email,
         },
       ],
+    });
+
+    return await Cognito.client.send(command);
+  }
+
+  public async confirm(data: SignupConfirm) {
+    const command = new ConfirmSignUpCommand({
+      ClientId: process.env.USER_POOL_CLIENT_ID,
+      Username: data.username,
+      ConfirmationCode: data.confirmationCode,
     });
 
     return await Cognito.client.send(command);

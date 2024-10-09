@@ -4,10 +4,12 @@ import { SubmitHandler } from 'react-hook-form';
 import SignupForm from '~/components/auth/signup-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { SignupInput } from '~/models/user.model';
+import { useUserStore } from '~/stores/user.store';
 
 export default function SignupPage() {
   const actionData = useActionData<ActionFunction>();
   const submit = useSubmit();
+  const setUsername = useUserStore((state) => state.setUsername);
 
   const onSubmit: SubmitHandler<SignupInput> = (data) => {
     const formData = new FormData();
@@ -15,7 +17,7 @@ export default function SignupPage() {
     formData.append('email', data.email);
     formData.append('password', data.password);
     formData.append('rePassword', data.rePassword);
-
+    setUsername(data.username);
     submit(formData, { method: 'post', action: '/api/auth/signup' });
   };
 

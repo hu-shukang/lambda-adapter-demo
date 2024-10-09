@@ -11,6 +11,9 @@ const rePassword = z
   .string({ required_error: '必須項目です' })
   .min(8, '8文字以上は必須')
   .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/, '大文字、小文字のアルファベットと数字は必須');
+const confirmationCode = z.string().regex(/^\d{6}$/, {
+  message: '6桁数字は必須',
+});
 export const userInfoSchema = z.object({
   email: z.string().email().min(1, 'Name is required'),
   password: z.string().min(1, 'Address is required'),
@@ -37,9 +40,15 @@ export const signupInputSchema = z
     path: ['rePassword'],
   });
 
+export const signupConfirmInputSchema = z.object({
+  username: username,
+  confirmationCode: confirmationCode,
+});
+
 export type UserInfo = z.infer<typeof userInfoSchema>;
 export type UserEntity = DBKey & UserInfo;
 export type SigninInput = z.infer<typeof signinInputSchema>;
 export type SignupInput = z.infer<typeof signupInputSchema>;
+export type SignupConfirmInput = z.infer<typeof signupConfirmInputSchema>;
 
 export type ID = z.infer<typeof idSchema>;
