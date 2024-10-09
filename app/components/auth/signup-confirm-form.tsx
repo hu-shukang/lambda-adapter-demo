@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '../ui/input-otp';
 import { useUserStore } from '~/stores/user.store';
+import { Button } from '../ui/button';
 
 const SignupConfirmForm: React.FC<{ onSubmit: SubmitHandler<SignupConfirmInput> }> = ({ onSubmit }) => {
   const username = useUserStore((state) => state.username);
@@ -42,6 +43,7 @@ const SignupConfirmForm: React.FC<{ onSubmit: SubmitHandler<SignupConfirmInput> 
             </FormItem>
           )}
         />
+        <Button type="submit">Submit</Button>
       </form>
     </Form>
   );

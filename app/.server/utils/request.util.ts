@@ -33,3 +33,18 @@ export class RequestWrapper {
     return result.data;
   }
 }
+
+export class RequestUtil {
+  private _withSignin: boolean;
+  public static instance() {
+    return new RequestUtil();
+  }
+
+  public withSignin() {
+    this._withSignin = true;
+  }
+
+  public withBodyValid() {}
+}
+
+export const action: LoaderFunction = RequestUtil.withSignin().action((args: LoaderFunctionArgs) => {});

@@ -1,4 +1,4 @@
-import { SigninInput, SignupConfirm, SignupInput } from '~/models/user.model';
+import { SigninInput, SignupConfirmInput, SignupInput } from '~/models/user.model';
 import { Cognito } from '../utils/cognito.util';
 import {
   SignUpCommand,
@@ -42,7 +42,7 @@ class AuthService {
     return await Cognito.client.send(command);
   }
 
-  public async confirm(data: SignupConfirm) {
+  public async confirm(data: SignupConfirmInput) {
     const command = new ConfirmSignUpCommand({
       ClientId: process.env.USER_POOL_CLIENT_ID,
       Username: data.username,

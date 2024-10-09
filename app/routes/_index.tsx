@@ -1,7 +1,11 @@
-import type { MetaFunction } from '@remix-run/node';
+import { json, type LoaderFunction, type MetaFunction } from '@remix-run/node';
 
 export const meta: MetaFunction = () => {
   return [{ title: 'New Remix App' }, { name: 'description', content: 'Welcome to Remix!' }];
+};
+
+export const loader: LoaderFunction = async (args) => {
+  return json({ error: '获取用户详情失败' }, { status: 500 });
 };
 
 export default function Index() {
