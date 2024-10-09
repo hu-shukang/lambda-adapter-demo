@@ -13,7 +13,7 @@ export const handler = async (event: PostConfirmationTriggerEvent): Promise<any>
   } = event;
 
   const params = {
-    TableName: process.env.USER_TABLE_NAME!,
+    TableName: process.env.USER_TBL!,
     Item: {
       userId: userName,
       email: userAttributes.email,

@@ -47,9 +47,9 @@ export default function Users() {
                   {user.pk}
                 </Link>
               </TableCell>
-              <TableCell>{user.sk}</TableCell>
+              {/* <TableCell>{user.sk}</TableCell>
               <TableCell>{user.name}</TableCell>
-              <TableCell>{user.address}</TableCell>
+              <TableCell>{user.address}</TableCell> */}
               <TableCell>
                 <Button onClick={() => handleDelete(user.pk)}>删除</Button>
               </TableCell>
