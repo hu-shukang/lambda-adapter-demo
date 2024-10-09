@@ -7,7 +7,6 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
-import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 
 export class LambdaStack extends cdk.Stack {
@@ -30,12 +29,12 @@ export class LambdaStack extends cdk.Stack {
     const repository = ecr.Repository.fromRepositoryName(this, `${envs.APP_NAME}-ecr`, envs.APP_NAME);
 
     // 创建一个 DynamoDB 表
-    new dynamodb.Table(this, envs.USER_TBL, {
-      tableName: envs.USER_TBL,
-      partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST, // 按需计费模式
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // 销毁堆栈时销毁表
-    });
+    // new dynamodb.Table(this, envs.USER_TBL, {
+    //   tableName: envs.USER_TBL,
+    //   partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
+    //   billingMode: dynamodb.BillingMode.PAY_PER_REQUEST, // 按需计费模式
+    //   removalPolicy: cdk.RemovalPolicy.DESTROY, // 销毁堆栈时销毁表
+    // });
 
     const commonLayer = new lambda.LayerVersion(this, `${envs.APP_NAME}-common-layer-${envs.ENV}`, {
       layerVersionName: `${envs.APP_NAME}-common-layer-${envs.ENV}`,
