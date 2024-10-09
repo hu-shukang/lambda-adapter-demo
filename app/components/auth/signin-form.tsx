@@ -14,12 +14,12 @@ const SigninForm: React.FC<{ onSubmit: SubmitHandler<SigninInput> }> = ({ onSubm
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
-          name="email"
+          name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>メール</FormLabel>
+              <FormLabel>ユーザ名</FormLabel>
               <FormControl>
-                <Input placeholder="メール" {...field} />
+                <Input placeholder="ユーザ名" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

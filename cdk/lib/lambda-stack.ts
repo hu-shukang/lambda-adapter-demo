@@ -105,7 +105,7 @@ export class LambdaStack extends cdk.Stack {
     });
 
     // 添加用户池客户端
-    userPool.addClient(`${envs.APP_NAME}-client-${envs.ENV}`, {
+    const userPoolClient = userPool.addClient(`${envs.APP_NAME}-client-${envs.ENV}`, {
       userPoolClientName: `${envs.APP_NAME}-client-${envs.ENV}`,
       authFlows: {
         userPassword: true, // 支持通过用户名和密码进行认证
@@ -124,7 +124,7 @@ export class LambdaStack extends cdk.Stack {
       ...lambdaProps,
       environment: {
         ...envs,
-        USER_POOL_ID: userPool.userPoolId,
+        USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
       },
     });
 

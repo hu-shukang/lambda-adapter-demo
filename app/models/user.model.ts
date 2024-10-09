@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { DBKey } from './common.model';
 
+const username = z.string({ required_error: '必須項目です' });
 const email = z.string({ required_error: '必須項目です' }).email({ message: 'メール形式不正' });
 const password = z
   .string({ required_error: '必須項目です' })
@@ -20,12 +21,13 @@ export const idSchema = z.object({
 });
 
 export const signinInputSchema = z.object({
-  email: email,
+  username: username,
   password: password,
 });
 
 export const signupInputSchema = z
   .object({
+    username: username,
     email: email,
     password: password,
     rePassword: rePassword,

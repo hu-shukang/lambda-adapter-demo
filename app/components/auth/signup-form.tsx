@@ -14,6 +14,19 @@ const SignupForm: React.FC<{ onSubmit: SubmitHandler<SignupInput> }> = ({ onSubm
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>ユーザ名</FormLabel>
+              <FormControl>
+                <Input placeholder="ユーザ名" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem>
