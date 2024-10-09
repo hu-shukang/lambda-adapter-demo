@@ -4,10 +4,10 @@ phases:
   install:
     commands:
       - npm ci
+      - mkdir artifact
   pre_build:
     commands:
       - npm run lint
-      - mkdir artifact
       - echo Logging in to Amazon ECR
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ${ECR_REPOSITORY_URI}
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
@@ -23,25 +23,29 @@ phases:
       - echo "Build Lambda..."
       - npm run build:lambda
       # post-confirmation lambda
-      - echo "sync post-confirmation..."
-      - cd ${CODEBUILD_SRC_DIR}/lambda/dist/post-confirmation
+      - echo "cp post-confirmation..."
+      - pushd ${CODEBUILD_SRC_DIR}/lambda/dist/post-confirmation
       - zip -rq post-confirmation-${TIMESTAMP}.zip .
-      - aws s3 sync post-confirmation-${TIMESTAMP}.zip s3://$ASSET_BUCKET/post-confirmation-${TIMESTAMP}.zip --acl bucket-owner-full-control
+      - aws s3 cp post-confirmation-${TIMESTAMP}.zip s3://$ASSET_BUCKET/post-confirmation-${TIMESTAMP}.zip --acl bucket-owner-full-control
+      - popd
       # post-confirmation lambda
-      - echo "sync pre-signup..."
-      - cd ${CODEBUILD_SRC_DIR}/lambda/dist/pre-signup
+      - echo "cp pre-signup..."
+      - pushd ${CODEBUILD_SRC_DIR}/lambda/dist/pre-signup
       - zip -rq pre-signup-${TIMESTAMP}.zip .
-      - aws s3 sync pre-signup-${TIMESTAMP}.zip s3://$ASSET_BUCKET/pre-signup-${TIMESTAMP}.zip --acl bucket-owner-full-control
+      - aws s3 cp pre-signup-${TIMESTAMP}.zip s3://$ASSET_BUCKET/pre-signup-${TIMESTAMP}.zip --acl bucket-owner-full-control
+      - popd
       # layer
-      - echo "sync common-layer..."
-      - cd ${CODEBUILD_SRC_DIR}/lambda/common-layer/nodejs
+      - echo "cp common-layer..."
+      - pushd ${CODEBUILD_SRC_DIR}/lambda/common-layer/nodejs
       - npm ci --omit=dev
-      - cd ${CODEBUILD_SRC_DIR}/lambda/common-layer
-      - zip -rq common-layer.zip .
-      - aws s3 sync common-layer.zip s3://$ASSET_BUCKET/common-layer-${TIMESTAMP}.zip --acl bucket-owner-full-control
-      - cd ${CODEBUILD_SRC_DIR}
+      - popd
+      - pushd ${CODEBUILD_SRC_DIR}/lambda/common-layer
+      - zip -rq common-layer-${TIMESTAMP}.zip .
+      - aws s3 cp common-layer-${TIMESTAMP}.zip s3://$ASSET_BUCKET/common-layer-${TIMESTAMP}.zip --acl bucket-owner-full-control
+      - popd
       # Build Docker Image
       - echo "Building the Docker image..."
+      - pwd
       - docker build -t ${ECR_REPOSITORY_URI}:latest .
       - docker tag ${ECR_REPOSITORY_URI}:latest ${ECR_REPOSITORY_URI}:${IMAGE_TAG}
       - docker image ls
