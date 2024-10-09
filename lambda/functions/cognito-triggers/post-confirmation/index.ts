@@ -15,9 +15,8 @@ export const handler = async (event: PostConfirmationTriggerEvent): Promise<any>
   const params = {
     TableName: process.env.USER_TBL!,
     Item: {
-      userId: userName,
+      pk: userName,
       email: userAttributes.email,
-      name: userAttributes.name,
     },
   };
 
