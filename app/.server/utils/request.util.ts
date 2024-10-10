@@ -1,38 +1,12 @@
-import { ActionFunction, ActionFunctionArgs, json, LoaderFunctionArgs, redirect } from '@remix-run/node';
+import {
+  ActionFunction,
+  ActionFunctionArgs,
+  json,
+  LoaderFunction,
+  LoaderFunctionArgs,
+  redirect,
+} from '@remix-run/node';
 import { ZodSchema } from 'zod';
-
-export class RequestWrapper {
-  private args: LoaderFunctionArgs;
-
-  constructor(args: LoaderFunctionArgs) {
-    this.args = args;
-  }
-
-  public async data<T>(schema: ZodSchema<T>): Promise<T> {
-    const formData = await this.args.request.formData();
-    const formDataObject = Object.fromEntries(formData);
-    return this.validate(formDataObject, schema);
-  }
-
-  public params<T>(schema: ZodSchema<T>): T {
-    return this.validate(this.args.params, schema);
-  }
-
-  public query<T>(schema: ZodSchema<T>): T {
-    const url = new URL(this.args.request.url);
-    const data = Object.fromEntries(url.searchParams.entries());
-    return this.validate(data, schema);
-  }
-
-  private validate<T>(data: Record<string, any>, schema: ZodSchema<T>) {
-    const result = schema.safeParse(data);
-    if (!result.success) {
-      console.error(result.error);
-      throw new Error(`Form data validation error: ${result.error.message}`);
-    }
-    return result.data;
-  }
-}
 
 type CustomActionFunctionArgs = {
   bodyData?: any;
@@ -122,6 +96,84 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
 
   action() {
     return this.actionFunc as unknown as ActionFunction;
+  }
+
+  private async checkUserSignedIn(request: Request) {
+    const cookieHeader = request.headers.get('Cookie');
+    const userId = cookieHeader ? 'user123' : null;
+    return userId;
+  }
+}
+
+type CustomLoaderFunctionArgs = {
+  paramsData?: any;
+  queryData?: any;
+};
+
+type CustomLoaderFunction<T extends CustomLoaderFunctionArgs> = (
+  args: LoaderFunctionArgs & T,
+) => ReturnType<LoaderFunction>;
+
+export class LoaderWrapper<T extends CustomLoaderFunctionArgs> {
+  private loaderFunc: CustomLoaderFunction<T>;
+
+  private constructor(actionFunc: CustomLoaderFunction<T>) {
+    this.loaderFunc = actionFunc;
+  }
+
+  static init<T extends CustomLoaderFunctionArgs>(loaderFunc: CustomLoaderFunction<T>) {
+    return new LoaderWrapper<T>(loaderFunc);
+  }
+
+  withSignin() {
+    const originalLoader = this.loaderFunc;
+    this.loaderFunc = async (args) => {
+      const { request } = args;
+      const userId = await this.checkUserSignedIn(request);
+
+      if (!userId) {
+        throw redirect('/auth/signin');
+      }
+
+      return originalLoader(args);
+    };
+    return this;
+  }
+
+  withParamsValid<TParam>(schema: ZodSchema<TParam>) {
+    const originalLoader = this.loaderFunc;
+    this.loaderFunc = async (args) => {
+      let paramData;
+      try {
+        paramData = schema.parse(args.params);
+      } catch (error) {
+        return json({ error: 'Invalid request path parameter', details: error }, { status: 400 });
+      }
+
+      return originalLoader({ ...args, paramData });
+    };
+    return this;
+  }
+
+  withQueryValid<TQuery>(schema: ZodSchema<TQuery>) {
+    const originalLoader = this.loaderFunc;
+    this.loaderFunc = async (args) => {
+      let queryData;
+      try {
+        const url = new URL(args.request.url);
+        const data = Object.fromEntries(url.searchParams.entries());
+        queryData = schema.parse(data);
+      } catch (error) {
+        return json({ error: 'Invalid request path parameter', details: error }, { status: 400 });
+      }
+
+      return originalLoader({ ...args, queryData });
+    };
+    return this;
+  }
+
+  loader() {
+    return this.loaderFunc as unknown as LoaderFunction;
   }
 
   private async checkUserSignedIn(request: Request) {

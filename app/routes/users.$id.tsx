@@ -1,20 +1,19 @@
 import { Form, useLoaderData, useParams } from '@remix-run/react';
 import { json } from '@remix-run/node';
-import type { LoaderFunction } from '@remix-run/node';
 import { Button } from '~/components/ui/button';
-import { RequestWrapper } from '~/.server/utils/request.util';
+import { LoaderWrapper } from '~/.server/utils/request.util';
 import { userService } from '~/.server/services/user.service';
-import { idSchema, UserEntity } from '~/models/user.model';
+import { ID, idSchema, UserEntity } from '~/models/user.model';
 
-export const loader: LoaderFunction = async (args) => {
-  const requestWrapper = new RequestWrapper(args);
-  const { id } = requestWrapper.params(idSchema);
-  const user = await userService.getDetail(id);
+export const loader = LoaderWrapper.init<{ paramsData: ID }>(async ({ paramsData }) => {
+  const user = await userService.getDetail(paramsData.id);
   if (user) {
     return json(user);
   }
   return json({ error: '获取用户详情失败' }, { status: 500 });
-};
+})
+  .withParamsValid(idSchema)
+  .loader();
 
 export default function UserDetail() {
   const user = useLoaderData<UserEntity>();

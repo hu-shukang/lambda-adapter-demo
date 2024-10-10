@@ -1,10 +1,10 @@
-import { ActionFunction, json } from '@remix-run/node';
-import { RequestWrapper } from '~/.server/utils/request.util';
-import { signinInputSchema } from '~/models/user.model';
+import { json } from '@remix-run/node';
+import { ActionWrapper } from '~/.server/utils/request.util';
+import { SigninInput, signinInputSchema } from '~/models/user.model';
 
-export const action: ActionFunction = async (args) => {
-  const requestWrapper = new RequestWrapper(args);
-  const data = await requestWrapper.data(signinInputSchema);
-  console.log(data);
+export const action = ActionWrapper.init<{ bodyData: SigninInput }>(({ bodyData }) => {
+  console.log(bodyData);
   return json({ success: true });
-};
+})
+  .withBodyValid(signinInputSchema)
+  .action();
