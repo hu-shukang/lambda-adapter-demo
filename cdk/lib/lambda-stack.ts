@@ -125,6 +125,7 @@ export class LambdaStack extends cdk.Stack {
       environment: {
         ...envs,
         USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
+        USER_POOL_ID: userPool.userPoolId,
       },
     });
 

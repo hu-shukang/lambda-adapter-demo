@@ -7,11 +7,15 @@ import {
   redirect,
 } from '@remix-run/node';
 import { ZodSchema } from 'zod';
+import { Cookie } from './cookie.util';
+import { Cognito } from './cognito.util';
+import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 
 type CustomActionFunctionArgs = {
   bodyData?: any;
   paramsData?: any;
   queryData?: any;
+  payload?: CognitoIdTokenPayload;
 };
 
 type CustomActionFunction<T extends CustomActionFunctionArgs> = (
@@ -30,7 +34,7 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
   }
 
   withSignin() {
-    const originalLoader = this.actionFunc;
+    const originalAction = this.actionFunc;
     this.actionFunc = async (args) => {
       const { request } = args;
       const userId = await this.checkUserSignedIn(request);
@@ -39,13 +43,13 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
         throw redirect('/auth/signin');
       }
 
-      return originalLoader(args);
+      return originalAction(args);
     };
     return this;
   }
 
   withBodyValid<TBody>(schema: ZodSchema<TBody>) {
-    const originalLoader = this.actionFunc;
+    const originalAction = this.actionFunc;
     this.actionFunc = async (args) => {
       let bodyData;
 
@@ -57,13 +61,13 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
         return json({ error: 'Invalid request body', details: error }, { status: 400 });
       }
 
-      return originalLoader({ ...args, bodyData });
+      return originalAction({ ...args, bodyData });
     };
     return this;
   }
 
   withParamsValid<TParam>(schema: ZodSchema<TParam>) {
-    const originalLoader = this.actionFunc;
+    const originalAction = this.actionFunc;
     this.actionFunc = async (args) => {
       let paramData;
       try {
@@ -72,13 +76,13 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
         return json({ error: 'Invalid request path parameter', details: error }, { status: 400 });
       }
 
-      return originalLoader({ ...args, paramData });
+      return originalAction({ ...args, paramData });
     };
     return this;
   }
 
   withQueryValid<TQuery>(schema: ZodSchema<TQuery>) {
-    const originalLoader = this.actionFunc;
+    const originalAction = this.actionFunc;
     this.actionFunc = async (args) => {
       let queryData;
       try {
@@ -89,7 +93,24 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
         return json({ error: 'Invalid request path parameter', details: error }, { status: 400 });
       }
 
-      return originalLoader({ ...args, queryData });
+      return originalAction({ ...args, queryData });
+    };
+    return this;
+  }
+
+  withLogin() {
+    const originalAction = this.actionFunc;
+    this.actionFunc = async (args) => {
+      let payload: CognitoIdTokenPayload | undefined = undefined;
+      try {
+        const cookieHeader = args.request.headers.get('Cookie');
+        const idToken = await Cookie.idToken.parse(cookieHeader);
+        payload = Cognito.verifier.verifySync(idToken);
+      } catch (error) {
+        console.log(error);
+        return redirect('/auth/signin', { status: 301 });
+      }
+      return originalAction({ ...args, payload });
     };
     return this;
   }
@@ -108,6 +129,7 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
 type CustomLoaderFunctionArgs = {
   paramsData?: any;
   queryData?: any;
+  payload?: CognitoIdTokenPayload;
 };
 
 type CustomLoaderFunction<T extends CustomLoaderFunctionArgs> = (
@@ -168,6 +190,23 @@ export class LoaderWrapper<T extends CustomLoaderFunctionArgs> {
       }
 
       return originalLoader({ ...args, queryData });
+    };
+    return this;
+  }
+
+  withLogin() {
+    const originalLoader = this.loaderFunc;
+    this.loaderFunc = async (args) => {
+      let payload: CognitoIdTokenPayload | undefined = undefined;
+      try {
+        const cookieHeader = args.request.headers.get('Cookie');
+        const idToken = await Cookie.idToken.parse(cookieHeader);
+        payload = Cognito.verifier.verifySync(idToken);
+      } catch (error) {
+        console.log(error);
+        return redirect('/auth/signin', { status: 301 });
+      }
+      return originalLoader({ ...args, payload });
     };
     return this;
   }

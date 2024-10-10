@@ -13,7 +13,7 @@ export const action = ActionWrapper.init<{ bodyData: SigninInput }>(async ({ bod
   if (!token) {
     return json('cannot signin', { status: 401 });
   }
-  const cookieHeader = await Cookie.create('token', token);
+  const cookieHeader = await Cookie.idToken.serialize(token);
   return redirect('/', {
     headers: {
       'Set-Cookie': cookieHeader,

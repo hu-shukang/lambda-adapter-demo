@@ -1,16 +1,22 @@
-import { json, type LoaderFunction, type MetaFunction } from '@remix-run/node';
+import { json, LoaderFunction, type MetaFunction } from '@remix-run/node';
+import { useLoaderData } from '@remix-run/react';
+import { LoaderWrapper } from '~/.server/utils/request.util';
 
 export const meta: MetaFunction = () => {
   return [{ title: 'New Remix App' }, { name: 'description', content: 'Welcome to Remix!' }];
 };
 
-export const loader: LoaderFunction = async (args) => {
-  return json({ error: '获取用户详情失败' }, { status: 500 });
-};
+export const loader = LoaderWrapper.init(({ payload }) => {
+  return json({ payload: payload });
+})
+  .withLogin()
+  .loader();
 
 export default function Index() {
+  const loaderData = useLoaderData<LoaderFunction>();
   return (
     <div className="flex h-screen items-center justify-center">
+      <div>{loaderData}</div>
       <div className="flex flex-col items-center gap-16">
         <header className="flex flex-col items-center gap-9">
           <h1 className="leading text-2xl font-bold text-gray-800 dark:text-gray-100">
