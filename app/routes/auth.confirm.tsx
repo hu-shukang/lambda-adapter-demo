@@ -19,7 +19,6 @@ export default function AuthConfirmPage() {
   const submit = useSubmit();
 
   const onSubmit: SubmitHandler<SignupConfirmInput> = (data) => {
-    console.log(data);
     const formData = new FormData();
     formData.append('username', data.username);
     formData.append('confirmationCode', data.confirmationCode);
