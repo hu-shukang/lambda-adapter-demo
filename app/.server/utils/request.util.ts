@@ -34,19 +34,25 @@ export class RequestWrapper {
   }
 }
 
-type CustomActionFunction<TBody = any, TParams = any, TQuery = any> = (
-  args: ActionFunctionArgs & { bodyData: TBody; paramData: TParams; queryData: TQuery },
+type CustomActionFunctionArgs = {
+  bodyData?: any;
+  paramsData?: any;
+  queryData?: any;
+};
+
+type CustomActionFunction<T extends CustomActionFunctionArgs> = (
+  args: ActionFunctionArgs & T,
 ) => ReturnType<ActionFunction>;
 
-export class RequestUtil<TBody = any, TParams = any, TQuery = any> {
-  private actionFunc: CustomActionFunction<TBody, TParams, TQuery>;
+export class ActionWrapper<T extends CustomActionFunctionArgs> {
+  private actionFunc: CustomActionFunction<T>;
 
-  private constructor(actionFunc: CustomActionFunction<TBody, TParams, TQuery>) {
+  private constructor(actionFunc: CustomActionFunction<T>) {
     this.actionFunc = actionFunc;
   }
 
-  static init(loaderFunc: CustomActionFunction) {
-    return new RequestUtil(loaderFunc);
+  static init<T extends CustomActionFunctionArgs>(loaderFunc: CustomActionFunction<T>) {
+    return new ActionWrapper<T>(loaderFunc);
   }
 
   withSignin() {
@@ -64,7 +70,7 @@ export class RequestUtil<TBody = any, TParams = any, TQuery = any> {
     return this;
   }
 
-  withBodyValid<T extends TBody>(schema: ZodSchema<T>) {
+  withBodyValid<TBody>(schema: ZodSchema<TBody>) {
     const originalLoader = this.actionFunc;
     this.actionFunc = async (args) => {
       let bodyData;
@@ -79,10 +85,10 @@ export class RequestUtil<TBody = any, TParams = any, TQuery = any> {
 
       return originalLoader({ ...args, bodyData });
     };
-    return this as RequestUtil<T, TParams, TQuery>;
+    return this;
   }
 
-  withParamsValid<T extends TParams>(schema: ZodSchema<T>) {
+  withParamsValid<TParam>(schema: ZodSchema<TParam>) {
     const originalLoader = this.actionFunc;
     this.actionFunc = async (args) => {
       let paramData;
@@ -94,10 +100,10 @@ export class RequestUtil<TBody = any, TParams = any, TQuery = any> {
 
       return originalLoader({ ...args, paramData });
     };
-    return this as RequestUtil<TBody, T, TQuery>;
+    return this;
   }
 
-  withQueryValid<T extends TQuery>(schema: ZodSchema<T>) {
+  withQueryValid<TQuery>(schema: ZodSchema<TQuery>) {
     const originalLoader = this.actionFunc;
     this.actionFunc = async (args) => {
       let queryData;
@@ -111,7 +117,7 @@ export class RequestUtil<TBody = any, TParams = any, TQuery = any> {
 
       return originalLoader({ ...args, queryData });
     };
-    return this as RequestUtil<TBody, TParams, T>;
+    return this;
   }
 
   action() {
