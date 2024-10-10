@@ -52,11 +52,11 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
     const originalAction = this.actionFunc;
     this.actionFunc = async (args) => {
       let bodyData;
-
       try {
         const formData = await args.request.formData();
         const form = Object.fromEntries(formData);
         bodyData = schema.parse(form);
+        console.log(`[bodyData]: ${JSON.stringify(bodyData)}`);
       } catch (error) {
         return json({ error: 'Invalid request body', details: error }, { status: 400 });
       }
@@ -72,6 +72,7 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
       let paramData;
       try {
         paramData = schema.parse(args.params);
+        console.log(`[paramData]: ${JSON.stringify(paramData)}`);
       } catch (error) {
         return json({ error: 'Invalid request path parameter', details: error }, { status: 400 });
       }
@@ -89,6 +90,7 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
         const url = new URL(args.request.url);
         const data = Object.fromEntries(url.searchParams.entries());
         queryData = schema.parse(data);
+        console.log(`[queryData]: ${JSON.stringify(queryData)}`);
       } catch (error) {
         return json({ error: 'Invalid request path parameter', details: error }, { status: 400 });
       }
@@ -102,11 +104,13 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
     const originalAction = this.actionFunc;
     this.actionFunc = async (args) => {
       let payload: CognitoIdTokenPayload | undefined = undefined;
+      let idToken;
       try {
         const cookieHeader = args.request.headers.get('Cookie');
-        const idToken = await Cookie.idToken.parse(cookieHeader);
-        payload = Cognito.verifier.verifySync(idToken);
+        idToken = await Cookie.idToken.parse(cookieHeader);
+        payload = await Cognito.verifier.verify(idToken);
       } catch (error) {
+        console.log(`[login fail]idToken: ${idToken}`);
         console.log(error);
         return redirect('/auth/signin', { status: 301 });
       }
@@ -198,11 +202,13 @@ export class LoaderWrapper<T extends CustomLoaderFunctionArgs> {
     const originalLoader = this.loaderFunc;
     this.loaderFunc = async (args) => {
       let payload: CognitoIdTokenPayload | undefined = undefined;
+      let idToken;
       try {
         const cookieHeader = args.request.headers.get('Cookie');
-        const idToken = await Cookie.idToken.parse(cookieHeader);
-        payload = Cognito.verifier.verifySync(idToken);
+        idToken = await Cookie.idToken.parse(cookieHeader);
+        payload = await Cognito.verifier.verify(idToken);
       } catch (error) {
+        console.log(`[login fail]idToken: ${idToken}`);
         console.log(error);
         return redirect('/auth/signin', { status: 301 });
       }

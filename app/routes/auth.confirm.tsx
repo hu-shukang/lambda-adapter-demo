@@ -7,7 +7,7 @@ import SignupConfirmForm from '~/components/auth/signup-confirm-form';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { SignupConfirmInput, signupConfirmInputSchema } from '~/models/user.model';
 
-export const action = ActionWrapper.init(async ({ bodyData }) => {
+export const action = ActionWrapper.init<{ bodyData: SignupConfirmInput }>(async ({ bodyData }) => {
   await authService.confirm(bodyData);
   return redirect('/auth/signin');
 })

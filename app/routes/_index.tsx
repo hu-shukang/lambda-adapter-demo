@@ -1,6 +1,7 @@
 import { json, LoaderFunction, type MetaFunction } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { LoaderWrapper } from '~/.server/utils/request.util';
+import { useUserStore } from '~/stores/user.store';
 
 export const meta: MetaFunction = () => {
   return [{ title: 'New Remix App' }, { name: 'description', content: 'Welcome to Remix!' }];
@@ -14,9 +15,10 @@ export const loader = LoaderWrapper.init(({ payload }) => {
 
 export default function Index() {
   const loaderData = useLoaderData<LoaderFunction>();
+  const setPayload = useUserStore((state) => state.setPayload);
+  setPayload(loaderData);
   return (
     <div className="flex h-screen items-center justify-center">
-      <div>{loaderData}</div>
       <div className="flex flex-col items-center gap-16">
         <header className="flex flex-col items-center gap-9">
           <h1 className="leading text-2xl font-bold text-gray-800 dark:text-gray-100">
