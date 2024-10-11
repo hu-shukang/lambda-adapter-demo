@@ -111,7 +111,6 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
         payload = await Cognito.verifier.verify(idToken);
       } catch (error) {
         console.log(`[login fail]idToken: ${idToken}`);
-        console.log(error);
         return redirect('/auth/signin', { status: 301 });
       }
       return originalAction({ ...args, payload });
@@ -120,7 +119,19 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
   }
 
   action() {
-    return this.actionFunc as unknown as ActionFunction;
+    const wrappedAction: ActionFunction = async (args) => {
+      try {
+        return await this.actionFunc(args as ActionFunctionArgs & T);
+      } catch (error: any) {
+        if (error.name === 'UserNotFoundException') {
+          return json({ error: 'ログイン失敗' }, { status: 400 });
+        }
+        // 如果需要，可以返回一个统一的错误响应，或者重定向到错误页面
+        return json({ error: 'An unexpected error occurred' }, { status: 500 });
+      }
+    };
+
+    return wrappedAction;
   }
 
   private async checkUserSignedIn(request: Request) {
@@ -208,8 +219,7 @@ export class LoaderWrapper<T extends CustomLoaderFunctionArgs> {
         idToken = await Cookie.idToken.parse(cookieHeader);
         payload = await Cognito.verifier.verify(idToken);
       } catch (error) {
-        console.log(`[login fail]idToken: ${idToken}`);
-        console.log(error);
+        console.log(`[login fail] idToken: ${idToken}`);
         return redirect('/auth/signin', { status: 301 });
       }
       return originalLoader({ ...args, payload });

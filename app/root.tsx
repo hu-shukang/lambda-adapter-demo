@@ -34,6 +34,34 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+// export function ErrorBoundary() {
+//   const error = useRouteError();
+
+//   // 处理 Remix 的错误响应
+//   if (isRouteErrorResponse(error)) {
+//     return (
+//       <div className="flex items-center justify-center min-h-screen bg-gray-100">
+//         <div className="max-w-md p-6 bg-white shadow-md rounded">
+//           <h1 className="text-xl font-semibold text-red-600">Error {error.status}</h1>
+//           <p className="mt-2 text-gray-700">
+//             {error.data.message || 'An error occurred while processing your request.'}
+//           </p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   // 处理其他类型的错误
+//   return (
+//     <div className="flex items-center justify-center min-h-screen bg-gray-100">
+//       <div className="max-w-md p-6 bg-white shadow-md rounded">
+//         <h1 className="text-xl font-semibold text-red-600">Something went wrong</h1>
+//         <p className="mt-2 text-gray-700">{error instanceof Error ? error.message : 'An unknown error occurred.'}</p>
+//       </div>
+//     </div>
+//   );
+// }
+
 export default function App() {
   return <Outlet />;
 }
