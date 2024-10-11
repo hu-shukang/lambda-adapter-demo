@@ -5,6 +5,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Link } from '@remix-run/react';
 
 const SigninForm: React.FC<{ onSubmit: SubmitHandler<SigninInput> }> = ({ onSubmit }) => {
   const form = useForm<SigninInput>({ resolver: zodResolver(signinInputSchema) });
@@ -38,7 +39,10 @@ const SigninForm: React.FC<{ onSubmit: SubmitHandler<SigninInput> }> = ({ onSubm
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit">signin</Button>
+        <Link to="/auth/signup">
+          <Button variant="link">go to signup</Button>
+        </Link>
       </form>
     </Form>
   );

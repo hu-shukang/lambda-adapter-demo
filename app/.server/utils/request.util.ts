@@ -33,21 +33,6 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
     return new ActionWrapper<T>(loaderFunc);
   }
 
-  withSignin() {
-    const originalAction = this.actionFunc;
-    this.actionFunc = async (args) => {
-      const { request } = args;
-      const userId = await this.checkUserSignedIn(request);
-
-      if (!userId) {
-        throw redirect('/auth/signin');
-      }
-
-      return originalAction(args);
-    };
-    return this;
-  }
-
   withBodyValid<TBody>(schema: ZodSchema<TBody>) {
     const originalAction = this.actionFunc;
     this.actionFunc = async (args) => {
@@ -111,7 +96,7 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
         payload = await Cognito.verifier.verify(idToken);
       } catch (error) {
         console.log(`[login fail]idToken: ${idToken}`);
-        return redirect('/auth/signin', { status: 301 });
+        return redirect('/auth/signin?signinRequired=true', { status: 301 });
       }
       return originalAction({ ...args, payload });
     };
@@ -132,12 +117,6 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
     };
 
     return wrappedAction;
-  }
-
-  private async checkUserSignedIn(request: Request) {
-    const cookieHeader = request.headers.get('Cookie');
-    const userId = cookieHeader ? 'user123' : null;
-    return userId;
   }
 }
 
@@ -160,21 +139,6 @@ export class LoaderWrapper<T extends CustomLoaderFunctionArgs> {
 
   static init<T extends CustomLoaderFunctionArgs>(loaderFunc: CustomLoaderFunction<T>) {
     return new LoaderWrapper<T>(loaderFunc);
-  }
-
-  withSignin() {
-    const originalLoader = this.loaderFunc;
-    this.loaderFunc = async (args) => {
-      const { request } = args;
-      const userId = await this.checkUserSignedIn(request);
-
-      if (!userId) {
-        throw redirect('/auth/signin');
-      }
-
-      return originalLoader(args);
-    };
-    return this;
   }
 
   withParamsValid<TParam>(schema: ZodSchema<TParam>) {
@@ -220,7 +184,10 @@ export class LoaderWrapper<T extends CustomLoaderFunctionArgs> {
         payload = await Cognito.verifier.verify(idToken);
       } catch (error) {
         console.log(`[login fail] idToken: ${idToken}`);
-        return redirect('/auth/signin', { status: 301 });
+        const { pathname, search } = new URL(args.request.url);
+
+        const redirectUrl = encodeURIComponent(`${pathname}${search}`);
+        return redirect(`/auth/signin?signinRequired=true&redirectUrl=${redirectUrl}`, { status: 301 });
       }
       return originalLoader({ ...args, payload });
     };
@@ -229,11 +196,5 @@ export class LoaderWrapper<T extends CustomLoaderFunctionArgs> {
 
   loader() {
     return this.loaderFunc as unknown as LoaderFunction;
-  }
-
-  private async checkUserSignedIn(request: Request) {
-    const cookieHeader = request.headers.get('Cookie');
-    const userId = cookieHeader ? 'user123' : null;
-    return userId;
   }
 }

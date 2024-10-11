@@ -1,5 +1,5 @@
 import { ActionFunction } from '@remix-run/node';
-import { json, useActionData, useNavigate, useSubmit } from '@remix-run/react';
+import { json, useActionData, useNavigate, useSearchParams, useSubmit } from '@remix-run/react';
 import { useEffect } from 'react';
 import { SubmitHandler } from 'react-hook-form';
 import { authService } from '~/.server/services/auth.service';
@@ -35,6 +35,9 @@ export default function SigninPage() {
   const submit = useSubmit();
   const navigate = useNavigate();
   const setPayload = useUserStore((state) => state.setPayload);
+  const [searchParams] = useSearchParams();
+  const signinRequired = searchParams.get('signinRequired');
+  const redirectUrl = searchParams.get('redirectUrl');
 
   const onSubmit: SubmitHandler<SigninInput> = (data) => {
     const formData = new FormData();
@@ -47,9 +50,9 @@ export default function SigninPage() {
   useEffect(() => {
     if (actionData?.message === 'Signin successful') {
       setPayload(actionData.payload);
-      navigate('/');
+      navigate(redirectUrl || '/');
     }
-  }, [actionData, navigate, setPayload]);
+  }, [actionData, navigate, redirectUrl, setPayload]);
 
   return (
     <div>
@@ -60,6 +63,7 @@ export default function SigninPage() {
         </CardHeader>
         <CardContent>
           {actionData?.error && <p className="text-red-500">{actionData.error}</p>}
+          {signinRequired && <p className="text-red-500">お先にサインインしてください</p>}
           <SigninForm onSubmit={onSubmit} />
         </CardContent>
       </Card>

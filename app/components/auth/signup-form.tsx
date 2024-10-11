@@ -5,6 +5,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '../ui/input';
 import PropTypes from 'prop-types';
 import { Button } from '../ui/button';
+import { Link } from '@remix-run/react';
 
 const SignupForm: React.FC<{ onSubmit: SubmitHandler<SignupInput> }> = ({ onSubmit }) => {
   const form = useForm<SignupInput>({ resolver: zodResolver(signupInputSchema) });
@@ -64,7 +65,10 @@ const SignupForm: React.FC<{ onSubmit: SubmitHandler<SignupInput> }> = ({ onSubm
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit">Signup</Button>
+        <Link to="/auth/signin">
+          <Button variant="link">go to signin</Button>
+        </Link>
       </form>
     </Form>
   );
