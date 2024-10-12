@@ -1,6 +1,9 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react';
-import type { LinksFunction } from '@remix-run/node';
+import { json, Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react';
+import type { LinksFunction, LoaderFunction } from '@remix-run/node';
 import styles from './tailwind.css?url';
+import { Amplify } from 'aws-amplify';
+import { cognitoUserPoolsTokenProvider } from 'aws-amplify/auth/cognito';
+import { sharedInMemoryStorage } from 'aws-amplify/utils';
 
 export const links: LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -16,12 +19,24 @@ export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: styles },
 ];
 
+export const loader: LoaderFunction = () => {
+  return json({
+    ENV: {
+      USER_POOL_CLIENT_ID: process.env.USER_POOL_CLIENT_ID,
+      USER_POOL_ID: process.env.USER_POOL_ID,
+    },
+  });
+};
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="Cache-Control" content="no-store, no-cache, must-revalidate, proxy-revalidate" />
+        <meta name="Pragma" content="no-cache" />
+        <meta name="Expires" content="0" />
         <Meta />
         <Links />
       </head>
@@ -34,34 +49,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-// export function ErrorBoundary() {
-//   const error = useRouteError();
-
-//   // 处理 Remix 的错误响应
-//   if (isRouteErrorResponse(error)) {
-//     return (
-//       <div className="flex items-center justify-center min-h-screen bg-gray-100">
-//         <div className="max-w-md p-6 bg-white shadow-md rounded">
-//           <h1 className="text-xl font-semibold text-red-600">Error {error.status}</h1>
-//           <p className="mt-2 text-gray-700">
-//             {error.data.message || 'An error occurred while processing your request.'}
-//           </p>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   // 处理其他类型的错误
-//   return (
-//     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-//       <div className="max-w-md p-6 bg-white shadow-md rounded">
-//         <h1 className="text-xl font-semibold text-red-600">Something went wrong</h1>
-//         <p className="mt-2 text-gray-700">{error instanceof Error ? error.message : 'An unknown error occurred.'}</p>
-//       </div>
-//     </div>
-//   );
-// }
-
 export default function App() {
-  return <Outlet />;
+  const data = useLoaderData<typeof loader>();
+  Amplify.configure({
+    Auth: {
+      Cognito: {
+        userPoolClientId: data.ENV.USER_POOL_CLIENT_ID,
+        userPoolId: data.ENV.USER_POOL_ID,
+      },
+    },
+  });
+  cognitoUserPoolsTokenProvider.setKeyValueStorage(sharedInMemoryStorage);
+
+  return (
+    <>
+      <Outlet />
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `window.ENV = ${JSON.stringify(data.ENV)}`,
+        }}
+      />
+      <Scripts />
+    </>
+  );
 }

@@ -1,10 +1,27 @@
-import { createCookie } from '@remix-run/node';
+import { parse } from 'cookie';
 
-export const Cookie = {
-  idToken: createCookie('idToken', {
-    maxAge: 60 * 60 * 24 * 7, // 设置 cookie 的过期时间为 7 天
-    httpOnly: true, // 使 cookie 只能在服务器端访问
-    secure: process.env.NODE_ENV === 'production', // 在生产环境下启用 secure
-    path: '/', // 设置 cookie 的路径
-  }),
-};
+export class Cookies {
+  private cookies: Record<string, string | undefined>;
+  private constructor(request: Request) {
+    const cookieHeader = request.headers.get('cookie');
+    if (!cookieHeader) {
+      this.cookies = {};
+    } else {
+      this.cookies = parse(cookieHeader);
+    }
+  }
+  public static init(request: Request) {
+    return new Cookies(request);
+  }
+
+  public getUserName() {
+    const cookieName = `CognitoIdentityServiceProvider.${process.env.USER_POOL_CLIENT_ID}.LastAuthUser`;
+    return this.cookies[cookieName];
+  }
+
+  public getIdToken() {
+    const userName = this.getUserName();
+    const cookieName = `CognitoIdentityServiceProvider.${process.env.USER_POOL_CLIENT_ID}.${userName}.idToken`;
+    return this.cookies[cookieName];
+  }
+}

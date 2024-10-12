@@ -1,24 +1,30 @@
 import { ActionFunction } from '@remix-run/node';
-import { useActionData, useSubmit } from '@remix-run/react';
+import { useActionData, useNavigate } from '@remix-run/react';
 import { SubmitHandler } from 'react-hook-form';
 import SignupForm from '~/components/auth/signup-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { SignupInput } from '~/models/user.model';
 import { useUserStore } from '~/stores/user.store';
+import { signUp } from 'aws-amplify/auth';
 
 export default function SignupPage() {
   const actionData = useActionData<ActionFunction>();
-  const submit = useSubmit();
   const setUsername = useUserStore((state) => state.setUsername);
+  const navigate = useNavigate();
 
-  const onSubmit: SubmitHandler<SignupInput> = (data) => {
-    const formData = new FormData();
-    formData.append('username', data.username);
-    formData.append('email', data.email);
-    formData.append('password', data.password);
-    formData.append('rePassword', data.rePassword);
-    setUsername(data.username);
-    submit(formData, { method: 'post', action: '/api/auth/signup' });
+  const onSubmit: SubmitHandler<SignupInput> = async (data) => {
+    try {
+      const result = await signUp({
+        username: data.username,
+        password: data.password,
+        options: { userAttributes: { email: data.email } },
+      });
+      console.log(result);
+      setUsername(data.username);
+      navigate('/auth/confirm');
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (

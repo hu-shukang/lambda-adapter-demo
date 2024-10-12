@@ -8,7 +8,16 @@ export const meta: MetaFunction = () => {
 
 export const loader = LoaderWrapper.init<{ payload: CognitoIdTokenPayload }>(({ payload }) => {
   console.log(payload);
-  return json({ message: 'successful' });
+  return json(
+    { message: 'successful' },
+    {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
+    },
+  );
 })
   .withLogin()
   .loader();

@@ -7,7 +7,7 @@ import {
   redirect,
 } from '@remix-run/node';
 import { ZodSchema } from 'zod';
-import { Cookie } from './cookie.util';
+import { Cookies } from './cookie.util';
 import { Cognito } from './cognito.util';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 
@@ -91,8 +91,10 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
       let payload: CognitoIdTokenPayload | undefined = undefined;
       let idToken;
       try {
-        const cookieHeader = args.request.headers.get('Cookie');
-        idToken = await Cookie.idToken.parse(cookieHeader);
+        idToken = Cookies.init(args.request).getIdToken();
+        if (!idToken) {
+          throw new Error('no idToken');
+        }
         payload = await Cognito.verifier.verify(idToken);
       } catch (error) {
         console.log(`[login fail]idToken: ${idToken}`);
@@ -179,8 +181,10 @@ export class LoaderWrapper<T extends CustomLoaderFunctionArgs> {
       let payload: CognitoIdTokenPayload | undefined = undefined;
       let idToken;
       try {
-        const cookieHeader = args.request.headers.get('Cookie');
-        idToken = await Cookie.idToken.parse(cookieHeader);
+        idToken = Cookies.init(args.request).getIdToken();
+        if (!idToken) {
+          throw new Error('no idToken');
+        }
         payload = await Cognito.verifier.verify(idToken);
       } catch (error) {
         console.log(`[login fail] idToken: ${idToken}`);
