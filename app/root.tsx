@@ -3,7 +3,7 @@ import type { LinksFunction, LoaderFunction } from '@remix-run/node';
 import styles from './tailwind.css?url';
 import { Amplify } from 'aws-amplify';
 import { cognitoUserPoolsTokenProvider } from 'aws-amplify/auth/cognito';
-import { sharedInMemoryStorage } from 'aws-amplify/utils';
+import { CookieStorage } from 'aws-amplify/utils';
 
 export const links: LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -59,7 +59,7 @@ export default function App() {
       },
     },
   });
-  cognitoUserPoolsTokenProvider.setKeyValueStorage(sharedInMemoryStorage);
+  cognitoUserPoolsTokenProvider.setKeyValueStorage(new CookieStorage());
 
   return (
     <>

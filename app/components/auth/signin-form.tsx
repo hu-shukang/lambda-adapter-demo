@@ -8,7 +8,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from '@remix-run/react';
 
 const SigninForm: React.FC<{ onSubmit: SubmitHandler<SigninInput> }> = ({ onSubmit }) => {
-  const form = useForm<SigninInput>({ resolver: zodResolver(signinInputSchema) });
+  const form = useForm<SigninInput>({
+    defaultValues: {
+      username: '',
+      password: '',
+    },
+    resolver: zodResolver(signinInputSchema),
+  });
 
   return (
     <Form {...form}>

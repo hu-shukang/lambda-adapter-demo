@@ -8,7 +8,15 @@ import { Button } from '../ui/button';
 import { Link } from '@remix-run/react';
 
 const SignupForm: React.FC<{ onSubmit: SubmitHandler<SignupInput> }> = ({ onSubmit }) => {
-  const form = useForm<SignupInput>({ resolver: zodResolver(signupInputSchema) });
+  const form = useForm<SignupInput>({
+    defaultValues: {
+      username: '',
+      email: '',
+      password: '',
+      rePassword: '',
+    },
+    resolver: zodResolver(signupInputSchema),
+  });
 
   return (
     <Form {...form}>

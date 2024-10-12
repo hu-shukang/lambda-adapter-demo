@@ -6,8 +6,7 @@ export const meta: MetaFunction = () => {
   return [{ title: 'New Remix App' }, { name: 'description', content: 'Welcome to Remix!' }];
 };
 
-export const loader = LoaderWrapper.init<{ payload: CognitoIdTokenPayload }>(({ payload }) => {
-  console.log(payload);
+export const loader = LoaderWrapper.init<{ payload: CognitoIdTokenPayload }>(() => {
   return json(
     { message: 'successful' },
     {
