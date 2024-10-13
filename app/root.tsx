@@ -1,9 +1,8 @@
-import { json, Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react';
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react';
 import type { LinksFunction, LoaderFunction } from '@remix-run/node';
 import styles from './tailwind.css?url';
 import { Amplify } from 'aws-amplify';
-import { cognitoUserPoolsTokenProvider } from 'aws-amplify/auth/cognito';
-import { CookieStorage } from 'aws-amplify/utils';
+import { Resp } from './.server/utils/response.util';
 
 export const links: LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -19,8 +18,8 @@ export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: styles },
 ];
 
-export const loader: LoaderFunction = () => {
-  return json({
+export const loader: LoaderFunction = async ({ request }) => {
+  return await Resp.json(request, {
     ENV: {
       USER_POOL_CLIENT_ID: process.env.USER_POOL_CLIENT_ID,
       USER_POOL_ID: process.env.USER_POOL_ID,
@@ -59,7 +58,6 @@ export default function App() {
       },
     },
   });
-  cognitoUserPoolsTokenProvider.setKeyValueStorage(new CookieStorage());
 
   return (
     <>

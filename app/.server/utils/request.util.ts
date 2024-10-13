@@ -1,15 +1,9 @@
-import {
-  ActionFunction,
-  ActionFunctionArgs,
-  json,
-  LoaderFunction,
-  LoaderFunctionArgs,
-  redirect,
-} from '@remix-run/node';
+import { ActionFunction, ActionFunctionArgs, LoaderFunction, LoaderFunctionArgs } from '@remix-run/node';
 import { ZodSchema } from 'zod';
-import { Cookies } from './cookie.util';
+import { Cookie } from './cookie.util';
 import { Cognito } from './cognito.util';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
+import { Resp } from './response.util';
 
 type CustomActionFunctionArgs = {
   bodyData?: any;
@@ -43,7 +37,7 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
         bodyData = schema.parse(form);
         console.log(`[bodyData]: ${JSON.stringify(bodyData)}`);
       } catch (error) {
-        return json({ error: 'Invalid request body', details: error }, { status: 400 });
+        return await Resp.json(args.request, { error: 'Invalid request body', details: error }, { status: 400 });
       }
 
       return originalAction({ ...args, bodyData });
@@ -59,7 +53,11 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
         paramData = schema.parse(args.params);
         console.log(`[paramData]: ${JSON.stringify(paramData)}`);
       } catch (error) {
-        return json({ error: 'Invalid request path parameter', details: error }, { status: 400 });
+        return await Resp.json(
+          args.request,
+          { error: 'Invalid request path parameter', details: error },
+          { status: 400 },
+        );
       }
 
       return originalAction({ ...args, paramData });
@@ -77,7 +75,11 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
         queryData = schema.parse(data);
         console.log(`[queryData]: ${JSON.stringify(queryData)}`);
       } catch (error) {
-        return json({ error: 'Invalid request path parameter', details: error }, { status: 400 });
+        return await Resp.json(
+          args.request,
+          { error: 'Invalid request path parameter', details: error },
+          { status: 400 },
+        );
       }
 
       return originalAction({ ...args, queryData });
@@ -91,14 +93,14 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
       let payload: CognitoIdTokenPayload | undefined = undefined;
       let idToken;
       try {
-        idToken = Cookies.init(args.request).getIdToken();
+        idToken = await Cookie.idToken.parse(args.request.headers.get('Cookie'));
         if (!idToken) {
           throw new Error('no idToken');
         }
         payload = await Cognito.verifier.verify(idToken);
       } catch (error) {
         console.log(`[login fail]idToken: ${idToken}`);
-        return redirect('/auth/signin?signinRequired=true', { status: 301 });
+        return await Resp.redirect(args.request, '/auth/signin?signinRequired=true', { status: 301 });
       }
       return originalAction({ ...args, payload });
     };
@@ -111,10 +113,10 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
         return await this.actionFunc(args as ActionFunctionArgs & T);
       } catch (error: any) {
         if (error.name === 'UserNotFoundException') {
-          return json({ error: 'ログイン失敗' }, { status: 400 });
+          return await Resp.json(args.request, { error: 'ログイン失敗' }, { status: 400 });
         }
         // 如果需要，可以返回一个统一的错误响应，或者重定向到错误页面
-        return json({ error: 'An unexpected error occurred' }, { status: 500 });
+        return await Resp.json(args.request, { error: 'An unexpected error occurred' }, { status: 500 });
       }
     };
 
@@ -150,7 +152,11 @@ export class LoaderWrapper<T extends CustomLoaderFunctionArgs> {
       try {
         paramData = schema.parse(args.params);
       } catch (error) {
-        return json({ error: 'Invalid request path parameter', details: error }, { status: 400 });
+        return await Resp.json(
+          args.request,
+          { error: 'Invalid request path parameter', details: error },
+          { status: 400 },
+        );
       }
 
       return originalLoader({ ...args, paramData });
@@ -167,7 +173,11 @@ export class LoaderWrapper<T extends CustomLoaderFunctionArgs> {
         const data = Object.fromEntries(url.searchParams.entries());
         queryData = schema.parse(data);
       } catch (error) {
-        return json({ error: 'Invalid request path parameter', details: error }, { status: 400 });
+        return await Resp.json(
+          args.request,
+          { error: 'Invalid request path parameter', details: error },
+          { status: 400 },
+        );
       }
 
       return originalLoader({ ...args, queryData });
@@ -181,7 +191,7 @@ export class LoaderWrapper<T extends CustomLoaderFunctionArgs> {
       let payload: CognitoIdTokenPayload | undefined = undefined;
       let idToken;
       try {
-        idToken = Cookies.init(args.request).getIdToken();
+        idToken = await Cookie.idToken.parse(args.request.headers.get('Cookie'));
         if (!idToken) {
           throw new Error('no idToken');
         }
@@ -191,7 +201,9 @@ export class LoaderWrapper<T extends CustomLoaderFunctionArgs> {
         const { pathname, search } = new URL(args.request.url);
 
         const redirectUrl = encodeURIComponent(`${pathname}${search}`);
-        return redirect(`/auth/signin?signinRequired=true&redirectUrl=${redirectUrl}`, { status: 301 });
+        return await Resp.redirect(args.request, `/auth/signin?signinRequired=true&redirectUrl=${redirectUrl}`, {
+          status: 301,
+        });
       }
       return originalLoader({ ...args, payload });
     };

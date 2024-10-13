@@ -14,6 +14,8 @@ const rePassword = z
 const confirmationCode = z.string().regex(/^\d{6}$/, {
   message: '6桁数字は必須',
 });
+const idToken = z.string();
+const refreshToken = z.string();
 export const userInfoSchema = z.object({
   email: z.string().email().min(1, 'Name is required'),
   password: z.string().min(1, 'Address is required'),
@@ -45,10 +47,16 @@ export const signupConfirmInputSchema = z.object({
   confirmationCode: confirmationCode,
 });
 
+export const tokenInputSchema = z.object({
+  idToken: idToken,
+  refreshToken: refreshToken,
+});
+
 export type UserInfo = z.infer<typeof userInfoSchema>;
 export type UserEntity = DBKey & UserInfo;
 export type SigninInput = z.infer<typeof signinInputSchema>;
 export type SignupInput = z.infer<typeof signupInputSchema>;
 export type SignupConfirmInput = z.infer<typeof signupConfirmInputSchema>;
+export type TokenInput = z.infer<typeof tokenInputSchema>;
 
 export type ID = z.infer<typeof idSchema>;
