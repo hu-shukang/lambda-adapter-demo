@@ -1,5 +1,5 @@
 // types.d.ts
-export {}; // 确保文件是模块，避免污染全局
+import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 
 declare global {
   interface Window {
@@ -9,5 +9,11 @@ declare global {
       NODE_ENV: 'development' | 'production' | 'test';
       [key: string]: any; // 如果 `ENV` 中有其他动态键值对
     };
+  }
+}
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    payload?: CognitoIdTokenPayload;
   }
 }
