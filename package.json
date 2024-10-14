@@ -31,6 +31,7 @@
     "aws-jwt-verify": "^4.0.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "dayjs": "^1.11.13",
     "input-otp": "^1.2.4",
     "isbot": "^4.1.0",
     "lucide-react": "^0.447.0",

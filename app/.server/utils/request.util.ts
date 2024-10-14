@@ -18,6 +18,7 @@ type CustomActionFunction<T extends CustomActionFunctionArgs> = (
 
 export class ActionWrapper<T extends CustomActionFunctionArgs> {
   private actionFunc: CustomActionFunction<T>;
+  private payload: CognitoIdTokenPayload | undefined;
 
   private constructor(actionFunc: CustomActionFunction<T>) {
     this.actionFunc = actionFunc;
@@ -90,37 +91,29 @@ export class ActionWrapper<T extends CustomActionFunctionArgs> {
   withLogin() {
     const originalAction = this.actionFunc;
     this.actionFunc = async (args) => {
-      let payload: CognitoIdTokenPayload | undefined = undefined;
-      let idToken;
-      try {
-        idToken = await Cookie.idToken.parse(args.request.headers.get('Cookie'));
-        if (!idToken) {
-          throw new Error('no idToken');
-        }
-        payload = await Cognito.verifier.verify(idToken);
-      } catch (error) {
-        console.log(`[login fail]idToken: ${idToken}`);
-        return await Resp.redirect(args.request, '/auth/signin?signinRequired=true', { status: 301 });
+      if (!this.payload) {
+        const { pathname, search } = new URL(args.request.url);
+        const redirectUrl = encodeURIComponent(`${pathname}${search}`);
+        return await Resp.redirect(args.request, `/auth/signin?signinRequired=true&redirectUrl=${redirectUrl}`, {
+          status: 301,
+        });
       }
-      return originalAction({ ...args, payload });
+      return originalAction({ ...args });
     };
     return this;
   }
 
   action() {
-    const wrappedAction: ActionFunction = async (args) => {
-      try {
-        return await this.actionFunc(args as ActionFunctionArgs & T);
-      } catch (error: any) {
-        if (error.name === 'UserNotFoundException') {
-          return await Resp.json(args.request, { error: 'ログイン失敗' }, { status: 400 });
-        }
-        // 如果需要，可以返回一个统一的错误响应，或者重定向到错误页面
-        return await Resp.json(args.request, { error: 'An unexpected error occurred' }, { status: 500 });
+    const originalAction = this.actionFunc;
+    this.actionFunc = async (args) => {
+      const idToken = await Cookie.idToken.parse(args.request.headers.get('Cookie'));
+      if (idToken) {
+        this.payload = await Cognito.verifier.verify(idToken);
       }
+      return originalAction({ ...args, payload: this.payload });
     };
 
-    return wrappedAction;
+    return this.actionFunc as unknown as ActionFunction;
   }
 }
 
@@ -136,6 +129,7 @@ type CustomLoaderFunction<T extends CustomLoaderFunctionArgs> = (
 
 export class LoaderWrapper<T extends CustomLoaderFunctionArgs> {
   private loaderFunc: CustomLoaderFunction<T>;
+  private payload: CognitoIdTokenPayload | undefined;
 
   private constructor(actionFunc: CustomLoaderFunction<T>) {
     this.loaderFunc = actionFunc;
@@ -188,29 +182,27 @@ export class LoaderWrapper<T extends CustomLoaderFunctionArgs> {
   withLogin() {
     const originalLoader = this.loaderFunc;
     this.loaderFunc = async (args) => {
-      let payload: CognitoIdTokenPayload | undefined = undefined;
-      let idToken;
-      try {
-        idToken = await Cookie.idToken.parse(args.request.headers.get('Cookie'));
-        if (!idToken) {
-          throw new Error('no idToken');
-        }
-        payload = await Cognito.verifier.verify(idToken);
-      } catch (error) {
-        console.log(`[login fail] idToken: ${idToken}`);
+      if (!this.payload) {
         const { pathname, search } = new URL(args.request.url);
-
         const redirectUrl = encodeURIComponent(`${pathname}${search}`);
         return await Resp.redirect(args.request, `/auth/signin?signinRequired=true&redirectUrl=${redirectUrl}`, {
           status: 301,
         });
       }
-      return originalLoader({ ...args, payload });
+      return originalLoader({ ...args });
     };
     return this;
   }
 
   loader() {
+    const originalLoader = this.loaderFunc;
+    this.loaderFunc = async (args) => {
+      const idToken = await Cookie.idToken.parse(args.request.headers.get('Cookie'));
+      if (idToken) {
+        this.payload = await Cognito.verifier.verify(idToken);
+      }
+      return originalLoader({ ...args, payload: this.payload });
+    };
     return this.loaderFunc as unknown as LoaderFunction;
   }
 }

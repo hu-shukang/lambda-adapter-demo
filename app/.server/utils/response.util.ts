@@ -1,16 +1,28 @@
-import { Cookie, json, redirect } from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
 import { Cookie as CookieUtil } from './cookie.util';
+import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
+import { dateUtil } from './date.util';
+import { Cognito } from './cognito.util';
 
-const refreshCookie = async (request: Request, cookie: Cookie, headers: Headers) => {
-  const cookieValue = await cookie.parse(request.headers.get('Cookie'));
+const THIRTY_MINUTES = 30 * 60;
+
+const refreshIdTokenCookie = async (request: Request, headers: Headers, payload?: CognitoIdTokenPayload) => {
+  const cookie = CookieUtil.idToken;
+  const now = dateUtil.unix();
+  let cookieValue;
+  if (payload && payload.exp - now < THIRTY_MINUTES) {
+    console.log('Token will expire in less than 30 minutes. Attempting to refresh...');
+    const refreshToken = await CookieUtil.refreshToken.parse(request.headers.get('Cookie'));
+    if (refreshToken) {
+      cookieValue = await Cognito.refreshIdTokenByRefreshToken(refreshToken);
+    }
+  } else {
+    cookieValue = await cookie.parse(request.headers.get('Cookie'));
+  }
+
   if (cookieValue) {
     headers.append('Set-Cookie', await cookie.serialize(cookieValue));
   }
-};
-
-const refreshIdTokenCookie = async (request: Request, headers: Headers) => {
-  const cookie = CookieUtil.idToken;
-  await refreshCookie(request, cookie, headers);
 };
 
 const formatHeaders = (headers?: HeadersInit): Headers => {
@@ -29,7 +41,7 @@ const formatHeaders = (headers?: HeadersInit): Headers => {
   return result;
 };
 
-const sendJson = async (request: Request, data: any, init?: number | ResponseInit) => {
+const sendJson = async (request: Request, data: any, init?: number | ResponseInit, payload?: CognitoIdTokenPayload) => {
   const respInit: ResponseInit = {};
   let headers = new Headers();
   if (typeof init === 'number') {
@@ -37,7 +49,7 @@ const sendJson = async (request: Request, data: any, init?: number | ResponseIni
   } else if (init != undefined) {
     headers = formatHeaders(init.headers);
   }
-  await refreshIdTokenCookie(request, headers);
+  await refreshIdTokenCookie(request, headers, payload);
   respInit.headers = headers;
   return json(data, respInit);
 };
