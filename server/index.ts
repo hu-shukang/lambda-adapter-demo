@@ -1,20 +1,19 @@
 import process from 'node:process';
 import { remixFastify } from '@mcansh/remix-fastify';
 import { fastify } from 'fastify';
-// import { fastifyAutoload } from '@fastify/autoload';
-// import path from 'node:path';
-// import { fileURLToPath } from 'node:url';
+import { fastifyAutoload } from '@fastify/autoload';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = fastify();
-// app.register(fastifyAutoload, {
-//   dir: path.join(__dirname, 'plugins'),
-// });
+app.register(fastifyAutoload, {
+  dir: path.join(__dirname, 'plugins'),
+});
 
 await app.register(remixFastify, {
-  buildDirectory: 'build/remix',
   getLoadContext: (request) => {
     return { payload: request.payload };
   },
