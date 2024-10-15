@@ -1,5 +1,5 @@
 // types.d.ts
-import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
+export {}; // 确保文件是模块，避免污染全局
 
 declare global {
   interface Window {
