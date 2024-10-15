@@ -12,8 +12,11 @@ declare global {
   }
 }
 
-declare module 'fastify' {
-  interface FastifyRequest {
+declare module '@remix-run/node' {
+  interface AppLoadContext {
     payload?: CognitoIdTokenPayload;
+    bodyData?: any;
+    paramsData?: any;
+    queryData?: any;
   }
 }
