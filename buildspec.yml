@@ -18,7 +18,7 @@ phases:
       - npm run build
       # 打包静态文件
       - echo "Upload Static Files..."
-      - aws s3 sync build/remix/client s3://$WEB_BUCKET/ --delete --acl bucket-owner-full-control
+      - aws s3 sync build/client s3://$WEB_BUCKET/ --delete --acl bucket-owner-full-control
       # Build Lambda and layer
       - echo "Build Lambda And Layer..."
       - npm run build:lambda
