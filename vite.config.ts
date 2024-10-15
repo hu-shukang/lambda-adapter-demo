@@ -15,6 +15,7 @@ export default defineConfig({
         process.env.NODE_ENV === 'production'
           ? ['**/*.{css,js,png,jpg,jpeg,gif,svg,webp,ico,woff,woff2,ttf,eot,json}']
           : [],
+      buildDirectory: 'build/remix',
     }),
     tsconfigPaths(),
     visualizer({
