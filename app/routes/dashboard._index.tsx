@@ -1,9 +1,9 @@
 import { Link } from '@remix-run/react';
-import { LoaderWrapper } from '~/.server/utils/request.util';
+import { RequestWrapper } from '~/.server/utils/request.util';
 import { Resp } from '~/.server/utils/response.util';
 import { Button } from '~/components/ui/button';
 
-export const loader = LoaderWrapper.init(async ({ request }) => {
+export const loader = RequestWrapper.init(async ({ request }) => {
   return await Resp.json(request, { success: true });
 })
   .withLogin()

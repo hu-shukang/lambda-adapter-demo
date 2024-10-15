@@ -1,208 +1,112 @@
-import { ActionFunction, ActionFunctionArgs, LoaderFunction, LoaderFunctionArgs } from '@remix-run/node';
+import { ActionFunction, json, LoaderFunction, redirect } from '@remix-run/node';
 import { ZodSchema } from 'zod';
 import { Cookie } from './cookie.util';
 import { Cognito } from './cognito.util';
-import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
-import { Resp } from './response.util';
 
-type CustomActionFunctionArgs = {
-  bodyData?: any;
-  paramsData?: any;
-  queryData?: any;
-  payload?: CognitoIdTokenPayload;
-};
+export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
+  private func: T;
 
-type CustomActionFunction<T extends CustomActionFunctionArgs> = (
-  args: ActionFunctionArgs & T,
-) => ReturnType<ActionFunction>;
-
-export class ActionWrapper<T extends CustomActionFunctionArgs> {
-  private actionFunc: CustomActionFunction<T>;
-  private payload: CognitoIdTokenPayload | undefined;
-
-  private constructor(actionFunc: CustomActionFunction<T>) {
-    this.actionFunc = actionFunc;
+  private constructor(func: T) {
+    this.func = func;
   }
 
-  static init<T extends CustomActionFunctionArgs>(loaderFunc: CustomActionFunction<T>) {
-    return new ActionWrapper<T>(loaderFunc);
+  public static init<T extends LoaderFunction | ActionFunction>(func: T) {
+    return new RequestWrapper(func);
   }
 
-  withBodyValid<TBody>(schema: ZodSchema<TBody>) {
-    const originalAction = this.actionFunc;
-    this.actionFunc = async (args) => {
-      let bodyData;
+  public withBodyValid(schema: ZodSchema) {
+    const originalFunc = this.func;
+    const newFunc = async (args: Parameters<T>[0]) => {
       try {
         const formData = await args.request.formData();
         const form = Object.fromEntries(formData);
-        bodyData = schema.parse(form);
+        const bodyData = schema.parse(form);
         console.log(`[bodyData]: ${JSON.stringify(bodyData)}`);
+        args.context.bodyData = bodyData;
       } catch (error) {
-        return await Resp.json(args.request, { error: 'Invalid request body', details: error }, { status: 400 });
+        return json({ error: 'Invalid request body', details: error }, { status: 400 });
       }
 
-      return originalAction({ ...args, bodyData });
+      return originalFunc({ ...args });
     };
+    this.func = newFunc as T;
     return this;
   }
 
-  withParamsValid<TParam>(schema: ZodSchema<TParam>) {
-    const originalAction = this.actionFunc;
-    this.actionFunc = async (args) => {
-      let paramData;
+  public withParamsValid(schema: ZodSchema) {
+    const originalFunc = this.func;
+    const newFunc = async (args: Parameters<T>[0]) => {
       try {
-        paramData = schema.parse(args.params);
+        const paramData = schema.parse(args.params);
         console.log(`[paramData]: ${JSON.stringify(paramData)}`);
+        args.context.paramData = paramData;
       } catch (error) {
-        return await Resp.json(
-          args.request,
-          { error: 'Invalid request path parameter', details: error },
-          { status: 400 },
-        );
+        return json({ error: 'Invalid request params', details: error }, { status: 400 });
       }
 
-      return originalAction({ ...args, paramData });
+      return originalFunc({ ...args });
     };
+    this.func = newFunc as T;
     return this;
   }
 
-  withQueryValid<TQuery>(schema: ZodSchema<TQuery>) {
-    const originalAction = this.actionFunc;
-    this.actionFunc = async (args) => {
-      let queryData;
+  public withQueryValid(schema: ZodSchema) {
+    const originalFunc = this.func;
+    const newFunc = async (args: Parameters<T>[0]) => {
       try {
         const url = new URL(args.request.url);
         const data = Object.fromEntries(url.searchParams.entries());
-        queryData = schema.parse(data);
+        const queryData = schema.parse(data);
         console.log(`[queryData]: ${JSON.stringify(queryData)}`);
+        args.context.queryData = queryData;
       } catch (error) {
-        return await Resp.json(
-          args.request,
-          { error: 'Invalid request path parameter', details: error },
-          { status: 400 },
-        );
+        return json({ error: 'Invalid request query', details: error }, { status: 400 });
       }
 
-      return originalAction({ ...args, queryData });
+      return originalFunc({ ...args });
     };
+    this.func = newFunc as T;
     return this;
   }
 
-  withLogin() {
-    const originalAction = this.actionFunc;
-    this.actionFunc = async (args) => {
-      if (!this.payload) {
+  public withLogin() {
+    const originalFunc = this.func;
+    const newFunc = async (args: Parameters<T>[0]) => {
+      if (!args.context.payload) {
         const { pathname, search } = new URL(args.request.url);
         const redirectUrl = encodeURIComponent(`${pathname}${search}`);
-        return await Resp.redirect(args.request, `/auth/signin?signinRequired=true&redirectUrl=${redirectUrl}`, {
+        return redirect(`/auth/signin?signinRequired=true&redirectUrl=${redirectUrl}`, {
           status: 301,
         });
       }
-      return originalAction({ ...args });
+
+      return originalFunc({ ...args });
     };
+    this.func = newFunc as T;
     return this;
   }
 
-  action() {
-    const originalAction = this.actionFunc;
-    this.actionFunc = async (args) => {
+  private invoke() {
+    const originalFunc = this.func;
+    const newFunc = async (args: Parameters<T>[0]) => {
       const idToken = await Cookie.idToken.parse(args.request.headers.get('Cookie'));
       if (idToken) {
-        this.payload = await Cognito.verifier.verify(idToken);
-      }
-      return originalAction({ ...args, payload: this.payload });
-    };
-
-    return this.actionFunc as unknown as ActionFunction;
-  }
-}
-
-type CustomLoaderFunctionArgs = {
-  paramsData?: any;
-  queryData?: any;
-  payload?: CognitoIdTokenPayload;
-};
-
-type CustomLoaderFunction<T extends CustomLoaderFunctionArgs> = (
-  args: LoaderFunctionArgs & T,
-) => ReturnType<LoaderFunction>;
-
-export class LoaderWrapper<T extends CustomLoaderFunctionArgs> {
-  private loaderFunc: CustomLoaderFunction<T>;
-  private payload: CognitoIdTokenPayload | undefined;
-
-  private constructor(actionFunc: CustomLoaderFunction<T>) {
-    this.loaderFunc = actionFunc;
-  }
-
-  static init<T extends CustomLoaderFunctionArgs>(loaderFunc: CustomLoaderFunction<T>) {
-    return new LoaderWrapper<T>(loaderFunc);
-  }
-
-  withParamsValid<TParam>(schema: ZodSchema<TParam>) {
-    const originalLoader = this.loaderFunc;
-    this.loaderFunc = async (args) => {
-      let paramData;
-      try {
-        paramData = schema.parse(args.params);
-      } catch (error) {
-        return await Resp.json(
-          args.request,
-          { error: 'Invalid request path parameter', details: error },
-          { status: 400 },
-        );
+        args.context.payload = await Cognito.verifier.verify(idToken);
       }
 
-      return originalLoader({ ...args, paramData });
+      return originalFunc({ ...args });
     };
+    this.func = newFunc as T;
     return this;
   }
 
-  withQueryValid<TQuery>(schema: ZodSchema<TQuery>) {
-    const originalLoader = this.loaderFunc;
-    this.loaderFunc = async (args) => {
-      let queryData;
-      try {
-        const url = new URL(args.request.url);
-        const data = Object.fromEntries(url.searchParams.entries());
-        queryData = schema.parse(data);
-      } catch (error) {
-        return await Resp.json(
-          args.request,
-          { error: 'Invalid request path parameter', details: error },
-          { status: 400 },
-        );
-      }
-
-      return originalLoader({ ...args, queryData });
-    };
-    return this;
+  public action() {
+    this.invoke();
+    return this.func as ActionFunction;
   }
 
-  withLogin() {
-    const originalLoader = this.loaderFunc;
-    this.loaderFunc = async (args) => {
-      if (!this.payload) {
-        const { pathname, search } = new URL(args.request.url);
-        const redirectUrl = encodeURIComponent(`${pathname}${search}`);
-        return await Resp.redirect(args.request, `/auth/signin?signinRequired=true&redirectUrl=${redirectUrl}`, {
-          status: 301,
-        });
-      }
-      return originalLoader({ ...args });
-    };
-    return this;
-  }
-
-  loader() {
-    const originalLoader = this.loaderFunc;
-    this.loaderFunc = async (args) => {
-      const idToken = await Cookie.idToken.parse(args.request.headers.get('Cookie'));
-      if (idToken) {
-        this.payload = await Cognito.verifier.verify(idToken);
-      }
-      return originalLoader({ ...args, payload: this.payload });
-    };
-    return this.loaderFunc as unknown as LoaderFunction;
+  public loader() {
+    this.invoke();
+    return this.func as LoaderFunction;
   }
 }

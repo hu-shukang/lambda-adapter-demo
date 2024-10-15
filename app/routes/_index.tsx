@@ -1,6 +1,6 @@
 import { type MetaFunction } from '@remix-run/node';
 import { Link } from '@remix-run/react';
-import { RequestWrapper } from '~/.server/utils/req.util';
+import { RequestWrapper } from '~/.server/utils/request.util';
 import { Resp } from '~/.server/utils/response.util';
 import { Button } from '~/components/ui/button';
 
