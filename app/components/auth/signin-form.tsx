@@ -7,7 +7,12 @@ import { Button } from '../ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from '@remix-run/react';
 
-const SigninForm: React.FC<{ onSubmit: SubmitHandler<SigninInput> }> = ({ onSubmit }) => {
+type Props = {
+  onSubmit: SubmitHandler<SigninInput>;
+  signinByGoogle: () => void;
+};
+
+const SigninForm: React.FC<Props> = ({ onSubmit, signinByGoogle }) => {
   const form = useForm<SigninInput>({
     defaultValues: {
       username: '',
@@ -46,6 +51,7 @@ const SigninForm: React.FC<{ onSubmit: SubmitHandler<SigninInput> }> = ({ onSubm
           )}
         />
         <Button type="submit">signin</Button>
+        <Button onClick={signinByGoogle}>signin by google</Button>
         <Link to="/auth/signup">
           <Button variant="link">go to signup</Button>
         </Link>
@@ -56,6 +62,7 @@ const SigninForm: React.FC<{ onSubmit: SubmitHandler<SigninInput> }> = ({ onSubm
 
 SigninForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
+  signinByGoogle: PropTypes.func.isRequired,
 };
 
 export default SigninForm;

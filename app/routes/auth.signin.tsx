@@ -3,7 +3,7 @@ import { SubmitHandler } from 'react-hook-form';
 import SigninForm from '~/components/auth/signin-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { SigninInput } from '~/models/user.model';
-import { signIn, signOut } from 'aws-amplify/auth';
+import { signIn, signOut, signInWithRedirect } from 'aws-amplify/auth';
 import { useState } from 'react';
 
 export default function SigninPage() {
@@ -43,6 +43,12 @@ export default function SigninPage() {
     }
   };
 
+  const signinByGoogle = () => {
+    signInWithRedirect({
+      provider: 'Google',
+    });
+  };
+
   return (
     <div>
       <Card className="w-[600px] mx-auto mt-10">
@@ -53,7 +59,7 @@ export default function SigninPage() {
         <CardContent>
           {error && <p className="text-red-500">{error}</p>}
           {signinRequired && <p className="text-red-500">お先にサインインしてください</p>}
-          <SigninForm onSubmit={onSubmit} />
+          <SigninForm onSubmit={onSubmit} signinByGoogle={signinByGoogle} />
         </CardContent>
       </Card>
     </div>

@@ -23,6 +23,9 @@ export const loader: LoaderFunction = async ({ request }) => {
     ENV: {
       USER_POOL_CLIENT_ID: process.env.USER_POOL_CLIENT_ID,
       USER_POOL_ID: process.env.USER_POOL_ID,
+      REGION: process.env.REGION,
+      SIGN_IN_CALLBACK: process.env.SIGN_IN_CALLBACK,
+      SIGN_OUT_CALLBACK: process.env.SIGN_OUT_CALLBACK,
     },
   });
 };
@@ -56,6 +59,19 @@ export default function App() {
         userPoolClientId: data.ENV.USER_POOL_CLIENT_ID,
         userPoolId: data.ENV.USER_POOL_ID,
       },
+    },
+    auth: {
+      oauth: {
+        domain: '',
+        scopes: ['openid', 'email', 'profile'],
+        identity_providers: ['google'],
+        redirect_sign_in_uri: [data.SIGN_IN_CALLBACK],
+        redirect_sign_out_uri: [data.SIGN_OUT_CALLBACK],
+        response_type: 'code',
+      },
+      aws_region: data.REGION,
+      user_pool_id: data.ENV.USER_POOL_ID,
+      user_pool_client_id: data.ENV.USER_POOL_CLIENT_ID,
     },
   });
 

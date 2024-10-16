@@ -90,11 +90,15 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
     const originalFunc = this.func;
     const newFunc = async (args: Parameters<T>[0]) => {
       const idToken = await Cookie.idToken.parse(args.request.headers.get('Cookie'));
-      if (idToken) {
-        args.context.payload = await Cognito.verifier.verify(idToken);
-      }
+      try {
+        if (idToken) {
+          args.context.payload = await Cognito.verifier.verify(idToken);
+        }
 
-      return originalFunc({ ...args });
+        return originalFunc({ ...args });
+      } catch (e) {
+        return redirect('/auth/signin?signinRequired=true', { status: 401 });
+      }
     };
     this.func = newFunc as T;
     return this;

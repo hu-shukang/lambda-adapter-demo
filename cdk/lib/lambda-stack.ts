@@ -9,6 +9,7 @@ import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 
 export class LambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, envs: Record<string, string>, props?: cdk.StackProps) {
@@ -18,6 +19,15 @@ export class LambdaStack extends cdk.Stack {
     const lambdaRole = iam.Role.fromRoleArn(this, `${envs.APP_NAME}-lambda-role-${envs.ENV}`, envs.LAMBDA_ROLE_ARN, {
       mutable: false,
     });
+
+    const googleOAuthClientId = ssm.StringParameter.valueForStringParameter(
+      this,
+      `/${envs.APP_NAME}/${envs.ENV}/google/oauth/client-id`,
+    );
+    const googleOAuthClientSecret = ssm.StringParameter.valueForStringParameter(
+      this,
+      `/${envs.APP_NAME}/${envs.ENV}/google/oauth/client-secrets`,
+    );
 
     /* web bucket */
     const webBucketArn = cdk.Fn.importValue(`${envs.WEB_BUCKET}-arn`);
@@ -110,6 +120,17 @@ export class LambdaStack extends cdk.Stack {
       authFlows: {
         userPassword: true, // 支持通过用户名和密码进行认证
         userSrp: true, // 支持 SRP 流程
+      },
+    });
+
+    new cognito.UserPoolIdentityProviderGoogle(this, `${envs.APP_NAME}-google-oauth-${envs.ENV}`, {
+      userPool: userPool,
+      clientId: googleOAuthClientId,
+      clientSecretValue: new cdk.SecretValue(googleOAuthClientSecret),
+      scopes: ['profile', 'email', 'openid'],
+      attributeMapping: {
+        email: cognito.ProviderAttribute.GOOGLE_EMAIL,
+        fullname: cognito.ProviderAttribute.GOOGLE_NAME,
       },
     });
 
