@@ -20,19 +20,13 @@ export class LambdaStack extends cdk.Stack {
       mutable: false,
     });
 
-    const googleOAuthClientId = ssm.StringParameter.fromSecureStringParameterAttributes(
+    const googleOAuthClientId = ssm.StringParameter.valueForStringParameter(
       this,
-      `${envs.APP_NAME}-google-oauth-client-id-${envs.ENV}`,
-      {
-        parameterName: `/${envs.APP_NAME}/${envs.ENV}/google/oauth/client-id`,
-      },
+      `/${envs.APP_NAME}/${envs.ENV}/google/oauth/client-id`,
     );
-    const googleOAuthClientSecret = ssm.StringParameter.fromSecureStringParameterAttributes(
+    const googleOAuthClientSecret = ssm.StringParameter.valueForStringParameter(
       this,
-      `${envs.APP_NAME}-google-oauth-client-secrets-${envs.ENV}`,
-      {
-        parameterName: `/${envs.APP_NAME}/${envs.ENV}/google/oauth/client-secrets`,
-      },
+      `/${envs.APP_NAME}/${envs.ENV}/google/oauth/client-secrets`,
     );
 
     /* web bucket */
@@ -131,8 +125,8 @@ export class LambdaStack extends cdk.Stack {
 
     new cognito.UserPoolIdentityProviderGoogle(this, `${envs.APP_NAME}-google-oauth-${envs.ENV}`, {
       userPool: userPool,
-      clientId: googleOAuthClientId.stringValue,
-      clientSecretValue: new cdk.SecretValue(googleOAuthClientSecret.stringValue),
+      clientId: googleOAuthClientId,
+      clientSecretValue: new cdk.SecretValue(googleOAuthClientSecret),
       scopes: ['profile', 'email', 'openid'],
       attributeMapping: {
         email: cognito.ProviderAttribute.GOOGLE_EMAIL,
