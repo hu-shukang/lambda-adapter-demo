@@ -43,8 +43,9 @@ export default function SigninPage() {
     }
   };
 
-  const signinByGoogle = () => {
-    signInWithRedirect({
+  const signinByGoogle = async () => {
+    console.log('signin by google');
+    await signInWithRedirect({
       provider: 'Google',
     });
   };

@@ -51,7 +51,9 @@ const SigninForm: React.FC<Props> = ({ onSubmit, signinByGoogle }) => {
           )}
         />
         <Button type="submit">signin</Button>
-        <Button onClick={signinByGoogle}>signin by google</Button>
+        <Button type="button" onClick={signinByGoogle}>
+          signin by google
+        </Button>
         <Link to="/auth/signup">
           <Button variant="link">go to signup</Button>
         </Link>

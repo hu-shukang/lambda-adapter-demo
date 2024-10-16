@@ -26,6 +26,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       REGION: process.env.REGION,
       SIGN_IN_CALLBACK: process.env.SIGN_IN_CALLBACK,
       SIGN_OUT_CALLBACK: process.env.SIGN_OUT_CALLBACK,
+      USER_POOL_DOMAIN_PREFIX: process.env.USER_POOL_DOMAIN_PREFIX,
     },
   });
 };
@@ -62,7 +63,7 @@ export default function App() {
     },
     auth: {
       oauth: {
-        domain: '',
+        domain: `https://${data.USER_POOL_DOMAIN_PREFIX}.auth.ap-northeast-1.amazoncognito.com`,
         scopes: ['openid', 'email', 'profile'],
         identity_providers: ['google'],
         redirect_sign_in_uri: [data.SIGN_IN_CALLBACK],

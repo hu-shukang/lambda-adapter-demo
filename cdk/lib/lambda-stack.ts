@@ -113,6 +113,10 @@ export class LambdaStack extends cdk.Stack {
         preSignUp: preSignUpTriggerLambda,
       },
     });
+    const domainPrefix = `${envs.APP_NAME}-${envs.ENV}`;
+    userPool.addDomain(`${envs.APP_NAME}-user-pool-domain-${envs.ENV}`, {
+      cognitoDomain: { domainPrefix: domainPrefix },
+    });
 
     // 添加用户池客户端
     const userPoolClient = userPool.addClient(`${envs.APP_NAME}-client-${envs.ENV}`, {
@@ -147,6 +151,7 @@ export class LambdaStack extends cdk.Stack {
         ...envs,
         USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
         USER_POOL_ID: userPool.userPoolId,
+        USER_POOL_DOMAIN_PREFIX: domainPrefix,
       },
     });
 
