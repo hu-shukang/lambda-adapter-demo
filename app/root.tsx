@@ -3,6 +3,7 @@ import type { LinksFunction, LoaderFunction } from '@remix-run/node';
 import styles from './tailwind.css?url';
 import { Amplify } from 'aws-amplify';
 import { Resp } from './.server/utils/response.util';
+import { useEffect } from 'react';
 
 export const links: LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -54,27 +55,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const data = useLoaderData<typeof loader>();
-  Amplify.configure({
-    Auth: {
-      Cognito: {
-        userPoolClientId: data.ENV.USER_POOL_CLIENT_ID,
-        userPoolId: data.ENV.USER_POOL_ID,
+
+  useEffect(() => {
+    Amplify.configure({
+      Auth: {
+        Cognito: {
+          userPoolClientId: window.ENV.USER_POOL_CLIENT_ID,
+          userPoolId: window.ENV.USER_POOL_ID,
+          loginWith: {
+            oauth: {
+              domain: `${window.ENV.USER_POOL_DOMAIN_PREFIX}.auth.ap-northeast-1.amazoncognito.com`,
+              redirectSignIn: [window.ENV.SIGN_IN_CALLBACK],
+              redirectSignOut: [window.ENV.SIGN_OUT_CALLBACK],
+              responseType: 'code',
+              scopes: ['openid', 'email', 'profile'],
+              providers: ['Google'],
+            },
+          },
+        },
       },
-    },
-    auth: {
-      oauth: {
-        domain: `https://${data.USER_POOL_DOMAIN_PREFIX}.auth.ap-northeast-1.amazoncognito.com`,
-        scopes: ['openid', 'email', 'profile'],
-        identity_providers: ['google'],
-        redirect_sign_in_uri: [data.SIGN_IN_CALLBACK],
-        redirect_sign_out_uri: [data.SIGN_OUT_CALLBACK],
-        response_type: 'code',
-      },
-      aws_region: data.REGION,
-      user_pool_id: data.ENV.USER_POOL_ID,
-      user_pool_client_id: data.ENV.USER_POOL_CLIENT_ID,
-    },
-  });
+    });
+  }, []);
 
   return (
     <>
