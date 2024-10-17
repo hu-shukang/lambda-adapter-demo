@@ -67,7 +67,7 @@ export default function App() {
               domain: `${window.ENV.USER_POOL_DOMAIN_PREFIX}.auth.ap-northeast-1.amazoncognito.com`,
               redirectSignIn: [window.ENV.SIGN_IN_CALLBACK],
               redirectSignOut: [window.ENV.SIGN_OUT_CALLBACK],
-              responseType: 'code',
+              responseType: 'token',
               scopes: ['openid', 'email', 'profile'],
               providers: ['Google'],
             },
