@@ -143,6 +143,10 @@ export class LambdaStack extends cdk.Stack {
       attributeMapping: {
         email: cognito.ProviderAttribute.GOOGLE_EMAIL,
         fullname: cognito.ProviderAttribute.GOOGLE_NAME,
+        profilePicture: cognito.ProviderAttribute.GOOGLE_PICTURE,
+        custom: {
+          email_verified: cognito.ProviderAttribute.other('email_verified'),
+        },
       },
     });
 
