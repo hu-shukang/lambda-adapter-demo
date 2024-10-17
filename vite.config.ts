@@ -22,15 +22,15 @@ export default defineConfig({
       open: process.env.NODE_ENV !== 'production',
     }),
   ],
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('aws-amplify')) {
-            return 'cognito';
-          }
-        },
-      },
-    },
-  },
+  // build: {
+  //   rollupOptions: {
+  //     output: {
+  //       manualChunks(id) {
+  //         if (id.includes('aws-amplify')) {
+  //           return 'cognito';
+  //         }
+  //       },
+  //     },
+  //   },
+  // },
 });
