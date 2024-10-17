@@ -130,7 +130,7 @@ export class LambdaStack extends cdk.Stack {
         cognito.UserPoolClientIdentityProvider.GOOGLE,
       ],
       oAuth: {
-        callbackUrls: ['http://localhost:5173/auth/callback', envs.SIGN_IN_CALLBACK],
+        callbackUrls: ['http://localhost:5173/auth/signin/callback', envs.SIGN_IN_CALLBACK],
         logoutUrls: ['http://localhost:5173/auth/signin', envs.SIGN_OUT_CALLBACK],
         defaultRedirectUri: envs.SIGN_IN_CALLBACK,
       },
