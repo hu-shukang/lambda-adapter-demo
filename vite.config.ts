@@ -22,4 +22,17 @@ export default defineConfig({
       open: process.env.NODE_ENV !== 'production',
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          // 检查模块路径是否包含 `amplify-auth`
+          if (id.includes('aws-amplify')) {
+            // 将所有与 `amplify-auth` 相关的代码合并到 root.js 中
+            return 'cognito';
+          }
+        },
+      },
+    },
+  },
 });
