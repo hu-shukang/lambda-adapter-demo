@@ -132,6 +132,7 @@ export class LambdaStack extends cdk.Stack {
       oAuth: {
         callbackUrls: ['http://localhost:5173/auth/callback', envs.SIGN_IN_CALLBACK],
         logoutUrls: ['http://localhost:5173/auth/signin', envs.SIGN_OUT_CALLBACK],
+        defaultRedirectUri: envs.SIGN_IN_CALLBACK,
       },
     });
 
