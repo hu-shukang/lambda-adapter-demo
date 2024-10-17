@@ -4,10 +4,8 @@ import { RequestWrapper } from '~/.server/utils/request.util';
 import { Resp } from '~/.server/utils/response.util';
 import { LoaderFunction } from '@remix-run/node';
 
-export const loader = RequestWrapper.init(({ request, params }) => {
-  const { code, state } = params;
-
-  return Resp.json(request, { code: code, state: state });
+export const loader = RequestWrapper.init(({ request }) => {
+  return Resp.json(request, { sucess: true });
 }).loader();
 
 export default function AuthProviderCallbackPage() {
@@ -17,7 +15,7 @@ export default function AuthProviderCallbackPage() {
     <div>
       <Card className="w-[600px] mx-auto mt-10">
         <CardHeader>
-          <CardTitle>認証コード入力</CardTitle>
+          <CardTitle>OAuth認証成功</CardTitle>
           {JSON.stringify(data)}
         </CardHeader>
       </Card>

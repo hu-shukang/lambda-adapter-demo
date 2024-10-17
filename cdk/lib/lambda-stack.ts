@@ -125,6 +125,14 @@ export class LambdaStack extends cdk.Stack {
         userPassword: true, // 支持通过用户名和密码进行认证
         userSrp: true, // 支持 SRP 流程
       },
+      supportedIdentityProviders: [
+        cognito.UserPoolClientIdentityProvider.COGNITO,
+        cognito.UserPoolClientIdentityProvider.GOOGLE,
+      ],
+      oAuth: {
+        callbackUrls: ['http://localhost:5173/auth/callback', envs.SIGN_IN_CALLBACK],
+        logoutUrls: ['http://localhost:5173/auth/signin', envs.SIGN_OUT_CALLBACK],
+      },
     });
 
     new cognito.UserPoolIdentityProviderGoogle(this, `${envs.APP_NAME}-google-oauth-${envs.ENV}`, {
