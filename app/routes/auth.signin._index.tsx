@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/com
 import { SigninInput } from '~/models/user.model';
 import { signIn, signOut, signInWithRedirect } from 'aws-amplify/auth';
 import { useState } from 'react';
+import { toSignin } from '~/lib/auth.client';
 
 export default function SigninPage() {
   const [error, setError] = useState<string>();
@@ -13,38 +14,20 @@ export default function SigninPage() {
   const signinRequired = searchParams.get('signinRequired');
   const redirectUrl = searchParams.get('redirectUrl');
 
-  const toSignin = () => {
-    const provider = 'CognitoIdentityServiceProvider';
-    const userPoolClientId = window.ENV.USER_POOL_CLIENT_ID;
-    const authUser = localStorage.getItem(`${provider}.${userPoolClientId}.LastAuthUser`);
-    const idToken = localStorage.getItem(`${provider}.${userPoolClientId}.${authUser}.idToken`);
-    const refreshToken = localStorage.getItem(`${provider}.${userPoolClientId}.${authUser}.refreshToken`);
-    if (!idToken || !refreshToken) {
-      throw new Error('login success, but no token');
-    }
-    const formData = new FormData();
-    formData.append('idToken', idToken);
-    formData.append('refreshToken', refreshToken);
-    formData.append('redirectUrl', redirectUrl || '/');
-    submit(formData, { method: 'POST', action: '/api/auth/signin' });
-  };
-
   const onSubmit: SubmitHandler<SigninInput> = async (data) => {
     try {
       await signOut();
       await signIn({ ...data });
-      toSignin();
+      toSignin(submit, redirectUrl);
     } catch (e: any) {
       console.log(e);
-      if (e.name === 'UserAlreadyAuthenticatedException') {
-        return toSignin();
-      }
       setError('ログイン失敗。ユーザ名あるいはパスワードが不正');
     }
   };
 
   const signinByGoogle = async () => {
     console.log('signin by google');
+    await signOut();
     await signInWithRedirect({
       provider: 'Google',
     });

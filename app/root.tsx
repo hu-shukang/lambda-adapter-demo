@@ -82,7 +82,6 @@ export default function App() {
           __html: `window.ENV = ${JSON.stringify(data.ENV)}`,
         }}
       />
-      <Scripts />
     </>
   );
 }
