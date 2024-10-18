@@ -1,11 +1,12 @@
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { SigninInput, signinInputSchema } from '~/models/user.model';
 import PropTypes from 'prop-types';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from '@remix-run/react';
+import { RiGoogleFill } from '@remixicon/react';
 
 type Props = {
   onSubmit: SubmitHandler<SigninInput>;
@@ -23,13 +24,12 @@ const SigninForm: React.FC<Props> = ({ onSubmit, signinByGoogle }) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>ユーザ名</FormLabel>
               <FormControl>
                 <Input placeholder="ユーザ名" {...field} />
               </FormControl>
@@ -42,7 +42,6 @@ const SigninForm: React.FC<Props> = ({ onSubmit, signinByGoogle }) => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>パスワード</FormLabel>
               <FormControl>
                 <Input placeholder="パスワード" {...field} />
               </FormControl>
@@ -50,13 +49,23 @@ const SigninForm: React.FC<Props> = ({ onSubmit, signinByGoogle }) => {
             </FormItem>
           )}
         />
-        <Button type="submit">signin</Button>
-        <Button type="button" onClick={signinByGoogle}>
-          signin by google
+        <Button type="submit" className="w-full">
+          サインイン
         </Button>
         <Link to="/auth/signup">
-          <Button variant="link">go to signup</Button>
+          <Button variant="outline" className="w-full mt-4">
+            新規登録
+          </Button>
         </Link>
+        <div className="h-[30px] flex flex-row items-center space-x-3">
+          <div className="h-[1px] flex-1 bg-gray-400"></div>
+          <div className="text-sm text-gray-400">OR CONTINUE WITH</div>
+          <div className="h-[1px] flex-1 bg-gray-400"></div>
+        </div>
+        <Button type="button" variant="outline" className="w-full" onClick={signinByGoogle}>
+          <RiGoogleFill size={20} className="mr-2 text-primary" />
+          Googleでサインイン
+        </Button>
       </form>
     </Form>
   );

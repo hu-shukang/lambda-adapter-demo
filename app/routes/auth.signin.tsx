@@ -1,10 +1,19 @@
 import { Outlet } from '@remix-run/react';
+import { RiBubbleChartFill } from '@remixicon/react';
 
 export default function SigninLayout() {
   return (
-    <div>
-      <h1>Signin Layout</h1>
-      <Outlet />
+    <div className="h-screen w-screen bg-slate-950 overflow-hidden flex">
+      <div className="flex-1 flex flex-col justify-between text-white p-10">
+        <div className="flex items-center h-[30px]">
+          <RiBubbleChartFill size={36} color="white" className="mr-4" />
+          <span>Lambda-Adapter-Demo</span>
+        </div>
+        <div className="h-[30px] text-right">Create By HUSHUKANG</div>
+      </div>
+      <div className="flex-1 flex p-10 bg-white items-center justify-center">
+        <Outlet />
+      </div>
     </div>
   );
 }

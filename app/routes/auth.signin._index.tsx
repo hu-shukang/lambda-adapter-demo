@@ -1,7 +1,6 @@
 import { useSearchParams, useSubmit } from '@remix-run/react';
 import { SubmitHandler } from 'react-hook-form';
 import SigninForm from '~/components/auth/signin-form';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { SigninInput } from '~/models/user.model';
 import { signIn, signOut, signInWithRedirect } from 'aws-amplify/auth';
 import { useState } from 'react';
@@ -34,18 +33,10 @@ export default function SigninPage() {
   };
 
   return (
-    <div>
-      <Card className="w-[600px] mx-auto mt-10">
-        <CardHeader>
-          <CardTitle>ユーザログイン</CardTitle>
-          <CardDescription>Card Description</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {error && <p className="text-red-500">{error}</p>}
-          {signinRequired && <p className="text-red-500">お先にサインインしてください</p>}
-          <SigninForm onSubmit={onSubmit} signinByGoogle={signinByGoogle} />
-        </CardContent>
-      </Card>
+    <div className="w-[350px]">
+      <h1 className="text-3xl text-center mb-4">サインイン</h1>
+      <h6 className="text-sm text-gray-500 text-center mb-4">ユーザ名とパスワードをご入力ください。</h6>
+      <SigninForm onSubmit={onSubmit} signinByGoogle={signinByGoogle} />
     </div>
   );
 }
