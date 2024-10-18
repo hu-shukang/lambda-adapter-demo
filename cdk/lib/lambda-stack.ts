@@ -100,6 +100,9 @@ export class LambdaStack extends cdk.Stack {
       autoVerify: {
         email: true, // 自动验证用户的电子邮件
       },
+      customAttributes: {
+        permissions: new cognito.StringAttribute({ mutable: true }),
+      },
       passwordPolicy: {
         minLength: 8, // 最小密码长度
         requireLowercase: true, // 需要小写字母

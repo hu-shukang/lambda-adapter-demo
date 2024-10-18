@@ -19,5 +19,5 @@ export default function AuthProviderCallbackPage() {
     };
   }, [submit]);
 
-  return <div>auth.</div>;
+  return <div>auth success</div>;
 }
