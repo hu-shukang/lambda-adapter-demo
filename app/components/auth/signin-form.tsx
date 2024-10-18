@@ -7,6 +7,7 @@ import { Button } from '../ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from '@remix-run/react';
 import { RiGoogleFill } from '@remixicon/react';
+import Separator from '../ui/separator';
 
 type Props = {
   onSubmit: SubmitHandler<SigninInput>;
@@ -57,11 +58,7 @@ const SigninForm: React.FC<Props> = ({ onSubmit, signinByGoogle }) => {
             新規登録
           </Button>
         </Link>
-        <div className="h-[30px] flex flex-row items-center space-x-3">
-          <div className="h-[1px] flex-1 bg-gray-400"></div>
-          <div className="text-sm text-gray-400">OR CONTINUE WITH</div>
-          <div className="h-[1px] flex-1 bg-gray-400"></div>
-        </div>
+        <Separator text="あるいは" />
         <Button type="button" variant="outline" className="w-full" onClick={signinByGoogle}>
           <RiGoogleFill size={20} className="mr-2 text-primary" />
           Googleでサインイン

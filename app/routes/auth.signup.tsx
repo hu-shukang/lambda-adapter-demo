@@ -2,7 +2,6 @@ import { ActionFunction } from '@remix-run/node';
 import { useActionData, useNavigate } from '@remix-run/react';
 import { SubmitHandler } from 'react-hook-form';
 import SignupForm from '~/components/auth/signup-form';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { SignupInput } from '~/models/user.model';
 import { useUserStore } from '~/stores/user.store';
 import { signUp } from 'aws-amplify/auth';
@@ -21,24 +20,17 @@ export default function SignupPage() {
       });
       console.log(result);
       setUsername(data.username);
-      navigate('/auth/confirm');
+      navigate('/auth/signup/confirm');
     } catch (e) {
       console.log(e);
     }
   };
 
   return (
-    <div>
-      <Card className="w-[600px] mx-auto mt-10">
-        <CardHeader>
-          <CardTitle>ユーザ登録</CardTitle>
-          <CardDescription>Card Description</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {actionData?.error && <p className="text-red-500">{actionData.error}</p>}
-          <SignupForm onSubmit={onSubmit} />
-        </CardContent>
-      </Card>
+    <div className="w-[350px]">
+      <h1 className="text-3xl text-center mb-4">ユーザ登録</h1>
+      <h6 className="text-sm text-gray-500 text-center mb-4">ユーザを新規登録お願いします。</h6>
+      <SignupForm onSubmit={onSubmit} />
     </div>
   );
 }

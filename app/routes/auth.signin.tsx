@@ -1,19 +1,42 @@
-import { Outlet } from '@remix-run/react';
-import { RiBubbleChartFill } from '@remixicon/react';
+import { useSearchParams, useSubmit } from '@remix-run/react';
+import { SubmitHandler } from 'react-hook-form';
+import SigninForm from '~/components/auth/signin-form';
+import { SigninInput } from '~/models/user.model';
+import { signIn, signOut, signInWithRedirect } from 'aws-amplify/auth';
+import { useState } from 'react';
+import { toSignin } from '~/lib/auth.client';
 
-export default function SigninLayout() {
+export default function SigninPage() {
+  const [error, setError] = useState<string>();
+  const submit = useSubmit();
+  const [searchParams] = useSearchParams();
+  const signinRequired = searchParams.get('signinRequired');
+  const redirectUrl = searchParams.get('redirectUrl');
+
+  const onSubmit: SubmitHandler<SigninInput> = async (data) => {
+    try {
+      await signOut();
+      await signIn({ ...data });
+      toSignin(submit, redirectUrl);
+    } catch (e: any) {
+      console.log(e);
+      setError('ログイン失敗。ユーザ名あるいはパスワードが不正');
+    }
+  };
+
+  const signinByGoogle = async () => {
+    console.log('signin by google');
+    await signOut();
+    await signInWithRedirect({
+      provider: 'Google',
+    });
+  };
+
   return (
-    <div className="h-screen w-screen bg-slate-950 overflow-hidden flex">
-      <div className="flex-1 flex flex-col justify-between text-white p-10">
-        <div className="flex items-center h-[30px]">
-          <RiBubbleChartFill size={36} color="white" className="mr-4" />
-          <span>Lambda-Adapter-Demo</span>
-        </div>
-        <div className="h-[30px] text-right">Create By HUSHUKANG</div>
-      </div>
-      <div className="flex-1 flex p-10 bg-white items-center justify-center">
-        <Outlet />
-      </div>
+    <div className="w-[350px]">
+      <h1 className="text-3xl text-center mb-4">サインイン</h1>
+      <h6 className="text-sm text-gray-500 text-center mb-4">ユーザ名とパスワードをご入力ください。</h6>
+      <SigninForm onSubmit={onSubmit} signinByGoogle={signinByGoogle} />
     </div>
   );
 }
