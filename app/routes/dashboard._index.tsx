@@ -1,13 +1,11 @@
 import { Link } from '@remix-run/react';
-import { RequestWrapper } from '~/.server/utils/request.util';
-import { Resp } from '~/.server/utils/response.util';
 import { Button } from '~/components/ui/button';
 
-export const loader = RequestWrapper.init(async ({ request }) => {
-  return await Resp.json(request, { success: true });
-})
-  .withLogin()
-  .loader();
+// export const loader = RequestWrapper.init(async ({ request }) => {
+//   return await Resp.json(request, { success: true });
+// })
+//   .withLogin()
+//   .loader();
 
 export default function DashboardPage() {
   return (
