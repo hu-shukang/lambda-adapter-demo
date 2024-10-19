@@ -9,7 +9,7 @@ export default function AuthLayout() {
           <RiBubbleChartFill size={36} color="white" className="mr-4" />
           <span>Lambda-Adapter-Demo</span>
         </div>
-        <div className="h-[30px] text-right">Create By HUSHUKANG</div>
+        <div className="h-[30px] text-right">Create By Remix＆React</div>
       </div>
       <div className="flex-1 flex p-10 bg-white items-center justify-center">
         <Outlet />

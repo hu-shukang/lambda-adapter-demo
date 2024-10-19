@@ -44,7 +44,7 @@ const SigninForm: React.FC<Props> = ({ onSubmit, signinByGoogle }) => {
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input placeholder="パスワード" {...field} />
+                <Input placeholder="パスワード" type="password" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
