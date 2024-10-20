@@ -8,6 +8,9 @@ export default function DashboardPage() {
       <Link to={'/'}>
         <Button>Back to Home</Button>
       </Link>
+      <Link to={'/dashboard/organization'}>
+        <Button>Back to Organization</Button>
+      </Link>
     </div>
   );
 }
