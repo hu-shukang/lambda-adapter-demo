@@ -41,7 +41,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="Cache-Control" content="no-store, no-cache, must-revalidate, proxy-revalidate" />
         <meta name="Pragma" content="no-cache" />
         <meta name="Expires" content="0" />
-        <meta name="theme-color" content="#020617" />
+        <meta name="theme-color" content="#0f172a" />
         <Meta />
         <Links />
       </head>
