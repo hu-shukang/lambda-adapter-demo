@@ -77,10 +77,10 @@ export class LambdaStack extends cdk.Stack {
       },
     );
 
-    const preSignUpTriggerLambda = new lambda.Function(this, `${envs.APP_NAME}-pre-signup-trigger-${envs.ENV}`, {
-      functionName: `${envs.APP_NAME}-pre-signup-trigger-${envs.ENV}`,
-      description: `${envs.APP_NAME}-pre-signup-trigger-${envs.ENV}`,
-      code: lambda.Code.fromBucket(assetBucket, `pre-signup-${timestamp}.zip`),
+    const preTokenTriggerLambda = new lambda.Function(this, `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`, {
+      functionName: `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`,
+      description: `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`,
+      code: lambda.Code.fromBucket(assetBucket, `pre-token-${timestamp}.zip`),
       handler: 'index.handler',
       runtime: lambda.Runtime.NODEJS_20_X,
       layers: [commonLayer],
@@ -113,7 +113,7 @@ export class LambdaStack extends cdk.Stack {
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY, // 只通过电子邮件找回密码
       lambdaTriggers: {
         postConfirmation: postConfirmationTriggerLambda, // 用户注册成功后的触发器
-        preSignUp: preSignUpTriggerLambda,
+        preTokenGeneration: preTokenTriggerLambda, // 生成IDToken时的触发器
       },
     });
     const domainPrefix = `${envs.APP_NAME}-${envs.ENV}`;

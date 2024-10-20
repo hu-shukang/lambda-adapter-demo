@@ -17,15 +17,14 @@ export const handler = async (event: PostConfirmationTriggerEvent): Promise<any>
     Item: {
       pk: userName,
       email: userAttributes.email,
+      sub: userAttributes.sub,
+      userStatus: userAttributes['cognito:user_status'],
+      name: userAttributes.name,
     },
   };
 
-  try {
-    await ddbDocClient.send(new PutCommand(params));
-    console.log('User data saved successfully');
-  } catch (error) {
-    console.error('Error saving user data', error);
-  }
+  await ddbDocClient.send(new PutCommand(params));
+  console.log('User data saved successfully');
 
   return event;
 };
