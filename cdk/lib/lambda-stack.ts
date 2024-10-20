@@ -121,12 +121,12 @@ export class LambdaStack extends cdk.Stack {
       cognitoDomain: { domainPrefix: domainPrefix },
     });
 
-    new cognito.CfnUserPoolGroup(this, `${envs.APP_NAME}-user-pool-admin-group-${envs.ENV}`, {
-      userPoolId: userPool.userPoolId,
-      groupName: 'Admin',
-      description: 'Admin group with full permissions',
-      precedence: 1,
-    });
+    // new cognito.CfnUserPoolGroup(this, `${envs.APP_NAME}-user-pool-admin-group-${envs.ENV}`, {
+    //   userPoolId: userPool.userPoolId,
+    //   groupName: 'Admin',
+    //   description: 'Admin group with full permissions',
+    //   precedence: 1,
+    // });
 
     // 添加用户池客户端
     const userPoolClient = userPool.addClient(`${envs.APP_NAME}-client-${envs.ENV}`, {
