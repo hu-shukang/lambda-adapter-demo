@@ -1,19 +1,6 @@
 import { z } from 'zod';
-import { DBKey } from './common.model';
+import { confirmationCode, DBKey, email, password, rePassword, username } from './common.model';
 
-const username = z.string({ required_error: '必須項目です' });
-const email = z.string({ required_error: '必須項目です' }).email({ message: 'メール形式不正' });
-const password = z
-  .string({ required_error: '必須項目です' })
-  .min(8, '8文字以上は必須')
-  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/, '大文字、小文字のアルファベットと数字は必須');
-const rePassword = z
-  .string({ required_error: '必須項目です' })
-  .min(8, '8文字以上は必須')
-  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/, '大文字、小文字のアルファベットと数字は必須');
-const confirmationCode = z.string().regex(/^\d{6}$/, {
-  message: '6桁数字は必須',
-});
 const idToken = z.string();
 const refreshToken = z.string();
 export const userInfoSchema = z.object({

@@ -1,0 +1,10 @@
+export const CONST = {
+  DB: {
+    INFO: 'INFO',
+    ORGANIZATION: 'ORGANIZATION',
+    USER: 'USER',
+    INDEXS: {
+      ORGANIZATION_PRIORITY_ORDER: 'ORGANIZATION_PRIORITY_ORDER',
+    },
+  },
+};

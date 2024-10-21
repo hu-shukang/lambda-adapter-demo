@@ -1,18 +1,16 @@
-import { Outlet, useMatches } from '@remix-run/react';
+import { Link, Outlet } from '@remix-run/react';
 import { RiBubbleChartFill } from '@remixicon/react';
 import { RequestWrapper } from '~/.server/utils/request.util';
 import { Resp } from '~/.server/utils/response.util';
+import BreadcrumbNav from '~/components/common/breadcrumb-nav';
 import UserMenu from '~/components/common/user-menu';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from '~/components/ui/breadcrumb';
+import { Button } from '~/components/ui/button';
 
 export const handle = {
-  breadcrumb: () => <BreadcrumbLink href="/dashboard">dashboard</BreadcrumbLink>,
+  breadcrumb: {
+    text: 'Dashboard',
+    href: '/dashboard',
+  },
 };
 
 export const loader = RequestWrapper.init(async ({ request }) => {
@@ -22,28 +20,26 @@ export const loader = RequestWrapper.init(async ({ request }) => {
   .loader();
 
 export default function DashboardLayout() {
-  const matches = useMatches();
   return (
     <div>
-      <div className="h-[60px] sticky top-0 w-screen bg-primary flex items-center justify-between px-10">
+      <div className="h-[60px] sticky top-0 w-screen bg-primary flex items-center px-10">
         <div className="flex items-center h-[30px] text-white">
           <RiBubbleChartFill size={36} className="mr-4" />
           <span>Dashboard</span>
         </div>
+        <div className="space-x-2 ml-4 mr-auto">
+          <Link to="/">
+            <Button variant="ghost" className="text-white">
+              Home
+            </Button>
+          </Link>
+        </div>
         <UserMenu />
       </div>
-      <Breadcrumb>
-        <BreadcrumbList>
-          {matches
-            .filter((match) => match.handle && (match.handle as any).breadcrumb)
-            .map((match, index) => (
-              <>
-                <BreadcrumbItem key={index}>{(match.handle as any).breadcrumb(match)}</BreadcrumbItem>
-                <BreadcrumbSeparator />
-              </>
-            ))}
-        </BreadcrumbList>
-      </Breadcrumb>
+      <div className="p-4">
+        <BreadcrumbNav />
+      </div>
+
       <Outlet />
     </div>
   );
