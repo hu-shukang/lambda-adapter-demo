@@ -49,7 +49,7 @@ export class LambdaStack extends cdk.Stack {
 
     userTable.addGlobalSecondaryIndex({
       indexName: 'ORGANIZATION_PRIORITY_ORDER',
-      partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
+      partitionKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'priority', type: dynamodb.AttributeType.NUMBER },
     });
 

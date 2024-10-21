@@ -16,11 +16,9 @@ export const loader = RequestWrapper.init(async ({ request }) => {
   const command = new QueryCommand({
     TableName: process.env.USER_TBL,
     IndexName: CONST.DB.INDEXS.ORGANIZATION_PRIORITY_ORDER,
-    KeyConditionExpression: 'begins_with(pk, :prefix)',
-    FilterExpression: 'sk = :sk',
+    KeyConditionExpression: 'sk = :sk',
     ExpressionAttributeValues: {
-      ':prefix': CONST.DB.ORGANIZATION,
-      ':sk': CONST.DB.INFO,
+      ':sk': CONST.DB.ORGANIZATION_INFO,
     },
     ScanIndexForward: true,
   });
