@@ -43,6 +43,7 @@ export class LambdaStack extends cdk.Stack {
     const userTable = new dynamodb.Table(this, envs.USER_TBL, {
       tableName: envs.USER_TBL,
       partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST, // 按需计费模式
       removalPolicy: cdk.RemovalPolicy.DESTROY, // 销毁堆栈时销毁表
     });
