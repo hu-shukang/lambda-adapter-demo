@@ -1,11 +1,49 @@
-import { Link, useRouteLoaderData } from '@remix-run/react';
+import { ActionFunction } from '@remix-run/node';
+import { Link, useActionData, useNavigate, useRouteLoaderData, useSubmit } from '@remix-run/react';
+import { useEffect, useState } from 'react';
+import { organizationService } from '~/.server/services/organization.service';
+import { RequestWrapper } from '~/.server/utils/request.util';
+import { Resp } from '~/.server/utils/response.util';
 import Title from '~/components/common/title';
+import OrganizationDeleteConfirm from '~/components/organization/organization-delete-confirm';
 import OrganizationList from '~/components/organization/organization-list';
 import { Button } from '~/components/ui/button';
-import { OrganizationInfo } from '~/models/organization.model';
+import { OrganizationInfo, organizationOne, organizationOneSchema } from '~/models/organization.model';
+
+export const action = RequestWrapper.init(async ({ request, context }) => {
+  const { pk } = context.bodyData as organizationOne;
+  await organizationService.delete(pk);
+  return Resp.json(request, { success: true });
+})
+  .withBodyValid(organizationOneSchema)
+  .action();
 
 export default function OrganizationPage() {
   const loaderData = useRouteLoaderData<OrganizationInfo[]>('routes/dashboard.organization');
+  const actionData = useActionData<ActionFunction>();
+  const navigate = useNavigate();
+  const submit = useSubmit();
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<OrganizationInfo>();
+
+  const updateHandler = (id: string) => {
+    navigate(`/dashboard/organization/${id}/update`);
+  };
+
+  const removeHandler = (info: OrganizationInfo) => {
+    setDeleteTarget(info);
+    setDeleteConfirmOpen(true);
+  };
+
+  const deleteAction = (info: OrganizationInfo) => {
+    const formData = new FormData();
+    formData.append('pk', info.pk);
+    submit(formData, { method: 'POST' });
+  };
+
+  useEffect(() => {
+    console.log(actionData);
+  }, [actionData]);
 
   return (
     <div className="container px-4 mx-auto">
@@ -18,7 +56,16 @@ export default function OrganizationPage() {
           </Link>
         </div>
       </div>
-      <OrganizationList data={loaderData || []} />
+      <OrganizationList data={loaderData || []} updateHandler={updateHandler} removeHandler={removeHandler} />
+      {deleteTarget && (
+        <OrganizationDeleteConfirm
+          open={deleteConfirmOpen}
+          setOpen={setDeleteConfirmOpen}
+          data={loaderData || []}
+          info={deleteTarget}
+          deleteAction={deleteAction}
+        />
+      )}
     </div>
   );
 }

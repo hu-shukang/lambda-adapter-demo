@@ -53,6 +53,12 @@ export class LambdaStack extends cdk.Stack {
       sortKey: { name: 'priority', type: dynamodb.AttributeType.NUMBER },
     });
 
+    userTable.addGlobalSecondaryIndex({
+      indexName: 'ORGANIZATION_PARENT',
+      partitionKey: { name: 'parent', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'updateTime', type: dynamodb.AttributeType.STRING },
+    });
+
     const commonLayer = new lambda.LayerVersion(this, `${envs.APP_NAME}-common-layer-${envs.ENV}`, {
       layerVersionName: `${envs.APP_NAME}-common-layer-${envs.ENV}`,
       code: lambda.Code.fromBucket(assetBucket, `common-layer-${timestamp}.zip`),

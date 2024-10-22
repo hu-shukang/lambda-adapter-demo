@@ -1,15 +1,11 @@
-import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { useRouteLoaderData, useSubmit } from '@remix-run/react';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 import { SubmitHandler } from 'react-hook-form';
-import { v7 } from 'uuid';
-import { DB } from '~/.server/utils/dynamodb.util';
+import { organizationService } from '~/.server/services/organization.service';
 import { RequestWrapper } from '~/.server/utils/request.util';
 import { Resp } from '~/.server/utils/response.util';
 import Title from '~/components/common/title';
 import OrganizationForm from '~/components/organization/organization-form';
-import { CONST } from '~/lib/const';
-import { dateUtil } from '~/lib/date.util';
 import { OrganizationInfo, OrganizationInput, organizationInputSchema } from '~/models/organization.model';
 
 export const handle = {
@@ -22,17 +18,7 @@ export const handle = {
 export const action = RequestWrapper.init(async ({ context, request }) => {
   const form = context.bodyData as OrganizationInput;
   const payload = context.payload as CognitoIdTokenPayload;
-  const command = new PutCommand({
-    TableName: process.env.USER_TBL,
-    Item: {
-      ...form,
-      pk: v7(),
-      sk: CONST.DB.ORGANIZATION_INFO,
-      updateUser: payload['cognito:username'],
-      updateTime: dateUtil.utc(),
-    },
-  });
-  await DB.client.send(command);
+  await organizationService.create(form, payload);
   return Resp.redirect(request, '/dashboard/organization');
 })
   .withLogin()

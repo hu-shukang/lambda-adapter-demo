@@ -26,9 +26,11 @@ import { dateUtil } from '~/lib/date.util';
 
 type Props = {
   data: OrganizationInfo[];
+  updateHandler: (id: string) => void;
+  removeHandler: (info: OrganizationInfo) => void;
 };
 
-export const getColumns = (data: OrganizationInfo[]): ColumnDef<OrganizationInfo>[] => {
+export const getColumns = ({ data, updateHandler, removeHandler }: Props): ColumnDef<OrganizationInfo>[] => {
   return [
     {
       id: 'select',
@@ -46,7 +48,6 @@ export const getColumns = (data: OrganizationInfo[]): ColumnDef<OrganizationInfo
           aria-label="Select row"
         />
       ),
-      enableHiding: false,
     },
     {
       accessorKey: 'name',
@@ -85,32 +86,35 @@ export const getColumns = (data: OrganizationInfo[]): ColumnDef<OrganizationInfo
     },
     {
       id: 'actions',
-      enableHiding: false,
-      cell: () => {
+      header: () => <div className="text-center">操作</div>,
+      cell: ({ row }) => {
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>View customer</DropdownMenuItem>
-              <DropdownMenuItem>View payment details</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="text-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>アクション</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => updateHandler(row.getValue('pk'))}>更新</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => removeHandler(row.original)}>削除</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         );
       },
     },
   ];
 };
 
-export default function OrganizationList({ data }: Props) {
+export default function OrganizationList(props: Props) {
+  const { data } = props;
   const [rowSelection, setRowSelection] = React.useState({});
-  const columns = React.useMemo(() => getColumns(data), [data]);
+  const columns = React.useMemo(() => getColumns(props), [props]);
 
   const table = useReactTable({
     data,

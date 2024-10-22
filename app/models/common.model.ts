@@ -29,6 +29,8 @@ export const organizationPriority = z.preprocess(
   },
   z.number({ required_error: '必須項目です' }).int().min(0, '0以上の正整数にしてください'),
 );
+export const pk = z.string().uuid();
+
 export const pkNullable = z
   .string()
   .refine((val) => val === '' || z.string().uuid().safeParse(val).success, {
