@@ -11,7 +11,6 @@ import {
 import { MoreHorizontal } from 'lucide-react';
 
 import { Button } from '~/components/ui/button';
-import { Checkbox } from '~/components/ui/checkbox';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,20 +33,8 @@ export const getColumns = ({ data, updateHandler, removeHandler }: Props): Colum
   return [
     {
       id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="全選択"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      ),
+      header: () => <div className="text-center">No.</div>,
+      cell: ({ row }) => <div className="text-center">{row.index + 1}</div>,
     },
     {
       accessorKey: 'name',
@@ -113,7 +100,6 @@ export const getColumns = ({ data, updateHandler, removeHandler }: Props): Colum
 
 export default function OrganizationList(props: Props) {
   const { data } = props;
-  const [rowSelection, setRowSelection] = React.useState({});
   const columns = React.useMemo(() => getColumns(props), [props]);
 
   const table = useReactTable({
@@ -123,10 +109,6 @@ export default function OrganizationList(props: Props) {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onRowSelectionChange: setRowSelection,
-    state: {
-      rowSelection,
-    },
   });
 
   return (
@@ -166,10 +148,6 @@ export default function OrganizationList(props: Props) {
         </Table>
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s)
-          selected.
-        </div>
         <div className="space-x-2">
           <Button
             variant="outline"

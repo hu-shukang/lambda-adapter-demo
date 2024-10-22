@@ -42,7 +42,9 @@ export default function OrganizationPage() {
   };
 
   useEffect(() => {
-    console.log(actionData);
+    if (actionData?.success == true) {
+      setDeleteConfirmOpen(false);
+    }
   }, [actionData]);
 
   return (

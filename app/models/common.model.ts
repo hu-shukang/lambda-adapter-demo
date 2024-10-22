@@ -31,9 +31,4 @@ export const organizationPriority = z.preprocess(
 );
 export const pk = z.string().uuid();
 
-export const pkNullable = z
-  .string()
-  .refine((val) => val === '' || z.string().uuid().safeParse(val).success, {
-    message: '必须是空字符串或有效的 UUID',
-  })
-  .nullable();
+export const pkNullable = z.string().uuid().optional();

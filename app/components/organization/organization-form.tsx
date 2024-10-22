@@ -20,7 +20,7 @@ const OrganizationForm: React.FC<Props> = ({ onSubmit, organizations }) => {
     defaultValues: {
       name: '',
       priority: 0,
-      parent: '',
+      parent: undefined,
     },
     resolver: zodResolver(organizationInputSchema),
   });
@@ -49,9 +49,9 @@ const OrganizationForm: React.FC<Props> = ({ onSubmit, organizations }) => {
                 </PopoverTrigger>
                 <PopoverContent className="p-0 w-[300px]">
                   <Command>
-                    <CommandInput placeholder="Search language..." />
+                    <CommandInput placeholder="Search Organization..." />
                     <CommandList>
-                      <CommandEmpty>No language found.</CommandEmpty>
+                      <CommandEmpty>No Organization found.</CommandEmpty>
                       <CommandGroup>
                         {organizations.map((o) => (
                           <CommandItem

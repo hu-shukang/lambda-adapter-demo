@@ -17,17 +17,16 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
   public withBodyValid(schema: ZodSchema) {
     const originalFunc = this.func;
     const newFunc = async (args: Parameters<T>[0]) => {
-      try {
-        const formData = await args.request.formData();
-        const form = Object.fromEntries(formData);
-        const bodyData = schema.parse(form);
-        console.log(`[bodyData]: ${JSON.stringify(bodyData)}`);
-        args.context.bodyData = bodyData;
-      } catch (error) {
-        return json({ error: 'Invalid request body', details: error }, { status: 400 });
+      const formData = await args.request.formData();
+      const form = Object.fromEntries(formData);
+      const parseResult = schema.safeParse(form);
+      if (!parseResult.success) {
+        return json({ error: 'Invalid request body', details: parseResult.error.errors }, { status: 400 });
       }
+      console.log(`[bodyData]: ${JSON.stringify(parseResult.data)}`);
+      args.context.bodyData = parseResult.data;
 
-      return originalFunc({ ...args });
+      return await originalFunc({ ...args });
     };
     this.func = newFunc as T;
     return this;
@@ -36,15 +35,14 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
   public withParamsValid(schema: ZodSchema) {
     const originalFunc = this.func;
     const newFunc = async (args: Parameters<T>[0]) => {
-      try {
-        const paramData = schema.parse(args.params);
-        console.log(`[paramData]: ${JSON.stringify(paramData)}`);
-        args.context.paramData = paramData;
-      } catch (error) {
-        return json({ error: 'Invalid request params', details: error }, { status: 400 });
+      const parseResult = schema.safeParse(args.params);
+      if (!parseResult.success) {
+        return json({ error: 'Invalid request path parameters', details: parseResult.error.errors }, { status: 400 });
       }
+      console.log(`[paramData]: ${JSON.stringify(parseResult.data)}`);
+      args.context.paramData = parseResult.data;
 
-      return originalFunc({ ...args });
+      return await originalFunc({ ...args });
     };
     this.func = newFunc as T;
     return this;
@@ -53,17 +51,15 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
   public withQueryValid(schema: ZodSchema) {
     const originalFunc = this.func;
     const newFunc = async (args: Parameters<T>[0]) => {
-      try {
-        const url = new URL(args.request.url);
-        const data = Object.fromEntries(url.searchParams.entries());
-        const queryData = schema.parse(data);
-        console.log(`[queryData]: ${JSON.stringify(queryData)}`);
-        args.context.queryData = queryData;
-      } catch (error) {
-        return json({ error: 'Invalid request query', details: error }, { status: 400 });
+      const url = new URL(args.request.url);
+      const data = Object.fromEntries(url.searchParams.entries());
+      const parseResult = schema.safeParse(data);
+      if (!parseResult.success) {
+        return json({ error: 'Invalid request query strings', details: parseResult.error.errors }, { status: 400 });
       }
-
-      return originalFunc({ ...args });
+      console.log(`[queryData]: ${JSON.stringify(parseResult.data)}`);
+      args.context.queryData = parseResult.data;
+      return await originalFunc({ ...args });
     };
     this.func = newFunc as T;
     return this;
@@ -80,7 +76,7 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
         });
       }
 
-      return originalFunc({ ...args });
+      return await originalFunc({ ...args });
     };
     this.func = newFunc as T;
     return this;
@@ -94,23 +90,24 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
         if (idToken) {
           args.context.payload = await Cognito.verifier.verify(idToken);
         }
-
-        return originalFunc({ ...args });
       } catch (e) {
-        return redirect('/auth/signin?signinRequired=true', { status: 401 });
+        const headers = new Headers();
+        headers.append('Set-Cookie', await Cookie.idToken.serialize('', { maxAge: -1 }));
+        headers.append('Set-Cookie', await Cookie.refreshToken.serialize('', { maxAge: -1 }));
+        return redirect('/auth/signin?signinRequired=true', { status: 301, headers: headers });
       }
+      return await originalFunc({ ...args });
     };
-    this.func = newFunc as T;
-    return this;
+    return newFunc;
   }
 
   public action() {
-    this.invoke();
+    this.func = this.invoke() as T;
     return this.func as ActionFunction;
   }
 
   public loader() {
-    this.invoke();
+    this.func = this.invoke() as T;
     return this.func as LoaderFunction;
   }
 }

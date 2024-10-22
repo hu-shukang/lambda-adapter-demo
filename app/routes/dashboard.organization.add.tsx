@@ -6,6 +6,7 @@ import { RequestWrapper } from '~/.server/utils/request.util';
 import { Resp } from '~/.server/utils/response.util';
 import Title from '~/components/common/title';
 import OrganizationForm from '~/components/organization/organization-form';
+import { getFormDataFromObject } from '~/lib/form.util.client';
 import { OrganizationInfo, OrganizationInput, organizationInputSchema } from '~/models/organization.model';
 
 export const handle = {
@@ -30,10 +31,7 @@ export default function OrganizationPage() {
   const submit = useSubmit();
 
   const onSubmit: SubmitHandler<OrganizationInput> = async (data) => {
-    const formData = new FormData();
-    formData.append('name', data.name);
-    formData.append('parent', data.parent || '');
-    formData.append('priority', String(data.priority));
+    const formData = getFormDataFromObject(data);
     submit(formData, { method: 'POST' });
   };
 
