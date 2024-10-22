@@ -16,6 +16,7 @@ export abstract class CommonService {
       TableName: tableName,
       Key: key,
     });
+
     return await DB.client.send(command);
   }
 
