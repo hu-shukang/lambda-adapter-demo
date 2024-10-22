@@ -11,8 +11,16 @@ class DateUtil {
     dayjs.locale(ja);
   }
 
+  public utc(date?: dayjs.ConfigType) {
+    return dayjs(date).utc().toISOString();
+  }
+
   public unix(date?: dayjs.ConfigType) {
     return dayjs(date).unix();
+  }
+
+  public format(date?: dayjs.ConfigType) {
+    return dayjs(date).format('YYYY/MM/DD HH:mm:ss');
   }
 }
 

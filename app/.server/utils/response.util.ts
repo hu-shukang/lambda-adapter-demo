@@ -1,8 +1,8 @@
 import { json, redirect } from '@remix-run/node';
 import { Cookie as CookieUtil } from './cookie.util';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
-import { dateUtil } from './date.util';
 import { Cognito } from './cognito.util';
+import { dateUtil } from '~/lib/date.util';
 
 const THIRTY_MINUTES = 30 * 60;
 

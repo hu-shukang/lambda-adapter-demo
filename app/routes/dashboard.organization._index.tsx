@@ -1,39 +1,24 @@
-import { QueryCommand } from '@aws-sdk/lib-dynamodb';
-import { useLoaderData } from '@remix-run/react';
-import { DB } from '~/.server/utils/dynamodb.util';
-import { RequestWrapper } from '~/.server/utils/request.util';
-import { Resp } from '~/.server/utils/response.util';
-import { CONST } from '~/lib/const';
-
-export const handle = {
-  breadcrumb: {
-    text: 'Organization',
-    href: '/dashboard/organization',
-  },
-};
-
-export const loader = RequestWrapper.init(async ({ request }) => {
-  const command = new QueryCommand({
-    TableName: process.env.USER_TBL,
-    IndexName: CONST.DB.INDEXS.ORGANIZATION_PRIORITY_ORDER,
-    KeyConditionExpression: 'sk = :sk',
-    ExpressionAttributeValues: {
-      ':sk': CONST.DB.ORGANIZATION_INFO,
-    },
-    ScanIndexForward: true,
-  });
-  const result = await DB.client.send(command);
-  const items = result.Items || [];
-  return Resp.json(request, items);
-}).loader();
+import { Link, useRouteLoaderData } from '@remix-run/react';
+import Title from '~/components/common/title';
+import OrganizationList from '~/components/organization/organization-list';
+import { Button } from '~/components/ui/button';
+import { OrganizationInfo } from '~/models/organization.model';
 
 export default function OrganizationPage() {
-  const loaderData = useLoaderData<typeof loader>();
+  const loaderData = useRouteLoaderData<OrganizationInfo[]>('routes/dashboard.organization');
 
   return (
-    <div className="container px-4">
-      <h1>organiation index page</h1>
-      <p>{JSON.stringify(loaderData)}</p>
+    <div className="container px-4 mx-auto">
+      <div className="flex justify-between items-center mb-2">
+        <Title text="組織一覧" />
+        <div className="space-x-2">
+          <Button variant="outline">削除</Button>
+          <Link to="/dashboard/organization/add">
+            <Button>新規作成</Button>
+          </Link>
+        </div>
+      </div>
+      <OrganizationList data={loaderData || []} />
     </div>
   );
 }

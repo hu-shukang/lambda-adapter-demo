@@ -18,5 +18,20 @@ export const rePassword = z
 export const confirmationCode = z.string().regex(/^\d{6}$/, {
   message: '6桁数字は必須',
 });
-export const organizationName = z.string({ required_error: '必須項目です' });
-export const organizationPriority = z.number({ required_error: '必須項目です' }).min(0, '0以上にしてください');
+export const organizationName = z.string({ required_error: '必須項目です' }).min(1, '必須項目です');
+export const organizationPriority = z.preprocess(
+  (val) => {
+    if (typeof val === 'string') {
+      const parsed = parseInt(val, 10);
+      return isNaN(parsed) ? val : parsed;
+    }
+    return val;
+  },
+  z.number({ required_error: '必須項目です' }).int().min(0, '0以上の正整数にしてください'),
+);
+export const pkNullable = z
+  .string()
+  .refine((val) => val === '' || z.string().uuid().safeParse(val).success, {
+    message: '必须是空字符串或有效的 UUID',
+  })
+  .nullable();
