@@ -16,6 +16,12 @@ import {
 class OrganizationService extends CommonService {
   private tableName = process.env.USER_TBL!;
 
+  /**
+   * 組織を新規作成
+   * @param input 組織情報
+   * @param payload idToken payload
+   * @returns 作成結果
+   */
   public create(input: OrganizationInput, payload: CognitoIdTokenPayload) {
     return this.createOne(
       this.tableName,
@@ -28,6 +34,10 @@ class OrganizationService extends CommonService {
     );
   }
 
+  /**
+   * 組織を全部取得する
+   * @returns 組織リスト
+   */
   public async query() {
     const command = new QueryCommand({
       TableName: this.tableName,
