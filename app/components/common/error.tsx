@@ -8,7 +8,7 @@ type Props = {
 export default function Error({ error }: Props) {
   return (
     error && (
-      <Alert variant="destructive">
+      <Alert variant="destructive" className="my-2">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>{error}</AlertDescription>

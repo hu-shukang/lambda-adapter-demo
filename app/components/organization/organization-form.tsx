@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { cn } from '~/lib/utils';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
+import { useState } from 'react';
 
 type Props = {
   onSubmit: SubmitHandler<OrganizationInput>;
@@ -17,6 +18,7 @@ type Props = {
 };
 
 const OrganizationForm = ({ onSubmit, organizations, defaultValues, submitButtonText }: Props) => {
+  const [open, setOpen] = useState(false);
   const form = useForm<OrganizationInput>({
     defaultValues: defaultValues || {
       name: '',
@@ -35,7 +37,7 @@ const OrganizationForm = ({ onSubmit, organizations, defaultValues, submitButton
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>親組織</FormLabel>
-              <Popover>
+              <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
@@ -58,9 +60,13 @@ const OrganizationForm = ({ onSubmit, organizations, defaultValues, submitButton
                           <CommandItem
                             value={o.pk}
                             key={o.pk}
-                            onSelect={() => {
-                              form.setValue('parent', o.pk);
+                            onSelect={(currentValue) => {
+                              form.setValue(
+                                'parent',
+                                currentValue === form.getValues().parent ? undefined : currentValue,
+                              );
                               form.setValue('priority', o.priority + 1);
+                              setOpen(false);
                             }}
                           >
                             <Check className={cn('mr-2 h-4 w-4', o.pk === field.value ? 'opacity-100' : 'opacity-0')} />

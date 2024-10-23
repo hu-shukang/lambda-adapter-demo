@@ -1,3 +1,4 @@
+import { LoaderFunction } from '@remix-run/node';
 import { UIMatch, useRouteLoaderData, useSubmit } from '@remix-run/react';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 import { SubmitHandler } from 'react-hook-form';
@@ -7,7 +8,7 @@ import { Resp } from '~/.server/utils/response.util';
 import Title from '~/components/common/title';
 import OrganizationForm from '~/components/organization/organization-form';
 import { getFormDataFromObject } from '~/lib/form.util.client';
-import { OrganizationInfo, OrganizationInput, organizationInputSchema } from '~/models/organization.model';
+import { OrganizationInput, organizationInputSchema } from '~/models/organization.model';
 
 export const handle = {
   breadcrumb: (_match: UIMatch) => ({
@@ -27,7 +28,7 @@ export const action = RequestWrapper.init(async ({ context, request }) => {
   .action();
 
 export default function OrganizationPage() {
-  const loaderData = useRouteLoaderData<OrganizationInfo[]>('routes/dashboard.organization');
+  const loaderData = useRouteLoaderData<LoaderFunction>('routes/dashboard.organization');
   const submit = useSubmit();
 
   const onSubmit: SubmitHandler<OrganizationInput> = async (data) => {
@@ -41,7 +42,7 @@ export default function OrganizationPage() {
         <Title text="組織を新規作成" />
       </div>
       <div className="w-[300px]">
-        <OrganizationForm onSubmit={onSubmit} organizations={loaderData || []} />
+        <OrganizationForm onSubmit={onSubmit} organizations={loaderData?.data || []} />
       </div>
     </div>
   );

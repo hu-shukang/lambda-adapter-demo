@@ -1,4 +1,4 @@
-import { ActionFunction } from '@remix-run/node';
+import { ActionFunction, LoaderFunction } from '@remix-run/node';
 import { Link, useActionData, useNavigate, useRouteLoaderData, useSubmit } from '@remix-run/react';
 import { useEffect, useState } from 'react';
 import { organizationService } from '~/.server/services/organization.service';
@@ -19,7 +19,7 @@ export const action = RequestWrapper.init(async ({ request, context }) => {
   .action();
 
 export default function OrganizationPage() {
-  const loaderData = useRouteLoaderData<OrganizationInfo[]>('routes/dashboard.organization');
+  const loaderData = useRouteLoaderData<LoaderFunction>('routes/dashboard.organization');
   const actionData = useActionData<ActionFunction>();
   const [error, setError] = useState<string>();
   const navigate = useNavigate();
@@ -56,13 +56,12 @@ export default function OrganizationPage() {
       <div className="flex justify-between items-center mb-2">
         <Title text="組織一覧" />
         <div className="space-x-2">
-          <Button variant="outline">削除</Button>
           <Link to="/dashboard/organization/add">
             <Button>新規作成</Button>
           </Link>
         </div>
       </div>
-      <OrganizationList data={loaderData || []} updateHandler={updateHandler} removeHandler={removeHandler} />
+      <OrganizationList data={loaderData?.data || []} updateHandler={updateHandler} removeHandler={removeHandler} />
       {deleteTarget && (
         <OrganizationDeleteConfirm
           open={deleteConfirmOpen}
@@ -70,7 +69,7 @@ export default function OrganizationPage() {
             setDeleteConfirmOpen(val);
             setError(undefined);
           }}
-          data={loaderData || []}
+          data={loaderData?.data || []}
           info={deleteTarget}
           deleteAction={deleteAction}
           error={error}

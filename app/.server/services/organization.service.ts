@@ -6,7 +6,12 @@ import { CONST } from '~/lib/const';
 import { dateUtil } from '~/lib/date.util';
 import { QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { DB } from '../utils/dynamodb.util';
-import { OrganizationHasChildError } from '~/models/error.model';
+import {
+  OrganizationDeadLockError,
+  OrganizationHasChildError,
+  OrganizationNotFoundError,
+  OrganizationSelfParentError,
+} from '~/models/error.model';
 
 class OrganizationService extends CommonService {
   private tableName = process.env.USER_TBL!;
@@ -55,6 +60,19 @@ class OrganizationService extends CommonService {
   }
 
   public async update(pk: string, input: OrganizationInput, payload: CognitoIdTokenPayload) {
+    if (input.parent) {
+      if (pk === input.parent) {
+        throw new OrganizationSelfParentError();
+      }
+      const item = await this.get({ pk: input.parent });
+      if (!item) {
+        throw new OrganizationNotFoundError();
+      }
+      if (item.parent === pk) {
+        throw new OrganizationDeadLockError();
+      }
+    }
+
     const key = { pk: pk, sk: CONST.DB.ORGANIZATION_INFO };
     const updateTarget = { ...input, updateUser: payload['cognito:username'], updateTime: dateUtil.utc() };
     return this.updateOne(this.tableName, key, updateTarget);

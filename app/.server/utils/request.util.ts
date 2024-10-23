@@ -70,6 +70,7 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
     const originalFunc = this.func;
     const newFunc = async (args: Parameters<T>[0]) => {
       if (!args.context.payload) {
+        console.log('no payload');
         const { pathname, search } = new URL(args.request.url);
         const redirectUrl = encodeURIComponent(`${pathname}${search}`);
         return redirect(`/auth/signin?signinRequired=true&redirectUrl=${redirectUrl}`, {
@@ -92,6 +93,7 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
           args.context.payload = await Cognito.verifier.verify(idToken);
         }
       } catch (e) {
+        console.log(e);
         const headers = new Headers();
         headers.append('Set-Cookie', await Cookie.idToken.serialize('', { maxAge: -1 }));
         headers.append('Set-Cookie', await Cookie.refreshToken.serialize('', { maxAge: -1 }));

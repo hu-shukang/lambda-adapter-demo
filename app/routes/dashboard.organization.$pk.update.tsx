@@ -1,14 +1,15 @@
-import { UIMatch, useLoaderData, useRouteLoaderData, useSubmit } from '@remix-run/react';
+import { LoaderFunction } from '@remix-run/node';
+import { UIMatch, useActionData, useLoaderData, useRouteLoaderData, useSubmit } from '@remix-run/react';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 import { SubmitHandler } from 'react-hook-form';
 import { organizationService } from '~/.server/services/organization.service';
 import { RequestWrapper } from '~/.server/utils/request.util';
 import { Resp } from '~/.server/utils/response.util';
+import Error from '~/components/common/error';
 import Title from '~/components/common/title';
 import OrganizationForm from '~/components/organization/organization-form';
 import { getFormDataFromObject } from '~/lib/form.util.client';
 import {
-  OrganizationInfo,
   OrganizationInput,
   organizationInputSchema,
   OrganizationOne,
@@ -24,7 +25,7 @@ export const handle = {
 
 export const loader = RequestWrapper.init(async ({ context, request }) => {
   const result = await organizationService.get(context.paramsData);
-  return Resp.json(request, { data: result });
+  return Resp.json(request, { success: true, data: result });
 })
   .withLogin()
   .withParamsValid(organizationOneSchema)
@@ -43,8 +44,9 @@ export const action = RequestWrapper.init(async ({ context, request }) => {
   .action();
 
 export default function OrganizationUpdatePage() {
-  const infos = useRouteLoaderData<OrganizationInfo[]>('routes/dashboard.organization');
+  const infos = useRouteLoaderData<LoaderFunction>('routes/dashboard.organization');
   const loaderData = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
   const submit = useSubmit();
 
   const onSubmit: SubmitHandler<OrganizationInput> = async (data) => {
@@ -57,10 +59,11 @@ export default function OrganizationUpdatePage() {
       <div className="mb-2">
         <Title text="組織を更新" />
       </div>
+      {actionData?.error && <Error error={actionData.error} />}
       <div className="w-[300px]">
         <OrganizationForm
           onSubmit={onSubmit}
-          organizations={infos || []}
+          organizations={infos?.data || []}
           defaultValues={loaderData.data}
           submitButtonText="更新"
         />

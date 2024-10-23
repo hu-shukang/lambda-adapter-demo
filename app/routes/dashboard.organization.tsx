@@ -12,7 +12,7 @@ export const handle = {
 
 export const loader = RequestWrapper.init(async ({ request }) => {
   const items = await organizationService.query();
-  return Resp.json(request, items);
+  return Resp.json(request, { success: true, data: items });
 }).loader();
 
 export default function OrganizationLayout() {
