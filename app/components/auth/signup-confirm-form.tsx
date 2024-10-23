@@ -1,13 +1,16 @@
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { SignupConfirmInput, signupConfirmInputSchema } from '~/models/user.model';
-import PropTypes from 'prop-types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '../ui/input-otp';
 import { useUserStore } from '~/stores/user.store';
 import { Button } from '../ui/button';
 
-const SignupConfirmForm: React.FC<{ onSubmit: SubmitHandler<SignupConfirmInput> }> = ({ onSubmit }) => {
+type Props = {
+  onSubmit: SubmitHandler<SignupConfirmInput>;
+};
+
+export default function SignupConfirmForm({ onSubmit }: Props) {
   const username = useUserStore((state) => state.username);
   const form = useForm<SignupConfirmInput>({
     resolver: zodResolver(signupConfirmInputSchema),
@@ -47,10 +50,4 @@ const SignupConfirmForm: React.FC<{ onSubmit: SubmitHandler<SignupConfirmInput> 
       </form>
     </Form>
   );
-};
-
-SignupConfirmForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-};
-
-export default SignupConfirmForm;
+}

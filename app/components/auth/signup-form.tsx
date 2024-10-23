@@ -3,11 +3,14 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { SignupInput, signupInputSchema } from '~/models/user.model';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
-import PropTypes from 'prop-types';
 import { Button } from '../ui/button';
 import { Link } from '@remix-run/react';
 
-const SignupForm: React.FC<{ onSubmit: SubmitHandler<SignupInput> }> = ({ onSubmit }) => {
+type Props = {
+  onSubmit: SubmitHandler<SignupInput>;
+};
+
+export default function SignupForm({ onSubmit }: Props) {
   const form = useForm<SignupInput>({
     defaultValues: {
       username: '',
@@ -80,10 +83,4 @@ const SignupForm: React.FC<{ onSubmit: SubmitHandler<SignupInput> }> = ({ onSubm
       </form>
     </Form>
   );
-};
-
-SignupForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-};
-
-export default SignupForm;
+}

@@ -1,6 +1,5 @@
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { SigninInput, signinInputSchema } from '~/models/user.model';
-import PropTypes from 'prop-types';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
@@ -14,7 +13,7 @@ type Props = {
   signinByGoogle: () => void;
 };
 
-const SigninForm: React.FC<Props> = ({ onSubmit, signinByGoogle }) => {
+export default function SigninForm({ onSubmit, signinByGoogle }: Props) {
   const form = useForm<SigninInput>({
     defaultValues: {
       username: '',
@@ -66,11 +65,4 @@ const SigninForm: React.FC<Props> = ({ onSubmit, signinByGoogle }) => {
       </form>
     </Form>
   );
-};
-
-SigninForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-  signinByGoogle: PropTypes.func.isRequired,
-};
-
-export default SigninForm;
+}
