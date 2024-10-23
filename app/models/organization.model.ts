@@ -7,19 +7,11 @@ export const organizationInputSchema = z.object({
   parent: pkNullable,
 });
 
-export const organizationUpdateInputSchema = z.object({
-  pk: pk,
-  name: organizationName,
-  priority: organizationPriority,
-  parent: pkNullable,
-});
-
 export const organizationOneSchema = z.object({
   pk: pk,
 });
 
 export type OrganizationInput = z.infer<typeof organizationInputSchema>;
-export type OrganizationUpdateInput = z.infer<typeof organizationUpdateInputSchema>;
-export type organizationOne = z.infer<typeof organizationOneSchema>;
+export type OrganizationOne = z.infer<typeof organizationOneSchema>;
 
 export type OrganizationInfo = DBKey & OrganizationInput & UpdateUserAndTime;

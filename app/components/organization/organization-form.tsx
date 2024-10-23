@@ -1,8 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import PropTypes from 'prop-types';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { OrganizationInfo, OrganizationInput, organizationInputSchema } from '~/models/organization.model';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
@@ -13,11 +12,13 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 type Props = {
   onSubmit: SubmitHandler<OrganizationInput>;
   organizations: OrganizationInfo[];
+  defaultValues?: OrganizationInfo | undefined;
+  submitButtonText?: string | undefined;
 };
 
-const OrganizationForm: React.FC<Props> = ({ onSubmit, organizations }) => {
+const OrganizationForm = ({ onSubmit, organizations, defaultValues, submitButtonText }: Props) => {
   const form = useForm<OrganizationInput>({
-    defaultValues: {
+    defaultValues: defaultValues || {
       name: '',
       priority: 0,
       parent: undefined,
@@ -71,6 +72,11 @@ const OrganizationForm: React.FC<Props> = ({ onSubmit, organizations }) => {
                   </Command>
                 </PopoverContent>
               </Popover>
+              {defaultValues && (
+                <FormDescription>
+                  元の値：{organizations.find((o) => o.pk === defaultValues?.parent)?.name || 'なし'}
+                </FormDescription>
+              )}
               <FormMessage />
             </FormItem>
           )}
@@ -84,19 +90,15 @@ const OrganizationForm: React.FC<Props> = ({ onSubmit, organizations }) => {
               <FormControl>
                 <Input placeholder="組織名" {...field} />
               </FormControl>
+              {defaultValues && <FormDescription>元の値：{defaultValues?.name}</FormDescription>}
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit">新規作成</Button>
+        <Button type="submit">{submitButtonText || '新規作成'}</Button>
       </form>
     </Form>
   );
-};
-
-OrganizationForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-  organizations: PropTypes.array.isRequired,
 };
 
 export default OrganizationForm;

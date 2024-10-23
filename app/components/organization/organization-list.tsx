@@ -25,7 +25,7 @@ import { dateUtil } from '~/lib/date.util';
 
 type Props = {
   data: OrganizationInfo[];
-  updateHandler: (id: string) => void;
+  updateHandler: (pk: string) => void;
   removeHandler: (info: OrganizationInfo) => void;
 };
 
@@ -87,7 +87,7 @@ export const getColumns = ({ data, updateHandler, removeHandler }: Props): Colum
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>アクション</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => updateHandler(row.getValue('pk'))}>更新</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => updateHandler(row.original.pk)}>更新</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => removeHandler(row.original)}>削除</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

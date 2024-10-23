@@ -1,4 +1,4 @@
-import { OrganizationInput, OrganizationUpdateInput } from '~/models/organization.model';
+import { OrganizationInput, OrganizationOne } from '~/models/organization.model';
 import { CommonService } from './common.service';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 import { v7 } from 'uuid';
@@ -54,11 +54,16 @@ class OrganizationService extends CommonService {
     return this.deleteOne(this.tableName, { pk: pk, sk: CONST.DB.ORGANIZATION_INFO });
   }
 
-  public async update(input: OrganizationUpdateInput, payload: CognitoIdTokenPayload) {
-    const { pk, ...item } = input;
+  public async update(pk: string, input: OrganizationInput, payload: CognitoIdTokenPayload) {
     const key = { pk: pk, sk: CONST.DB.ORGANIZATION_INFO };
-    const updateTarget = { ...item, updateUser: payload['cognito:username'], updateTime: dateUtil.utc() };
+    const updateTarget = { ...input, updateUser: payload['cognito:username'], updateTime: dateUtil.utc() };
     return this.updateOne(this.tableName, key, updateTarget);
+  }
+
+  public async get(input: OrganizationOne) {
+    const { pk } = input;
+    const result = await this.getOne(this.tableName, { pk: pk, sk: CONST.DB.ORGANIZATION_INFO });
+    return result.Item;
   }
 }
 

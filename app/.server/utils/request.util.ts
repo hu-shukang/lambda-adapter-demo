@@ -2,6 +2,7 @@ import { ActionFunction, json, LoaderFunction, redirect } from '@remix-run/node'
 import { ZodSchema } from 'zod';
 import { Cookie } from './cookie.util';
 import { Cognito } from './cognito.util';
+import { BaseError } from '~/models/error.model';
 
 export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
   private func: T;
@@ -39,8 +40,8 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
       if (!parseResult.success) {
         return json({ error: 'Invalid request path parameters', details: parseResult.error.errors }, { status: 400 });
       }
-      console.log(`[paramData]: ${JSON.stringify(parseResult.data)}`);
-      args.context.paramData = parseResult.data;
+      console.log(`[paramsData]: ${JSON.stringify(parseResult.data)}`);
+      args.context.paramsData = parseResult.data;
 
       return await originalFunc({ ...args });
     };
@@ -96,7 +97,15 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
         headers.append('Set-Cookie', await Cookie.refreshToken.serialize('', { maxAge: -1 }));
         return redirect('/auth/signin?signinRequired=true', { status: 301, headers: headers });
       }
-      return await originalFunc({ ...args });
+      try {
+        return await originalFunc({ ...args });
+      } catch (e: any) {
+        if (e instanceof BaseError) {
+          return json({ error: e.message, code: e.code }, { status: e.status });
+        } else {
+          throw e;
+        }
+      }
     };
     return newFunc;
   }

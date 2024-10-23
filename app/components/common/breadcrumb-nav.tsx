@@ -1,4 +1,4 @@
-import { useMatches } from '@remix-run/react';
+import { UIMatch, useMatches } from '@remix-run/react';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,6 +9,25 @@ import {
 } from '../ui/breadcrumb';
 import React from 'react';
 
+type ItemProps = {
+  match: UIMatch<any, any>;
+  index: number;
+  arr: UIMatch<unknown, unknown>[];
+};
+
+function Item({ match, index, arr }: ItemProps) {
+  const { href, text } = match.handle.breadcrumb(match);
+  return (
+    <BreadcrumbItem>
+      {index !== arr.length - 1 ? (
+        <BreadcrumbLink href={href}>{text}</BreadcrumbLink>
+      ) : (
+        <BreadcrumbPage>{text}</BreadcrumbPage>
+      )}
+    </BreadcrumbItem>
+  );
+}
+
 export default function BreadcrumbNav() {
   const matches = useMatches();
   return (
@@ -18,15 +37,7 @@ export default function BreadcrumbNav() {
           .filter((match) => match.handle && (match.handle as any).breadcrumb)
           .map((match, index, arr) => (
             <React.Fragment key={index}>
-              <BreadcrumbItem>
-                {index !== arr.length - 1 ? (
-                  <BreadcrumbLink href={(match.handle as any).breadcrumb.href}>
-                    {(match.handle as any).breadcrumb.text}
-                  </BreadcrumbLink>
-                ) : (
-                  <BreadcrumbPage>{(match.handle as any).breadcrumb.text}</BreadcrumbPage>
-                )}
-              </BreadcrumbItem>
+              <Item match={match} index={index} arr={arr} />
               {index !== arr.length - 1 && <BreadcrumbSeparator />}
             </React.Fragment>
           ))}

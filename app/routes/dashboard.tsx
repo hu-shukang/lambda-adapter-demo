@@ -1,4 +1,4 @@
-import { Link, Outlet } from '@remix-run/react';
+import { Link, Outlet, UIMatch } from '@remix-run/react';
 import { RiBubbleChartFill } from '@remixicon/react';
 import { RequestWrapper } from '~/.server/utils/request.util';
 import { Resp } from '~/.server/utils/response.util';
@@ -7,10 +7,10 @@ import UserMenu from '~/components/common/user-menu';
 import { Button } from '~/components/ui/button';
 
 export const handle = {
-  breadcrumb: {
+  breadcrumb: (_match: UIMatch) => ({
     text: 'Dashboard',
     href: '/dashboard',
-  },
+  }),
 };
 
 export const loader = RequestWrapper.init(async ({ request }) => {

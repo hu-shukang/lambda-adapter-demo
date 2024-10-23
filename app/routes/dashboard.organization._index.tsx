@@ -8,10 +8,10 @@ import Title from '~/components/common/title';
 import OrganizationDeleteConfirm from '~/components/organization/organization-delete-confirm';
 import OrganizationList from '~/components/organization/organization-list';
 import { Button } from '~/components/ui/button';
-import { OrganizationInfo, organizationOne, organizationOneSchema } from '~/models/organization.model';
+import { OrganizationInfo, OrganizationOne, organizationOneSchema } from '~/models/organization.model';
 
 export const action = RequestWrapper.init(async ({ request, context }) => {
-  const { pk } = context.bodyData as organizationOne;
+  const { pk } = context.bodyData as OrganizationOne;
   await organizationService.delete(pk);
   return Resp.json(request, { success: true });
 })
@@ -21,13 +21,15 @@ export const action = RequestWrapper.init(async ({ request, context }) => {
 export default function OrganizationPage() {
   const loaderData = useRouteLoaderData<OrganizationInfo[]>('routes/dashboard.organization');
   const actionData = useActionData<ActionFunction>();
+  const [error, setError] = useState<string>();
   const navigate = useNavigate();
   const submit = useSubmit();
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<OrganizationInfo>();
 
-  const updateHandler = (id: string) => {
-    navigate(`/dashboard/organization/${id}/update`);
+  const updateHandler = (pk: string) => {
+    console.log(pk);
+    navigate(`/dashboard/organization/${pk}/update`);
   };
 
   const removeHandler = (info: OrganizationInfo) => {
@@ -44,6 +46,8 @@ export default function OrganizationPage() {
   useEffect(() => {
     if (actionData?.success == true) {
       setDeleteConfirmOpen(false);
+    } else {
+      setError(actionData?.error);
     }
   }, [actionData]);
 
@@ -62,10 +66,14 @@ export default function OrganizationPage() {
       {deleteTarget && (
         <OrganizationDeleteConfirm
           open={deleteConfirmOpen}
-          setOpen={setDeleteConfirmOpen}
+          setOpen={(val) => {
+            setDeleteConfirmOpen(val);
+            setError(undefined);
+          }}
           data={loaderData || []}
           info={deleteTarget}
           deleteAction={deleteAction}
+          error={error}
         />
       )}
     </div>

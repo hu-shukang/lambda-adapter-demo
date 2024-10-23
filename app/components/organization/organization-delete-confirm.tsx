@@ -9,6 +9,7 @@ import {
 } from '~/components/ui/dialog';
 import { Label } from '~/components/ui/label';
 import { OrganizationInfo } from '~/models/organization.model';
+import Error from '../common/error';
 
 type Props = {
   open: boolean;
@@ -16,9 +17,10 @@ type Props = {
   info: OrganizationInfo;
   data: OrganizationInfo[];
   deleteAction: (info: OrganizationInfo) => void;
+  error: string | undefined;
 };
 
-export default function OrganizationDeleteConfirm({ open, setOpen, info, data, deleteAction }: Props) {
+export default function OrganizationDeleteConfirm({ open, setOpen, info, data, deleteAction, error }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[425px]">
@@ -28,6 +30,7 @@ export default function OrganizationDeleteConfirm({ open, setOpen, info, data, d
             下記の組織を削除してよろしいでしょうか。削除すると元に戻すことができません。
           </DialogDescription>
         </DialogHeader>
+        <Error error={error} />
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right">組織名</Label>
