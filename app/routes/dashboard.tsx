@@ -1,7 +1,6 @@
 import { Link, Outlet, UIMatch } from '@remix-run/react';
 import { RiBubbleChartFill } from '@remixicon/react';
-import { RequestWrapper } from '~/.server/utils/request.util';
-import { Resp } from '~/.server/utils/response.util';
+import { AuthAPI } from '~/.server/apis/auth.api';
 import BreadcrumbNav from '~/components/common/breadcrumb-nav';
 import UserMenu from '~/components/common/user-menu';
 import { Button } from '~/components/ui/button';
@@ -13,11 +12,7 @@ export const handle = {
   }),
 };
 
-export const loader = RequestWrapper.init(async ({ request }) => {
-  return await Resp.json(request, { success: true });
-})
-  .withLogin()
-  .loader();
+export const loader = AuthAPI.loaders.checkLogin;
 
 export default function DashboardLayout() {
   return (

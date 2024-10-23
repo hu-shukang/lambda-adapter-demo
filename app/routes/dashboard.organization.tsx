@@ -1,7 +1,5 @@
 import { Outlet, UIMatch } from '@remix-run/react';
-import { organizationService } from '~/.server/services/organization.service';
-import { RequestWrapper } from '~/.server/utils/request.util';
-import { Resp } from '~/.server/utils/response.util';
+import { OrganizationAPI } from '~/.server/apis/organization.api';
 
 export const handle = {
   breadcrumb: (_match: UIMatch) => ({
@@ -10,10 +8,7 @@ export const handle = {
   }),
 };
 
-export const loader = RequestWrapper.init(async ({ request }) => {
-  const items = await organizationService.query();
-  return Resp.json(request, { success: true, data: items });
-}).loader();
+export const loader = OrganizationAPI.loaders.query;
 
 export default function OrganizationLayout() {
   return <Outlet />;

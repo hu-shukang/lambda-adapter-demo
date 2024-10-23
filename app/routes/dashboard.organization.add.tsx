@@ -1,14 +1,11 @@
 import { LoaderFunction } from '@remix-run/node';
 import { UIMatch, useRouteLoaderData, useSubmit } from '@remix-run/react';
-import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 import { SubmitHandler } from 'react-hook-form';
-import { organizationService } from '~/.server/services/organization.service';
-import { RequestWrapper } from '~/.server/utils/request.util';
-import { Resp } from '~/.server/utils/response.util';
+import { OrganizationAPI } from '~/.server/apis/organization.api';
 import Title from '~/components/common/title';
 import OrganizationForm from '~/components/organization/organization-form';
 import { getFormDataFromObject } from '~/lib/form.util.client';
-import { OrganizationInput, organizationInputSchema } from '~/models/organization.model';
+import { OrganizationInput } from '~/models/organization.model';
 
 export const handle = {
   breadcrumb: (_match: UIMatch) => ({
@@ -17,15 +14,7 @@ export const handle = {
   }),
 };
 
-export const action = RequestWrapper.init(async ({ context, request }) => {
-  const form = context.bodyData as OrganizationInput;
-  const payload = context.payload as CognitoIdTokenPayload;
-  await organizationService.create(form, payload);
-  return Resp.redirect(request, '/dashboard/organization');
-})
-  .withLogin()
-  .withBodyValid(organizationInputSchema)
-  .action();
+export const action = OrganizationAPI.actions.create;
 
 export default function OrganizationPage() {
   const loaderData = useRouteLoaderData<LoaderFunction>('routes/dashboard.organization');

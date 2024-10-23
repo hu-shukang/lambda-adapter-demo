@@ -1,22 +1,14 @@
 import { ActionFunction, LoaderFunction } from '@remix-run/node';
 import { Link, useActionData, useNavigate, useRouteLoaderData, useSubmit } from '@remix-run/react';
 import { useEffect, useState } from 'react';
-import { organizationService } from '~/.server/services/organization.service';
-import { RequestWrapper } from '~/.server/utils/request.util';
-import { Resp } from '~/.server/utils/response.util';
+import { OrganizationAPI } from '~/.server/apis/organization.api';
 import Title from '~/components/common/title';
 import OrganizationDeleteConfirm from '~/components/organization/organization-delete-confirm';
 import OrganizationList from '~/components/organization/organization-list';
 import { Button } from '~/components/ui/button';
-import { OrganizationInfo, OrganizationOne, organizationOneSchema } from '~/models/organization.model';
+import { OrganizationInfo } from '~/models/organization.model';
 
-export const action = RequestWrapper.init(async ({ request, context }) => {
-  const { pk } = context.bodyData as OrganizationOne;
-  await organizationService.delete(pk);
-  return Resp.json(request, { success: true });
-})
-  .withBodyValid(organizationOneSchema)
-  .action();
+export const action = OrganizationAPI.actions.delete;
 
 export default function OrganizationPage() {
   const loaderData = useRouteLoaderData<LoaderFunction>('routes/dashboard.organization');
