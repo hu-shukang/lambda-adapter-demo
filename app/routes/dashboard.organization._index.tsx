@@ -52,7 +52,7 @@ export default function OrganizationPage() {
   }, [actionData]);
 
   return (
-    <div className="container px-4 mx-auto">
+    <div className="page-container">
       <div className="flex justify-between items-center mb-2">
         <Title text="組織一覧" />
         <div className="space-x-2">

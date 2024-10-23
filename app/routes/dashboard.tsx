@@ -36,9 +36,7 @@ export default function DashboardLayout() {
         </div>
         <UserMenu />
       </div>
-      <div className="container mx-auto p-4">
-        <BreadcrumbNav />
-      </div>
+      <BreadcrumbNav />
 
       <Outlet />
     </div>

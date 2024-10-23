@@ -55,7 +55,7 @@ export default function OrganizationUpdatePage() {
   };
 
   return (
-    <div className="container px-4 mx-auto">
+    <div className="page-container">
       <div className="mb-2">
         <Title text="組織を更新" />
       </div>

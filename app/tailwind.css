@@ -75,3 +75,9 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .page-container {
+    @apply container p-6 mx-auto border border-gray-300 rounded-md;
+  }
+}

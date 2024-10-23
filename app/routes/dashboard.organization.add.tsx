@@ -37,7 +37,7 @@ export default function OrganizationPage() {
   };
 
   return (
-    <div className="container px-4 mx-auto">
+    <div className="page-container">
       <div className="mb-2">
         <Title text="組織を新規作成" />
       </div>

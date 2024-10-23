@@ -7,6 +7,7 @@ export default {
     extend: {
       fontFamily: {
         sans: [
+          '"Roboto Mono"',
           '"Inter"',
           'ui-sans-serif',
           'system-ui',
