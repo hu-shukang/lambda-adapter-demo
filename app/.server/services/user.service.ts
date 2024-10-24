@@ -21,15 +21,34 @@ class UserService extends CommonService {
   }
 
   public async query(query: UserQueryInput) {
-    console.log(query);
+    const keyConditionExpression = ['sk = :sk'];
+    const filterExpression = [];
+    const expressionAttributeValues: Record<string, any> = {
+      ':sk': CONST.DB.ORGANIZATION_INFO,
+    };
+    if (query.block) {
+      filterExpression.push('block = :block');
+      expressionAttributeValues[':block'] = query.block;
+    }
+    if (query.name) {
+      filterExpression.push('begins_with(cognitoUsername, :cognitoUsername)');
+      expressionAttributeValues[':cognitoUsername'] = query.name;
+    }
+    if (query.organization) {
+      if (query.sort === CONST.DB.INDEXS.ORGANIZATION_USER) {
+        keyConditionExpression.push('organization = :organization');
+      } else {
+        filterExpression.push('organization = :organization');
+      }
+      expressionAttributeValues[':organization'] = query.organization;
+    }
+
     const command = new QueryCommand({
       TableName: this.tableName,
-      IndexName: CONST.DB.INDEXS.ORGANIZATION_PRIORITY_ORDER,
-      KeyConditionExpression: 'sk = :sk',
-      ExpressionAttributeValues: {
-        ':sk': CONST.DB.ORGANIZATION_INFO,
-      },
-      ScanIndexForward: true,
+      IndexName: query.sort,
+      KeyConditionExpression: keyConditionExpression.join(' AND '),
+      FilterExpression: filterExpression.join(' AND '),
+      ExpressionAttributeValues: expressionAttributeValues,
     });
     const result = await DB.client.send(command);
     return result.Items || [];

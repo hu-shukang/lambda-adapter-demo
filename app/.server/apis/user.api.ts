@@ -16,8 +16,8 @@ const createAction = RequestWrapper.init(async ({ context, request }) => {
 
 const queryLoader = RequestWrapper.init(async ({ context, request }) => {
   const query = context.queryData as UserQueryInput;
-  console.log(query);
-  return Resp.json(request, {});
+  const result = await userService.query(query);
+  return Resp.json(request, { data: result, success: true });
 })
   .withLogin()
   .withQueryValid(userQueryInputSchema)
