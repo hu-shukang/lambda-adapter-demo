@@ -4,9 +4,18 @@ export type DBKey = { pk: string; sk: string };
 
 export type UpdateUserAndTime = { updateUser: string; updateTime: string };
 
+export const idToken = z.string();
+export const refreshToken = z.string();
 /* zod schema define */
 export const username = z.string({ required_error: '必須項目です' });
+export const cognitoUsername = z.string({ required_error: '必須項目です' });
 export const email = z.string({ required_error: '必須項目です' }).email({ message: 'メール形式不正' });
+export const block = z.enum(['0', '1'], { required_error: '必須項目です' });
+export const organization = z.string({ required_error: '必須項目です' }).uuid();
+export const sort = z.enum(['SK_TIME', 'ORGANIZATION_USER'], { required_error: '必須項目です' });
+export const organizationFilter = z.string().uuid().optional();
+export const blockFilter = z.enum(['0', '1']).optional();
+export const nameFilter = z.string().optional();
 export const password = z
   .string({ required_error: '必須項目です' })
   .min(8, '8文字以上は必須')

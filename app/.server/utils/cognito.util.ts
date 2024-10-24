@@ -1,7 +1,10 @@
 import {
   AdminAddUserToGroupCommand,
+  AdminCreateUserCommand,
+  AdminDeleteUserCommand,
   AdminRemoveUserFromGroupCommand,
   AdminUpdateUserAttributesCommand,
+  AttributeType,
   CognitoIdentityProviderClient,
   CreateGroupCommand,
   InitiateAuthCommand,
@@ -72,6 +75,50 @@ const updateUserPermissions = async (username: string, permissions: string) => {
   return client.send(command);
 };
 
+const createUserByAdmin = async (username: string, email: string, attributes?: Record<string, string>) => {
+  const userAttributes = [
+    {
+      Name: 'email',
+      Value: email,
+    },
+    {
+      Name: 'email_verified',
+      Value: 'true',
+    },
+  ];
+
+  if (attributes) {
+    Object.entries(attributes).forEach(([k, v]) => {
+      userAttributes.push({ Name: k, Value: v });
+    });
+  }
+
+  const command = new AdminCreateUserCommand({
+    UserPoolId: process.env.USER_POOL_ID!,
+    Username: username,
+    UserAttributes: userAttributes,
+    MessageAction: 'SUPPRESS',
+  });
+  return client.send(command);
+};
+
+const updateUserByAdmin = async (username: string, attributes: AttributeType[]) => {
+  const command = new AdminUpdateUserAttributesCommand({
+    UserPoolId: process.env.USER_POOL_ID!,
+    Username: username,
+    UserAttributes: attributes,
+  });
+  return client.send(command);
+};
+
+const deleteUserByAdmin = async (username: string) => {
+  const command = new AdminDeleteUserCommand({
+    UserPoolId: process.env.USER_POOL_ID!,
+    Username: username,
+  });
+  return client.send(command);
+};
+
 export const Cognito = {
   client,
   verifier,
@@ -80,4 +127,9 @@ export const Cognito = {
   addUserToGroup,
   removeUserFromGroup,
   updateUserPermissions,
+  Admin: {
+    createUser: createUserByAdmin,
+    updateUser: updateUserByAdmin,
+    deleteUser: deleteUserByAdmin,
+  },
 };

@@ -1,11 +1,35 @@
 import { z } from 'zod';
-import { confirmationCode, DBKey, email, password, rePassword, username } from './common.model';
+import {
+  block,
+  blockFilter,
+  cognitoUsername,
+  confirmationCode,
+  DBKey,
+  email,
+  idToken,
+  nameFilter,
+  organization,
+  organizationFilter,
+  password,
+  refreshToken,
+  rePassword,
+  sort,
+  username,
+} from './common.model';
 
-const idToken = z.string();
-const refreshToken = z.string();
 export const userInfoSchema = z.object({
-  email: z.string().email().min(1, 'Name is required'),
-  password: z.string().min(1, 'Address is required'),
+  email: email,
+  username: email,
+  cognitoUsername: cognitoUsername,
+  block: block,
+  organization: organization,
+});
+
+export const userQueryInputSchema = z.object({
+  sort: sort,
+  organization: organizationFilter,
+  block: blockFilter,
+  name: nameFilter,
 });
 
 export const idSchema = z.object({
@@ -40,6 +64,7 @@ export const tokenInputSchema = z.object({
 });
 
 export type UserInfo = z.infer<typeof userInfoSchema>;
+export type UserQueryInput = z.infer<typeof userQueryInputSchema>;
 export type UserEntity = DBKey & UserInfo;
 export type SigninInput = z.infer<typeof signinInputSchema>;
 export type SignupInput = z.infer<typeof signupInputSchema>;
