@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CONST } from '~/lib/const';
 
 export type DBKey = { pk: string; sk: string };
 
@@ -10,11 +11,11 @@ export const refreshToken = z.string();
 export const username = z.string({ required_error: '必須項目です' });
 export const cognitoUsername = z.string({ required_error: '必須項目です' });
 export const email = z.string({ required_error: '必須項目です' }).email({ message: 'メール形式不正' });
-export const block = z.enum(['0', '1'], { required_error: '必須項目です' });
+export const status = z.enum(CONST.USER.STATUS.LIST, { required_error: '必須項目です' });
 export const organization = z.string({ required_error: '必須項目です' }).uuid();
 export const sort = z.enum(['SK_TIME', 'ORGANIZATION_USER'], { required_error: '必須項目です' });
 export const organizationFilter = z.string().uuid().optional();
-export const blockFilter = z.enum(['0', '1']).optional();
+export const statusFilter = z.enum(CONST.USER.STATUS.LIST).optional();
 export const nameFilter = z.string().optional();
 export const password = z
   .string({ required_error: '必須項目です' })

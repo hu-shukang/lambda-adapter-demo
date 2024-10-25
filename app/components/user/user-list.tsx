@@ -1,8 +1,8 @@
-import * as React from 'react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { MoreHorizontal } from 'lucide-react';
-
-import { Button } from '~/components/ui/button';
+import { useMemo } from 'react';
+import { dateUtil } from '~/lib/date.util';
+import { OrganizationInfo } from '~/models/organization.model';
+import { UserInfo } from '~/models/user.model';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,18 +10,29 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table';
-import { OrganizationInfo } from '~/models/organization.model';
-import { dateUtil } from '~/lib/date.util';
+} from '../ui/dropdown-menu';
+import { Button } from '../ui/button';
+import { MoreHorizontal } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import { Badge } from '../ui/badge';
 
 type Props = {
-  data: OrganizationInfo[];
+  data: UserInfo[];
+  organizations: OrganizationInfo[];
   updateHandler: (pk: string) => void;
-  removeHandler: (info: OrganizationInfo) => void;
+  removeHandler: (info: UserInfo) => void;
 };
 
-export const getColumns = ({ data, updateHandler, removeHandler }: Props): ColumnDef<OrganizationInfo>[] => {
+const getColumns = ({ organizations, updateHandler, removeHandler }: Props): ColumnDef<UserInfo>[] => {
+  const organizationMap = new Map<string, OrganizationInfo>();
+  organizations.forEach((v) => {
+    organizationMap.set(v.pk, v);
+  });
+
+  const statusType: Record<string, string> = {
+    ACTIVE: 'success',
+    BLOCK: 'error',
+  };
   return [
     {
       id: 'idx',
@@ -29,22 +40,36 @@ export const getColumns = ({ data, updateHandler, removeHandler }: Props): Colum
       cell: ({ row }) => <div className="text-center">{row.index + 1}</div>,
     },
     {
-      accessorKey: 'name',
-      meta: { displayName: '組織名' },
-      header: '組織名',
-      cell: ({ row }) => <div>{row.getValue('name')}</div>,
+      accessorKey: 'pk',
+      meta: { displayName: 'ユーザID' },
+      header: 'ユーザID',
+      cell: ({ row }) => <div>{row.getValue('pk')}</div>,
     },
     {
-      accessorKey: 'parent',
-      meta: { displayName: '親組織' },
-      header: '親組織',
-      cell: ({ row }) => <div>{data.find((item) => item.pk === row.getValue('parent'))?.name || 'なし'}</div>,
+      accessorKey: 'cognitoUsername',
+      meta: { displayName: 'ユーザ名' },
+      header: 'ユーザ名',
+      cell: ({ row }) => <div>{row.getValue('cognitoUsername')}</div>,
     },
     {
-      accessorKey: 'priority',
-      meta: { displayName: '優先度' },
-      header: '優先度',
-      cell: ({ row }) => <div>{row.getValue('priority')}</div>,
+      accessorKey: 'organization',
+      meta: { displayName: '組織' },
+      header: '組織',
+      cell: ({ row }) => <div>{organizationMap.get(row.getValue('organization'))?.name}</div>,
+    },
+    {
+      accessorKey: 'status',
+      meta: { displayName: 'ステータス' },
+      header: () => <div className="text-center">ステータス</div>,
+      cell: ({ row }) => {
+        const status = row.getValue<string>('status');
+        const variant = statusType[status] as any;
+        return (
+          <div className="text-center">
+            <Badge variant={variant}>{status}</Badge>
+          </div>
+        );
+      },
     },
     {
       accessorKey: 'updateUser',
@@ -90,12 +115,10 @@ export const getColumns = ({ data, updateHandler, removeHandler }: Props): Colum
   ];
 };
 
-export default function OrganizationList(props: Props) {
-  const { data } = props;
-  const columns = React.useMemo(() => getColumns(props), [props]);
-
+export default function UserList(props: Props) {
+  const columns = useMemo(() => getColumns(props), [props]);
   const table = useReactTable({
-    data,
+    data: props.data,
     columns: columns,
     getCoreRowModel: getCoreRowModel(),
   });

@@ -49,11 +49,14 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
     return this;
   }
 
-  public withQueryValid(schema: ZodSchema) {
+  public withQueryValid(schema: ZodSchema, defaultValues?: Record<string, string>) {
     const originalFunc = this.func;
     const newFunc = async (args: Parameters<T>[0]) => {
       const url = new URL(args.request.url);
-      const data = Object.fromEntries(url.searchParams.entries());
+      let data = Object.fromEntries(url.searchParams.entries());
+      if (defaultValues) {
+        data = { ...defaultValues, ...data };
+      }
       const parseResult = schema.safeParse(data);
       if (!parseResult.success) {
         return json({ error: 'Invalid request query strings', details: parseResult.error.errors }, { status: 400 });

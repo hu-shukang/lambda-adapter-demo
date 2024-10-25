@@ -12,4 +12,11 @@ export const CONST = {
       SK_TIME: 'SK_TIME',
     },
   },
-};
+  USER: {
+    STATUS: {
+      LIST: ['ACTIVE', 'BLOCK'],
+      ACTIVE: 'ACTIVE',
+      BLOCK: 'BLOCK',
+    },
+  },
+} as const;

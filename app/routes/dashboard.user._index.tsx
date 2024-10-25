@@ -1,18 +1,43 @@
-import { Link } from '@remix-run/react';
+import { LoaderFunction } from '@remix-run/node';
+import { useLoaderData, useRouteLoaderData } from '@remix-run/react';
+import { UserAPI } from '~/.server/apis/user.api';
 import Title from '~/components/common/title';
-import { Button } from '~/components/ui/button';
+import UserList from '~/components/user/user-list';
+import UserQueryForm from '~/components/user/user-query-form';
+import { UserInfo, UserQueryInput } from '~/models/user.model';
+
+export const loader = UserAPI.loader.query;
 
 export default function UserPage() {
+  const loaderData = useRouteLoaderData<LoaderFunction>('routes/dashboard.user');
+  const queryData = useLoaderData<LoaderFunction>();
+
+  const querySubmit = async (data: UserQueryInput) => {
+    console.log(data);
+  };
+
+  const updateHandler = (pk: string) => {
+    console.log(pk);
+  };
+
+  const removeHandler = (info: UserInfo) => {
+    console.log(info);
+  };
+
   return (
     <div className="page-container">
-      <div className="flex justify-between items-center mb-2">
+      <div className="mb-2">
         <Title text="ユーザ一覧" />
-        <div className="space-x-2">
-          <Link to="/dashboard/user/add">
-            <Button>ユーザ作成</Button>
-          </Link>
-        </div>
       </div>
+      <div>
+        <UserQueryForm onSubmit={querySubmit} />
+      </div>
+      <UserList
+        data={queryData.data || []}
+        organizations={loaderData?.data || []}
+        updateHandler={updateHandler}
+        removeHandler={removeHandler}
+      />
     </div>
   );
 }

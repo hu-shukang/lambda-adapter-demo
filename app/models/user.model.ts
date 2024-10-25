@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import {
-  block,
-  blockFilter,
+  status,
+  statusFilter,
   cognitoUsername,
   confirmationCode,
   DBKey,
@@ -14,21 +14,22 @@ import {
   refreshToken,
   rePassword,
   sort,
+  UpdateUserAndTime,
   username,
 } from './common.model';
 
-export const userInfoSchema = z.object({
+export const userInfoInputSchema = z.object({
   email: email,
   username: email,
   cognitoUsername: cognitoUsername,
-  block: block,
+  status: status,
   organization: organization,
 });
 
 export const userQueryInputSchema = z.object({
   sort: sort,
   organization: organizationFilter,
-  block: blockFilter,
+  status: statusFilter,
   name: nameFilter,
 });
 
@@ -63,9 +64,10 @@ export const tokenInputSchema = z.object({
   refreshToken: refreshToken,
 });
 
-export type UserInfo = z.infer<typeof userInfoSchema>;
+export type UserInfoInput = z.infer<typeof userInfoInputSchema>;
+export type UserInfo = Omit<UserInfoInput, 'email' | 'username'> & DBKey & UpdateUserAndTime;
 export type UserQueryInput = z.infer<typeof userQueryInputSchema>;
-export type UserEntity = DBKey & UserInfo;
+export type UserEntity = DBKey & UserInfoInput;
 export type SigninInput = z.infer<typeof signinInputSchema>;
 export type SignupInput = z.infer<typeof signupInputSchema>;
 export type SignupConfirmInput = z.infer<typeof signupConfirmInputSchema>;

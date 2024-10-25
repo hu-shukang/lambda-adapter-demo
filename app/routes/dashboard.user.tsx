@@ -1,4 +1,5 @@
 import { Outlet, UIMatch } from '@remix-run/react';
+import { OrganizationAPI } from '~/.server/apis/organization.api';
 
 export const handle = {
   breadcrumb: (_match: UIMatch) => ({
@@ -6,6 +7,8 @@ export const handle = {
     href: '/dashboard/user',
   }),
 };
+
+export const loader = OrganizationAPI.loaders.query;
 
 export default function UserLayout() {
   return <Outlet />;

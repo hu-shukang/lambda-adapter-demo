@@ -1,5 +1,5 @@
 import { CommonService } from './common.service';
-import { UserInfo, UserQueryInput } from '~/models/user.model';
+import { UserInfoInput, UserQueryInput } from '~/models/user.model';
 import { Cognito } from '../utils/cognito.util';
 import { CONST } from '~/lib/const';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
@@ -10,7 +10,7 @@ import { DB } from '../utils/dynamodb.util';
 class UserService extends CommonService {
   private tableName = process.env.USER_TBL!;
 
-  public async create(user: UserInfo, payload: CognitoIdTokenPayload) {
+  public async create(user: UserInfoInput, payload: CognitoIdTokenPayload) {
     const { username, email, ...attr } = user;
     await Cognito.Admin.createUser(username, email);
     await this.createOne(
@@ -24,11 +24,11 @@ class UserService extends CommonService {
     const keyConditionExpression = ['sk = :sk'];
     const filterExpression = [];
     const expressionAttributeValues: Record<string, any> = {
-      ':sk': CONST.DB.ORGANIZATION_INFO,
+      ':sk': CONST.DB.USER_INFO,
     };
-    if (query.block) {
-      filterExpression.push('block = :block');
-      expressionAttributeValues[':block'] = query.block;
+    if (query.status) {
+      filterExpression.push('status = :status');
+      expressionAttributeValues[':status'] = query.status;
     }
     if (query.name) {
       filterExpression.push('begins_with(cognitoUsername, :cognitoUsername)');
@@ -47,7 +47,7 @@ class UserService extends CommonService {
       TableName: this.tableName,
       IndexName: query.sort,
       KeyConditionExpression: keyConditionExpression.join(' AND '),
-      FilterExpression: filterExpression.join(' AND '),
+      FilterExpression: filterExpression.length > 0 ? filterExpression.join(' AND ') : undefined,
       ExpressionAttributeValues: expressionAttributeValues,
     });
     const result = await DB.client.send(command);
