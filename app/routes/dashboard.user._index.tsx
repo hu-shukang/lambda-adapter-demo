@@ -1,9 +1,10 @@
 import { LoaderFunction } from '@remix-run/node';
-import { useLoaderData, useRouteLoaderData } from '@remix-run/react';
+import { useLoaderData, useRouteLoaderData, useSubmit } from '@remix-run/react';
 import { UserAPI } from '~/.server/apis/user.api';
 import Title from '~/components/common/title';
 import UserList from '~/components/user/user-list';
 import UserQueryForm from '~/components/user/user-query-form';
+import { getQueryDataFromObject } from '~/lib/form.util.client';
 import { UserInfo, UserQueryInput } from '~/models/user.model';
 
 export const loader = UserAPI.loader.query;
@@ -11,9 +12,11 @@ export const loader = UserAPI.loader.query;
 export default function UserPage() {
   const loaderData = useRouteLoaderData<LoaderFunction>('routes/dashboard.user');
   const queryData = useLoaderData<LoaderFunction>();
+  const submit = useSubmit();
 
   const querySubmit = async (data: UserQueryInput) => {
-    console.log(data);
+    const condition = getQueryDataFromObject(data);
+    submit(condition, { method: 'GET' });
   };
 
   const updateHandler = (pk: string) => {
@@ -29,9 +32,7 @@ export default function UserPage() {
       <div className="mb-2">
         <Title text="ユーザ一覧" />
       </div>
-      <div>
-        <UserQueryForm onSubmit={querySubmit} />
-      </div>
+      <UserQueryForm onSubmit={querySubmit} />
       <UserList
         data={queryData.data || []}
         organizations={loaderData?.data || []}

@@ -1,31 +1,35 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { OrganizationInfo, OrganizationInput, organizationInputSchema } from '~/models/organization.model';
+import { CONST } from '~/lib/const';
+import { OrganizationInfo } from '~/models/organization.model';
+import { UserInfo, UserInfoInput, userInfoInputSchema } from '~/models/user.model';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
-import { Button } from '../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Button } from '../ui/button';
 import { cn } from '~/lib/utils';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
 import { useState } from 'react';
 
 type Props = {
-  onSubmit: SubmitHandler<OrganizationInput>;
+  onSubmit: SubmitHandler<UserInfoInput>;
   organizations: OrganizationInfo[];
-  defaultValues?: OrganizationInfo | undefined;
+  defaultValues?: UserInfo | undefined;
   submitButtonText?: string | undefined;
 };
 
-export default function OrganizationForm({ onSubmit, organizations, defaultValues, submitButtonText }: Props) {
+export default function UserForm({ onSubmit, organizations, defaultValues }: Props) {
   const [open, setOpen] = useState(false);
-  const form = useForm<OrganizationInput>({
-    defaultValues: defaultValues || {
-      name: '',
-      priority: 0,
-      parent: undefined,
+  const form = useForm<UserInfoInput>({
+    defaultValues: {
+      username: defaultValues?.pk || '',
+      cognitoUsername: defaultValues?.cognitoUsername || '',
+      email: '',
+      organization: defaultValues?.organization || '',
+      status: defaultValues?.status || CONST.USER.STATUS.ACTIVE,
     },
-    resolver: zodResolver(organizationInputSchema),
+    resolver: zodResolver(userInfoInputSchema),
   });
 
   return (
@@ -33,10 +37,51 @@ export default function OrganizationForm({ onSubmit, organizations, defaultValue
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="parent"
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>ユーザID</FormLabel>
+              <FormControl>
+                <Input placeholder="ユーザID" {...field} />
+              </FormControl>
+              {defaultValues && <FormDescription>元の値：{defaultValues?.pk}</FormDescription>}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="cognitoUsername"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>ユーザ名</FormLabel>
+              <FormControl>
+                <Input placeholder="ユーザ名" {...field} />
+              </FormControl>
+              {defaultValues && <FormDescription>元の値：{defaultValues?.cognitoUsername}</FormDescription>}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel></FormLabel>
+              <FormControl>
+                <Input placeholder="メールアドレス" {...field} />
+              </FormControl>
+              {defaultValues && <FormDescription>元の値：{'xx'}</FormDescription>}
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="organization"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>親組織</FormLabel>
+              <FormLabel>組織</FormLabel>
               <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -45,7 +90,7 @@ export default function OrganizationForm({ onSubmit, organizations, defaultValue
                       role="combobox"
                       className={cn('justify-between', !field.value && 'text-muted-foreground')}
                     >
-                      {field.value ? organizations.find((o) => o.pk === field.value)?.name : '親組織選択'}
+                      {field.value ? organizations.find((o) => o.pk === field.value)?.name : '組織選択'}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </FormControl>
@@ -62,10 +107,9 @@ export default function OrganizationForm({ onSubmit, organizations, defaultValue
                             key={o.pk}
                             onSelect={(currentValue) => {
                               form.setValue(
-                                'parent',
-                                currentValue === form.getValues().parent ? undefined : currentValue,
+                                'organization',
+                                currentValue === form.getValues().organization ? '' : currentValue,
                               );
-                              form.setValue('priority', o.priority + 1);
                               setOpen(false);
                             }}
                           >
@@ -80,28 +124,13 @@ export default function OrganizationForm({ onSubmit, organizations, defaultValue
               </Popover>
               {defaultValues && (
                 <FormDescription>
-                  元の値：{organizations.find((o) => o.pk === defaultValues?.parent)?.name || 'なし'}
+                  元の値：{organizations.find((o) => o.pk === defaultValues?.organization)?.name || 'なし'}
                 </FormDescription>
               )}
               <FormMessage />
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>組織名</FormLabel>
-              <FormControl>
-                <Input placeholder="組織名" {...field} />
-              </FormControl>
-              {defaultValues && <FormDescription>元の値：{defaultValues?.name}</FormDescription>}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit">{submitButtonText || '新規作成'}</Button>
       </form>
     </Form>
   );

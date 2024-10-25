@@ -18,3 +18,12 @@ export const getFormDataFromObject = (data: Record<string, any>) => {
 
   return formData;
 };
+
+export const getQueryDataFromObject = (data: Record<string, any>) => {
+  return Object.entries(data)
+    .filter(([_k, v]) => v !== undefined && v !== null && v !== '')
+    .reduce((prev, [k, v]) => {
+      prev[k] = v;
+      return prev;
+    }, {} as any);
+};
