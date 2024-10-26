@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { OrganizationInfo } from '~/models/organization.model';
 import { FormControl } from '../ui/form';
 import { Button } from '../ui/button';
 import { cn } from '~/lib/utils';
-import { ControllerRenderProps, FieldValues, Path, UseFormReturn } from 'react-hook-form';
+import { ControllerRenderProps, FieldValues, Path, PathValue, UseFormReturn } from 'react-hook-form';
 import { ChevronsUpDown } from 'lucide-react';
 import {
   Dialog,
@@ -14,15 +14,25 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../ui/dialog';
+import OrganizationTreeView from './organization-treeview';
 
 type Props<T extends FieldValues> = {
   organizations: OrganizationInfo[];
   form: UseFormReturn<T, any, undefined>;
+  fieldName: Path<T>;
   field: ControllerRenderProps<T, Path<T>>;
 };
 
-export default function OrganizationSelect<T extends FieldValues>({ organizations, field }: Props<T>) {
+export default function OrganizationSelect<T extends FieldValues>({ organizations, form, field, fieldName }: Props<T>) {
   const [open, setOpen] = useState(false);
+  const [checkOrganization, setCheckOrganization] = useState<OrganizationInfo | undefined>(
+    organizations.find((o) => o.pk === field.value),
+  );
+
+  const submitHandler = useCallback(() => {
+    form.setValue(fieldName, checkOrganization?.pk as PathValue<T, Path<T>>);
+  }, [checkOrganization, fieldName, form]);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -42,9 +52,15 @@ export default function OrganizationSelect<T extends FieldValues>({ organization
           <DialogTitle>Edit profile</DialogTitle>
           <DialogDescription>Make changes to your profile here. </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">contents</div>
+        <OrganizationTreeView
+          organizations={organizations}
+          checked={checkOrganization}
+          onCheckChanged={setCheckOrganization}
+        />
         <DialogFooter>
-          <Button type="submit">Save changes</Button>
+          <Button type="submit" onClick={submitHandler}>
+            選択
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
