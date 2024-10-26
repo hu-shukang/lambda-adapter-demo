@@ -1,16 +1,20 @@
 import { LoaderFunction } from '@remix-run/node';
 import { useLoaderData, useRouteLoaderData, useSubmit } from '@remix-run/react';
+import { useState } from 'react';
 import { UserAPI } from '~/.server/apis/user.api';
+import OrganizationTreeView from '~/components/common/organization-treeview';
 import Title from '~/components/common/title';
 import UserList from '~/components/user/user-list';
 import UserQueryForm from '~/components/user/user-query-form';
 import { getQueryDataFromObject } from '~/lib/form.util.client';
+import { OrganizationInfo } from '~/models/organization.model';
 import { UserInfo, UserQueryInput } from '~/models/user.model';
 
 export const loader = UserAPI.loader.query;
 
 export default function UserPage() {
-  const loaderData = useRouteLoaderData<LoaderFunction>('routes/dashboard.user');
+  const organizationDataLoader = useRouteLoaderData<LoaderFunction>('routes/dashboard.user');
+  const [checkOrganization, setCheckOrganization] = useState<OrganizationInfo>();
   const queryData = useLoaderData<LoaderFunction>();
   const submit = useSubmit();
 
@@ -35,9 +39,14 @@ export default function UserPage() {
       <UserQueryForm onSubmit={querySubmit} />
       <UserList
         data={queryData.data || []}
-        organizations={loaderData?.data || []}
+        organizations={organizationDataLoader?.data || []}
         updateHandler={updateHandler}
         removeHandler={removeHandler}
+      />
+      <OrganizationTreeView
+        organizations={organizationDataLoader?.data || []}
+        checked={checkOrganization}
+        onCheckChanged={setCheckOrganization}
       />
     </div>
   );

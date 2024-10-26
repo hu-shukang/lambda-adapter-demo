@@ -81,39 +81,47 @@ body {
     @apply container p-6 mx-auto border border-gray-300 rounded-md;
   }
 
-  .tree-node {
+  .tree .tree-node {
     --space: 20px;
     --node-item-height: 40px;
+    --offset: 2px;
     margin-left: var(--space);
     position: relative;
   }
 
-  .tree-node-item {
+  .tree .tree-node .tree-node-item {
     height: var(--node-item-height);
     display: inline-flex;
     align-items: center;
     gap: 10px;
   }
-  .tree-node::before {
+
+  .tree .tree-node .tree-node-item .empty-toggle {
+    width: 20px;
+    height: 1px;
+    background-color: #ccc;
+  }
+
+  .tree .tree-node::before {
     content: '';
     position: absolute;
     top: 0px;
     bottom: 0;
-    left: calc(0px - 3px - var(--space) / 2);
+    left: calc(0px - var(--offset) - var(--space) / 2);
     width: 1px;
     background-color: #ccc;
   }
 
-  .tree-node::after {
+  .tree .tree-node::after {
     content: '';
     position: absolute;
-    top: calc(var(--node-item-height) / 2 - 2px);
-    left: calc(0px - 3px - var(--space) / 2);
-    width: calc(var(--space) / 2);
+    top: calc(var(--node-item-height) / 2);
+    left: calc(0px - var(--offset) - var(--space) / 2);
+    width: calc(var(--space) / 2 + 3px);
     border-top: 1px solid #ccc;
   }
 
   .tree .tree-node:nth-last-child(1)::before {
-    bottom: calc(var(--node-item-height) / 2 + 2px);
+    bottom: calc(var(--node-item-height) / 2);
   }
 }
