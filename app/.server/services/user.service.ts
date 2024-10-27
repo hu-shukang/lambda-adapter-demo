@@ -12,7 +12,7 @@ class UserService extends CommonService {
 
   public async create(user: UserInfoInput, payload: CognitoIdTokenPayload) {
     const { username, email, ...attr } = user;
-    await Cognito.Admin.createUser(username, email, { name: attr.cognitoUsername });
+    await Cognito.Admin.createUser(username, email, { name: attr.name });
     await this.createOne(
       this.tableName,
       { pk: username, sk: CONST.DB.USER_INFO },
@@ -31,8 +31,8 @@ class UserService extends CommonService {
       expressionAttributeValues[':status'] = query.status;
     }
     if (query.name) {
-      filterExpression.push('begins_with(cognitoUsername, :cognitoUsername)');
-      expressionAttributeValues[':cognitoUsername'] = query.name;
+      filterExpression.push('begins_with(name, :name)');
+      expressionAttributeValues[':name'] = query.name;
     }
     if (query.organization) {
       if (query.sort === CONST.DB.INDEXS.ORGANIZATION_USER) {

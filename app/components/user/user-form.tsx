@@ -20,7 +20,7 @@ export default function UserForm({ onSubmit, organizations, defaultValues, submi
   const form = useForm<UserInfoInput>({
     defaultValues: {
       username: defaultValues?.pk || '',
-      cognitoUsername: defaultValues?.cognitoUsername || '',
+      name: defaultValues?.name || '',
       email: '',
       organization: defaultValues?.organization || '',
       status: defaultValues?.status || CONST.USER.STATUS.ACTIVE,
@@ -47,14 +47,14 @@ export default function UserForm({ onSubmit, organizations, defaultValues, submi
         />
         <FormField
           control={form.control}
-          name="cognitoUsername"
+          name="name"
           render={({ field }) => (
             <FormItem>
               <FormLabel>ユーザ名</FormLabel>
               <FormControl>
                 <Input placeholder="ユーザ名" {...field} />
               </FormControl>
-              {defaultValues && <FormDescription>元の値：{defaultValues?.cognitoUsername}</FormDescription>}
+              {defaultValues && <FormDescription>元の値：{defaultValues?.name}</FormDescription>}
               <FormMessage />
             </FormItem>
           )}

@@ -27,9 +27,9 @@ export const handler = async (event: PostConfirmationTriggerEvent): Promise<any>
     expressionAttributeValues[':status'] = userAttributes['cognito:user_status'];
   }
   if (userAttributes.name) {
-    updateExpressionList.push('#cognitoUsername = :cognitoUsername');
-    expressionAttributeNames['#cognitoUsername'] = 'cognitoUsername';
-    expressionAttributeValues[':cognitoUsername'] = userAttributes.name;
+    updateExpressionList.push('#name = :name');
+    expressionAttributeNames['#name'] = 'name';
+    expressionAttributeValues[':name'] = userAttributes.name;
   }
 
   const command = new UpdateCommand({

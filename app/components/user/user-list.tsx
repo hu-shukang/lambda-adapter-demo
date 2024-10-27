@@ -46,10 +46,10 @@ const getColumns = ({ organizations, updateHandler, removeHandler }: Props): Col
       cell: ({ row }) => <div>{row.getValue('pk')}</div>,
     },
     {
-      accessorKey: 'cognitoUsername',
+      accessorKey: 'name',
       meta: { displayName: 'ユーザ名' },
       header: 'ユーザ名',
-      cell: ({ row }) => <div>{row.getValue('cognitoUsername')}</div>,
+      cell: ({ row }) => <div>{row.getValue('name')}</div>,
     },
     {
       accessorKey: 'organization',

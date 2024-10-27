@@ -2,7 +2,7 @@ import { z } from 'zod';
 import {
   status,
   statusFilter,
-  cognitoUsername,
+  name,
   confirmationCode,
   DBKey,
   email,
@@ -21,7 +21,7 @@ import {
 export const userInfoInputSchema = z.object({
   email: email,
   username: username,
-  cognitoUsername: cognitoUsername,
+  name: name,
   status: status,
   organization: organization,
 });
