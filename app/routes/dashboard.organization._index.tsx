@@ -18,6 +18,7 @@ export default function OrganizationPage() {
   const submit = useSubmit();
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<OrganizationInfo>();
+  const [type, setType] = useState<'tree' | 'table'>('table');
 
   const updateHandler = (pk: string) => {
     console.log(pk);
@@ -48,6 +49,17 @@ export default function OrganizationPage() {
       <div className="flex justify-between items-center mb-2">
         <Title text="組織一覧" />
         <div className="space-x-2">
+          {type === 'tree' && (
+            <Button variant="outline" onClick={() => setType('table')}>
+              テーブル表示
+            </Button>
+          )}
+          {type === 'table' && (
+            <Button variant="outline" onClick={() => setType('tree')}>
+              ツリー表示
+            </Button>
+          )}
+
           <Link to="/dashboard/organization/add">
             <Button>新規作成</Button>
           </Link>
