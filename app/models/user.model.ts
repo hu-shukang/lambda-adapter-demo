@@ -16,6 +16,7 @@ import {
   sort,
   UpdateUserAndTime,
   username,
+  Expand,
 } from './common.model';
 
 export const userInfoInputSchema = z.object({
@@ -65,9 +66,9 @@ export const tokenInputSchema = z.object({
 });
 
 export type UserInfoInput = z.infer<typeof userInfoInputSchema>;
-export type UserInfo = Omit<UserInfoInput, 'email' | 'username'> & DBKey & UpdateUserAndTime;
+export type UserInfo = Expand<Omit<UserInfoInput, 'email' | 'username'> & DBKey & UpdateUserAndTime>;
 export type UserQueryInput = z.infer<typeof userQueryInputSchema>;
-export type UserEntity = DBKey & UserInfoInput;
+export type UserEntity = Expand<DBKey & UserInfoInput>;
 export type SigninInput = z.infer<typeof signinInputSchema>;
 export type SignupInput = z.infer<typeof signupInputSchema>;
 export type SignupConfirmInput = z.infer<typeof signupConfirmInputSchema>;

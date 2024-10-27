@@ -58,6 +58,12 @@ const getColumns = ({ organizations, updateHandler, removeHandler }: Props): Col
       cell: ({ row }) => <div>{organizationMap.get(row.getValue('organization'))?.name}</div>,
     },
     {
+      accessorKey: 'email',
+      meta: { displayName: 'メール' },
+      header: 'メール',
+      cell: ({ row }) => <div>{row.getValue('email')}</div>,
+    },
+    {
       accessorKey: 'status',
       meta: { displayName: 'ステータス' },
       header: () => <div className="text-center">ステータス</div>,

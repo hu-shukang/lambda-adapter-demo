@@ -16,8 +16,9 @@ export const loader = AuthAPI.loaders.checkLogin;
 
 export default function DashboardLayout() {
   return (
-    <div>
-      <div className="h-[60px] sticky top-0 w-screen bg-primary flex items-center px-10">
+    <div className="flex flex-col min-h-screen">
+      {/* header */}
+      <div className="h-[60px] sticky top-0 z-10 w-screen bg-primary flex items-center px-10">
         <div className="flex items-center h-[30px] text-white">
           <RiBubbleChartFill size={36} className="mr-4" />
           <span>Dashboard</span>
@@ -33,7 +34,15 @@ export default function DashboardLayout() {
       </div>
       <BreadcrumbNav />
 
-      <Outlet />
+      {/* content */}
+      <div className="flex-grow">
+        <Outlet />
+      </div>
+
+      {/* footer */}
+      <div className="h-[60px] w-screen bg-primary flex items-center justify-center px-10 mt-6 text-white text-sm">
+        <div>copyright@hushukang</div>
+      </div>
     </div>
   );
 }

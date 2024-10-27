@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { CONST } from '~/lib/const';
 
+export type Expand<T> = { [K in keyof T]: T[K] };
 export type DBKey = { pk: string; sk: string };
 
 export type UpdateUserAndTime = { updateUser: string; updateTime: string };

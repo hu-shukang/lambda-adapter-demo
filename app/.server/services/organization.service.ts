@@ -1,4 +1,4 @@
-import { OrganizationInput, OrganizationOne } from '~/models/organization.model';
+import { OrganizationInfo, OrganizationInput, OrganizationOne } from '~/models/organization.model';
 import { CommonService } from './common.service';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 import { v7 } from 'uuid';
@@ -12,6 +12,7 @@ import {
   OrganizationNotFoundError,
   OrganizationSelfParentError,
 } from '~/models/error.model';
+import lodash from 'lodash';
 
 class OrganizationService extends CommonService {
   private tableName = process.env.USER_TBL!;
@@ -38,7 +39,7 @@ class OrganizationService extends CommonService {
    * 組織を全部取得する
    * @returns 組織リスト
    */
-  public async query() {
+  public async query(): Promise<OrganizationInfo[]> {
     const command = new QueryCommand({
       TableName: this.tableName,
       IndexName: CONST.DB.INDEXS.ORGANIZATION_PRIORITY_ORDER,
@@ -49,7 +50,11 @@ class OrganizationService extends CommonService {
       ScanIndexForward: true,
     });
     const result = await DB.client.send(command);
-    return result.Items || [];
+    if (!result.Items) {
+      return [];
+    }
+    const data = result.Items as OrganizationInfo[];
+    return lodash.sortBy(data, ['priority', 'updateTime']);
   }
 
   public async delete(pk: string) {

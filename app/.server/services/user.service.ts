@@ -12,11 +12,13 @@ class UserService extends CommonService {
 
   public async create(user: UserInfoInput, payload: CognitoIdTokenPayload) {
     const { username, email, ...attr } = user;
-    await Cognito.Admin.createUser(username, email, { name: attr.name });
+    const cognitoResult = await Cognito.Admin.createUser(username, email, { name: attr.name });
+    const userAttributes = cognitoResult.User?.Attributes;
+    const sub = userAttributes?.find((a) => a.Name === 'sub')?.Value;
     await this.createOne(
       this.tableName,
       { pk: username, sk: CONST.DB.USER_INFO },
-      { ...attr, updateTime: dateUtil.utc(), updateUser: payload['cognito:username'] },
+      { ...attr, email: email, sub: sub, updateTime: dateUtil.utc(), updateUser: payload['cognito:username'] },
     );
   }
 

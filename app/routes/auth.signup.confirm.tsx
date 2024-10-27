@@ -17,7 +17,7 @@ export default function AuthConfirmPage() {
   };
 
   return (
-    <div className="w-[350px]">
+    <div className="md:w-[350px]">
       <h1 className="text-3xl text-center mb-4">認証コード入力</h1>
       <h6 className="text-sm text-gray-500 text-center mb-4">メールに記載されたコードをご入力ください。</h6>
       <SignupConfirmForm onSubmit={onSubmit} />
