@@ -12,7 +12,7 @@ class UserService extends CommonService {
 
   public async create(user: UserInfoInput, payload: CognitoIdTokenPayload) {
     const { username, email, ...attr } = user;
-    await Cognito.Admin.createUser(username, email);
+    await Cognito.Admin.createUser(username, email, { name: attr.cognitoUsername });
     await this.createOne(
       this.tableName,
       { pk: username, sk: CONST.DB.USER_INFO },

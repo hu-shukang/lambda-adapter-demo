@@ -6,6 +6,8 @@ import { UserInfo, UserInfoInput, userInfoInputSchema } from '~/models/user.mode
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import OrganizationSelect from '../common/organization-select';
+import { Button } from '../ui/button';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 
 type Props = {
   onSubmit: SubmitHandler<UserInfoInput>;
@@ -14,7 +16,7 @@ type Props = {
   submitButtonText?: string | undefined;
 };
 
-export default function UserForm({ onSubmit, organizations, defaultValues }: Props) {
+export default function UserForm({ onSubmit, organizations, defaultValues, submitButtonText }: Props) {
   const form = useForm<UserInfoInput>({
     defaultValues: {
       username: defaultValues?.pk || '',
@@ -67,6 +69,7 @@ export default function UserForm({ onSubmit, organizations, defaultValues }: Pro
                 <Input placeholder="メールアドレス" {...field} />
               </FormControl>
               {defaultValues && <FormDescription>元の値：{'xx'}</FormDescription>}
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -76,7 +79,11 @@ export default function UserForm({ onSubmit, organizations, defaultValues }: Pro
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>組織</FormLabel>
-              <OrganizationSelect organizations={organizations} form={form} field={field} fieldName="organization" />
+              <OrganizationSelect
+                organizations={organizations}
+                selected={organizations.find((o) => o.pk === field.value)}
+                onSelectChanged={(val) => form.setValue('organization', val?.pk || '')}
+              />
               {defaultValues && (
                 <FormDescription>
                   元の値：{organizations.find((o) => o.pk === defaultValues?.organization)?.name || 'なし'}
@@ -86,6 +93,37 @@ export default function UserForm({ onSubmit, organizations, defaultValues }: Pro
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name="status"
+          render={({ field }) => (
+            <FormItem className="space-y-2">
+              <FormLabel>ステータス</FormLabel>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className="flex flex-row space-x-1"
+                >
+                  <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value={CONST.USER.STATUS.ACTIVE} />
+                    </FormControl>
+                    <FormLabel className="font-normal">{CONST.USER.STATUS.ACTIVE}</FormLabel>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value={CONST.USER.STATUS.BLOCK} />
+                    </FormControl>
+                    <FormLabel className="font-normal">{CONST.USER.STATUS.BLOCK}</FormLabel>
+                  </FormItem>
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit">{submitButtonText || '新規作成'}</Button>
       </form>
     </Form>
   );

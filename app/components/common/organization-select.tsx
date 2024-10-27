@@ -3,7 +3,6 @@ import { OrganizationInfo } from '~/models/organization.model';
 import { FormControl } from '../ui/form';
 import { Button } from '../ui/button';
 import { cn } from '~/lib/utils';
-import { ControllerRenderProps, FieldValues, Path, PathValue, UseFormReturn } from 'react-hook-form';
 import { ChevronsUpDown } from 'lucide-react';
 import {
   Dialog,
@@ -16,44 +15,39 @@ import {
 } from '../ui/dialog';
 import OrganizationTreeView from './organization-treeview';
 
-type Props<T extends FieldValues> = {
+type Props = {
   organizations: OrganizationInfo[];
-  form: UseFormReturn<T, any, undefined>;
-  fieldName: Path<T>;
-  field: ControllerRenderProps<T, Path<T>>;
+  selected: OrganizationInfo | undefined;
+  onSelectChanged: (val: OrganizationInfo | undefined) => void;
 };
 
-export default function OrganizationSelect<T extends FieldValues>({ organizations, form, field, fieldName }: Props<T>) {
+export default function OrganizationSelect({ organizations, selected, onSelectChanged }: Props) {
   const [open, setOpen] = useState(false);
-  const [checkOrganization, setCheckOrganization] = useState<OrganizationInfo | undefined>(
-    organizations.find((o) => o.pk === form.getValues(fieldName)),
-  );
-
-  const openChangeHandler = useCallback(
-    (open: boolean) => {
-      console.log('openChangeHandler');
-      console.log(form.getValues(fieldName));
-      setCheckOrganization(form.getValues(fieldName));
-      setOpen(open);
-    },
-    [fieldName, form],
-  );
+  const [checkOrganization, setCheckOrganization] = useState<OrganizationInfo | undefined>(selected);
 
   const submitHandler = useCallback(() => {
-    form.setValue(fieldName, checkOrganization?.pk as PathValue<T, Path<T>>);
-    openChangeHandler(false);
-  }, [checkOrganization, fieldName, form, openChangeHandler]);
+    onSelectChanged(checkOrganization);
+    setOpen(false);
+  }, [checkOrganization, onSelectChanged]);
+
+  const openChangedHandler = useCallback(
+    (val: boolean) => {
+      setOpen(val);
+      setCheckOrganization(selected);
+    },
+    [selected],
+  );
 
   return (
-    <Dialog open={open} onOpenChange={openChangeHandler}>
+    <Dialog open={open} onOpenChange={openChangedHandler}>
       <DialogTrigger asChild>
         <FormControl>
           <Button
             variant="outline"
             role="combobox"
-            className={cn('justify-between', !field.value && 'text-muted-foreground')}
+            className={cn('justify-between', !selected && 'text-muted-foreground')}
           >
-            {field.value ? organizations.find((o) => o.pk === field.value)?.name : '組織選択'}
+            {selected ? selected?.name : '組織選択'}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </FormControl>

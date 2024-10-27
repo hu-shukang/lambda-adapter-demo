@@ -1,8 +1,10 @@
 import { LoaderFunction } from '@remix-run/node';
-import { UIMatch, useRouteLoaderData } from '@remix-run/react';
+import { UIMatch, useRouteLoaderData, useSubmit } from '@remix-run/react';
 import { SubmitHandler } from 'react-hook-form';
+import { UserAPI } from '~/.server/apis/user.api';
 import Title from '~/components/common/title';
 import UserForm from '~/components/user/user-form';
+import { getFormDataFromObject } from '~/lib/form.util.client';
 import { UserInfoInput } from '~/models/user.model';
 
 export const handle = {
@@ -12,11 +14,15 @@ export const handle = {
   }),
 };
 
+export const action = UserAPI.actions.create;
+
 export default function UserAddPage() {
   const loaderData = useRouteLoaderData<LoaderFunction>('routes/dashboard.user');
+  const submit = useSubmit();
 
   const onSubmit: SubmitHandler<UserInfoInput> = async (data) => {
-    console.log(data);
+    const formData = getFormDataFromObject(data);
+    submit(formData, { method: 'POST' });
   };
 
   return (

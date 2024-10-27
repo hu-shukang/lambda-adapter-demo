@@ -20,7 +20,7 @@ import {
 
 export const userInfoInputSchema = z.object({
   email: email,
-  username: email,
+  username: username,
   cognitoUsername: cognitoUsername,
   status: status,
   organization: organization,
