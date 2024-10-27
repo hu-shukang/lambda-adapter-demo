@@ -20,7 +20,7 @@ function nodeElement(
     <div className="inline-flex items-center space-x-2">
       <Checkbox
         id={node.id}
-        checked={node.checked}
+        checked={node.id === checked?.pk}
         onCheckedChange={(val) => {
           checkHandler(val ? node.origin : undefined);
         }}

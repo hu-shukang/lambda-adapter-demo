@@ -5,6 +5,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
+import { Link } from '@remix-run/react';
 
 type Props = {
   onSubmit: SubmitHandler<UserQueryInput>;
@@ -60,9 +61,11 @@ export default function UserQueryForm({ onSubmit, defaultValues }: Props) {
             )}
           />
           <Button type="submit">検索</Button>
-          <Button type="button" variant="outline">
-            ユーザ作成
-          </Button>
+          <Link to="/dashboard/user/add">
+            <Button type="button" variant="outline">
+              ユーザ作成
+            </Button>
+          </Link>
         </form>
       </Form>
     </div>

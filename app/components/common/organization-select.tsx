@@ -26,15 +26,26 @@ type Props<T extends FieldValues> = {
 export default function OrganizationSelect<T extends FieldValues>({ organizations, form, field, fieldName }: Props<T>) {
   const [open, setOpen] = useState(false);
   const [checkOrganization, setCheckOrganization] = useState<OrganizationInfo | undefined>(
-    organizations.find((o) => o.pk === field.value),
+    organizations.find((o) => o.pk === form.getValues(fieldName)),
+  );
+
+  const openChangeHandler = useCallback(
+    (open: boolean) => {
+      console.log('openChangeHandler');
+      console.log(form.getValues(fieldName));
+      setCheckOrganization(form.getValues(fieldName));
+      setOpen(open);
+    },
+    [fieldName, form],
   );
 
   const submitHandler = useCallback(() => {
     form.setValue(fieldName, checkOrganization?.pk as PathValue<T, Path<T>>);
-  }, [checkOrganization, fieldName, form]);
+    openChangeHandler(false);
+  }, [checkOrganization, fieldName, form, openChangeHandler]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={openChangeHandler}>
       <DialogTrigger asChild>
         <FormControl>
           <Button
@@ -49,14 +60,17 @@ export default function OrganizationSelect<T extends FieldValues>({ organization
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit profile</DialogTitle>
-          <DialogDescription>Make changes to your profile here. </DialogDescription>
+          <DialogTitle>組織選択</DialogTitle>
+          <DialogDescription>組織を一つ選択してください。</DialogDescription>
         </DialogHeader>
-        <OrganizationTreeView
-          organizations={organizations}
-          checked={checkOrganization}
-          onCheckChanged={setCheckOrganization}
-        />
+        <div className="max-h-[80vh] overflow-auto px-6 py-1 border-y">
+          <OrganizationTreeView
+            organizations={organizations}
+            checked={checkOrganization}
+            onCheckChanged={setCheckOrganization}
+          />
+        </div>
+
         <DialogFooter>
           <Button type="submit" onClick={submitHandler}>
             選択

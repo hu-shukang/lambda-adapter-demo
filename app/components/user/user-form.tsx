@@ -62,7 +62,7 @@ export default function UserForm({ onSubmit, organizations, defaultValues }: Pro
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel></FormLabel>
+              <FormLabel>メールアドレス</FormLabel>
               <FormControl>
                 <Input placeholder="メールアドレス" {...field} />
               </FormControl>
