@@ -12,7 +12,7 @@ export const handler = async (event: PostConfirmationTriggerEvent): Promise<any>
     request: { userAttributes },
   } = event;
 
-  const updateExpressionList = ['email = :email', 'sub = :sub'];
+  const updateExpressionList = ['#email = :email', '#sub = :sub'];
   const expressionAttributeNames: Record<string, string> = {
     '#email': 'email',
     '#sub': 'sub',
@@ -21,11 +21,6 @@ export const handler = async (event: PostConfirmationTriggerEvent): Promise<any>
     ':email': userAttributes.email,
     ':sub': userAttributes.sub,
   };
-  if (userAttributes['cognito:user_status']) {
-    updateExpressionList.push('#status = :status');
-    expressionAttributeNames['#status'] = 'status';
-    expressionAttributeValues[':status'] = userAttributes['cognito:user_status'];
-  }
   if (userAttributes.name) {
     updateExpressionList.push('#name = :name');
     expressionAttributeNames['#name'] = 'name';
