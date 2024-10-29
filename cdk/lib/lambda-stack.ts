@@ -73,7 +73,7 @@ export class LambdaStack extends cdk.Stack {
     });
 
     // DynamoDB -- permissionTable
-    const permissionTable = new dynamodb.Table(this, envs.USER_TBL, {
+    const permissionTable = new dynamodb.Table(this, envs.PERMISSION_TBL, {
       tableName: envs.PERMISSION_TBL,
       partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
