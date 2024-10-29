@@ -39,7 +39,7 @@ export class LambdaStack extends cdk.Stack {
 
     const repository = ecr.Repository.fromRepositoryName(this, `${envs.APP_NAME}-ecr`, envs.APP_NAME);
 
-    // 创建一个 DynamoDB 表
+    // DynamoDB -- userTable
     const userTable = new dynamodb.Table(this, envs.USER_TBL, {
       tableName: envs.USER_TBL,
       partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
@@ -70,6 +70,21 @@ export class LambdaStack extends cdk.Stack {
       indexName: 'ORGANIZATION_USER',
       partitionKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'organization', type: dynamodb.AttributeType.STRING },
+    });
+
+    // DynamoDB -- permissionTable
+    const permissionTable = new dynamodb.Table(this, envs.USER_TBL, {
+      tableName: envs.PERMISSION_TBL,
+      partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST, // 按需计费模式
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // 销毁堆栈时销毁表
+    });
+
+    permissionTable.addGlobalSecondaryIndex({
+      indexName: 'SK_TIME',
+      partitionKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'updateTime', type: dynamodb.AttributeType.STRING },
     });
 
     const commonLayer = new lambda.LayerVersion(this, `${envs.APP_NAME}-common-layer-${envs.ENV}`, {
