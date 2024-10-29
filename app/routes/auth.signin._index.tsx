@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { toSignin } from '~/lib/auth.client';
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { CONST } from '~/lib/const';
 
 export default function SigninPage() {
   const [error, setError] = useState<string>();
@@ -21,8 +22,13 @@ export default function SigninPage() {
       await signIn({ ...data });
       toSignin(submit, redirectUrl);
     } catch (e: any) {
-      console.log(e);
-      setError('ユーザ名かパスワードは正しくありません。');
+      const message = e.message;
+      console.log(message);
+      if (message.includes(CONST.ERROR_CODE.AUTH.USER_BLOCKED)) {
+        setError(CONST.ERROR_MSG.AUTH.USER_BLOCKED);
+      } else {
+        setError('ユーザ名かパスワードは正しくありません。');
+      }
     }
   };
 

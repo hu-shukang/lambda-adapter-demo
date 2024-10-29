@@ -18,6 +18,9 @@ export const handler = async (event: PreTokenGenerationTriggerEvent): Promise<an
   const dbResult = await ddbDocClient.send(command);
   const user = dbResult.Item;
   if (user) {
+    if (user.status === 'BLOCKED') {
+      throw new Error('USER_BLOCKED');
+    }
     event.response.claimsOverrideDetails = {
       claimsToAddOrOverride: {
         organization: user.organization,

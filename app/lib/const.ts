@@ -21,4 +21,14 @@ export const CONST = {
       BLOCK: 'BLOCK',
     },
   },
+  ERROR_CODE: {
+    AUTH: {
+      USER_BLOCKED: 'USER_BLOCKED',
+    },
+  },
+  ERROR_MSG: {
+    AUTH: {
+      USER_BLOCKED: 'ユーザはブロックされました。管理者までお問い合わせください。',
+    },
+  },
 } as const;
