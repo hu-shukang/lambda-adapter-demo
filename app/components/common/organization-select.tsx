@@ -14,6 +14,7 @@ import {
   DialogTrigger,
 } from '../ui/dialog';
 import OrganizationTreeView from './organization-treeview';
+import { ScrollArea } from '../ui/scroll-area';
 
 type Props = {
   organizations: OrganizationInfo[];
@@ -57,13 +58,13 @@ export default function OrganizationSelect({ organizations, selected, onSelectCh
           <DialogTitle>組織選択</DialogTitle>
           <DialogDescription>組織を一つ選択してください。</DialogDescription>
         </DialogHeader>
-        <div className="max-h-[80vh] overflow-auto px-6 py-1 border-y">
+        <ScrollArea className="max-h-[80vh] px-6 py-1 border-y" type="auto">
           <OrganizationTreeView
             organizations={organizations}
             checked={checkOrganization}
             onCheckChanged={setCheckOrganization}
           />
-        </div>
+        </ScrollArea>
 
         <DialogFooter>
           <Button type="submit" onClick={submitHandler}>

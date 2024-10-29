@@ -11,36 +11,12 @@ type Props = {
   onCheckChanged: CheckHandler;
 };
 
-function nodeElement(
-  node: TreeNode<OrganizationInfo>,
-  checked: OrganizationInfo | undefined,
-  checkHandler: CheckHandler,
-) {
-  return (
-    <div className="inline-flex items-center space-x-2">
-      <Checkbox
-        id={node.id}
-        checked={node.id === checked?.pk}
-        onCheckedChange={(val) => {
-          checkHandler(val ? node.origin : undefined);
-        }}
-      />
-      <label
-        htmlFor={node.id}
-        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-      >
-        {node.origin.name}
-      </label>
-    </div>
-  );
-}
-
 function toTreeNode(
   organizations: OrganizationInfo[],
   organization: OrganizationInfo,
   checkHandler: CheckHandler,
   checked: OrganizationInfo | undefined,
-  showed: Array<string>,
+  showed: Set<string>,
 ): TreeNode<OrganizationInfo> {
   const children: Array<TreeNode<OrganizationInfo>> = [];
   const childOrg = organizations.filter((o) => o.parent === organization.pk);
@@ -51,8 +27,7 @@ function toTreeNode(
   }
   const node: TreeNode<OrganizationInfo> = {
     id: organization.pk,
-    element: (organization) => nodeElement(organization, checked, checkHandler),
-    show: showed.includes(organization.pk),
+    show: showed.has(organization.pk),
     checked: organization.pk === checked?.pk,
     origin: organization,
     children: children.length > 0 ? children : undefined,
@@ -65,7 +40,7 @@ function toTree(
   organizations: OrganizationInfo[],
   checkHandler: CheckHandler,
   checked: OrganizationInfo | undefined,
-  showed: Array<string>,
+  showed: Set<string>,
 ): TreeNode<OrganizationInfo> {
   const root = organizations.find((o) => o.parent === undefined) as OrganizationInfo;
   const otherOrg = organizations.filter((o) => o.parent !== undefined);
@@ -73,7 +48,7 @@ function toTree(
 }
 
 export default function OrganizationTreeView({ organizations, checked, onCheckChanged }: Props) {
-  const [showed, setShowed] = useState<Array<string>>(organizations.map((o) => o.pk));
+  const [showed, setShowed] = useState<Set<string>>(new Set(organizations.map((o) => o.pk)));
 
   const organizationTree = useMemo(
     () => toTree(organizations, onCheckChanged, checked, showed),
@@ -82,14 +57,34 @@ export default function OrganizationTreeView({ organizations, checked, onCheckCh
 
   const toggleShowHandler = useCallback(
     (node: TreeNode<OrganizationInfo>) => {
+      const updatedShowed = new Set(showed);
       if (node.show) {
-        setShowed(showed.filter((s) => s !== node.id));
+        updatedShowed.delete(node.id);
       } else {
-        setShowed([...showed, node.id]);
+        updatedShowed.add(node.id);
       }
+      setShowed(updatedShowed);
     },
     [showed],
   );
 
-  return <TreeView node={organizationTree} toggleShow={toggleShowHandler} />;
+  const renderNodeElement = (node: TreeNode<OrganizationInfo>) => (
+    <div className="inline-flex items-center space-x-2">
+      <Checkbox
+        id={node.id}
+        checked={node.id === checked?.pk}
+        onCheckedChange={(val) => {
+          onCheckChanged(val ? node.origin : undefined);
+        }}
+      />
+      <label
+        htmlFor={node.id}
+        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+      >
+        {node.origin.name}
+      </label>
+    </div>
+  );
+
+  return <TreeView node={organizationTree} toggleShow={toggleShowHandler} renderNodeElement={renderNodeElement} />;
 }
