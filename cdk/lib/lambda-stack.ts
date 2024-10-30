@@ -19,6 +19,12 @@ export class LambdaStack extends cdk.Stack {
     const lambdaRole = iam.Role.fromRoleArn(this, `${envs.APP_NAME}-lambda-role-${envs.ENV}`, envs.LAMBDA_ROLE_ARN, {
       mutable: false,
     });
+    const codepipelineRole = iam.Role.fromRoleArn(
+      this,
+      `${envs.APP_NAME}-codepipeline-role-${envs.ENV}`,
+      envs.CODE_PIPELINE_ROLE_ARN,
+      { mutable: false },
+    );
 
     /* web bucket */
     const webBucketArn = cdk.Fn.importValue(`${envs.WEB_BUCKET}-arn`);
@@ -140,7 +146,7 @@ export class LambdaStack extends cdk.Stack {
         PostConfirmation: postConfirmationTriggerLambda.functionArn,
         PreTokenGeneration: preTokenTriggerLambda.functionArn,
       },
-      lambdaRole,
+      codepipelineRole,
     );
 
     // new cognito.CfnUserPoolGroup(this, `${envs.APP_NAME}-user-pool-admin-group-${envs.ENV}`, {
