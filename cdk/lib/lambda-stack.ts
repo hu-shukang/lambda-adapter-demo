@@ -7,9 +7,7 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
-import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import * as ssm from 'aws-cdk-lib/aws-ssm';
 
 export class LambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, envs: Record<string, string>, props?: cdk.StackProps) {
@@ -19,15 +17,6 @@ export class LambdaStack extends cdk.Stack {
     const lambdaRole = iam.Role.fromRoleArn(this, `${envs.APP_NAME}-lambda-role-${envs.ENV}`, envs.LAMBDA_ROLE_ARN, {
       mutable: false,
     });
-
-    const googleOAuthClientId = ssm.StringParameter.valueForStringParameter(
-      this,
-      `/${envs.APP_NAME}/${envs.ENV}/google/oauth/client-id`,
-    );
-    const googleOAuthClientSecret = ssm.StringParameter.valueForStringParameter(
-      this,
-      `/${envs.APP_NAME}/${envs.ENV}/google/oauth/client-secrets`,
-    );
 
     /* web bucket */
     const webBucketArn = cdk.Fn.importValue(`${envs.WEB_BUCKET}-arn`);
@@ -103,7 +92,7 @@ export class LambdaStack extends cdk.Stack {
       },
     };
 
-    const postConfirmationTriggerLambda = new lambda.Function(
+    const _postConfirmationTriggerLambda = new lambda.Function(
       this,
       `${envs.APP_NAME}-post-confirmation-trigger-${envs.ENV}`,
       {
@@ -117,7 +106,7 @@ export class LambdaStack extends cdk.Stack {
       },
     );
 
-    const preTokenTriggerLambda = new lambda.Function(this, `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`, {
+    const _preTokenTriggerLambda = new lambda.Function(this, `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`, {
       functionName: `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`,
       description: `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`,
       code: lambda.Code.fromBucket(assetBucket, `pre-token-${timestamp}.zip`),
@@ -127,45 +116,11 @@ export class LambdaStack extends cdk.Stack {
       ...lambdaProps,
     });
 
-    // 创建一个 Cognito 用户池
-    const userPool = new cognito.UserPool(this, `${envs.APP_NAME}-user-pool-${envs.ENV}`, {
-      userPoolName: `${envs.APP_NAME}-user-pool-${envs.ENV}`,
-      selfSignUpEnabled: true, // 启用用户自助注册
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      signInAliases: {
-        email: true, // 允许使用电子邮件进行登录
-        phone: false,
-        username: true, // 允许使用用户名进行登录
-      },
-      autoVerify: {
-        email: true, // 自动验证用户的电子邮件
-      },
-      customAttributes: {
-        permissions: new cognito.StringAttribute({ mutable: true }),
-      },
-      passwordPolicy: {
-        minLength: 8, // 最小密码长度
-        requireLowercase: true, // 需要小写字母
-        requireUppercase: true, // 需要大写字母
-        requireDigits: true, // 需要数字
-        requireSymbols: false, // 需要特殊字符
-      },
-      accountRecovery: cognito.AccountRecovery.EMAIL_ONLY, // 只通过电子邮件找回密码
-      // lambdaTriggers: {
-      //   postConfirmation: postConfirmationTriggerLambda, // 用户注册成功后的触发器
-      //   preTokenGeneration: preTokenTriggerLambda, // 生成IDToken时的触发器
-      // },
-    });
-    const domainPrefix = `${envs.APP_NAME}-${envs.ENV}`;
-    userPool.addDomain(`${envs.APP_NAME}-user-pool-domain-${envs.ENV}`, {
-      cognitoDomain: { domainPrefix: domainPrefix },
-    });
+    // postConfirmationTriggerLambda.addEnvironment('USER_POOL_ID', userPool.userPoolId);
+    // preTokenTriggerLambda.addEnvironment('USER_POOL_ID', userPool.userPoolId);
 
-    postConfirmationTriggerLambda.addEnvironment('USER_POOL_ID', userPool.userPoolId);
-    preTokenTriggerLambda.addEnvironment('USER_POOL_ID', userPool.userPoolId);
-
-    userPool.addTrigger(cognito.UserPoolOperation.POST_CONFIRMATION, postConfirmationTriggerLambda);
-    userPool.addTrigger(cognito.UserPoolOperation.PRE_TOKEN_GENERATION, preTokenTriggerLambda);
+    // userPool.addTrigger(cognito.UserPoolOperation.POST_CONFIRMATION, postConfirmationTriggerLambda);
+    // userPool.addTrigger(cognito.UserPoolOperation.PRE_TOKEN_GENERATION, preTokenTriggerLambda);
 
     // new cognito.CfnUserPoolGroup(this, `${envs.APP_NAME}-user-pool-admin-group-${envs.ENV}`, {
     //   userPoolId: userPool.userPoolId,
@@ -173,39 +128,6 @@ export class LambdaStack extends cdk.Stack {
     //   description: 'Admin group with full permissions',
     //   precedence: 1,
     // });
-
-    // 添加用户池客户端
-    const userPoolClient = userPool.addClient(`${envs.APP_NAME}-client-${envs.ENV}`, {
-      userPoolClientName: `${envs.APP_NAME}-client-${envs.ENV}`,
-      authFlows: {
-        userPassword: true, // 支持通过用户名和密码进行认证
-        userSrp: true, // 支持 SRP 流程
-      },
-      supportedIdentityProviders: [
-        cognito.UserPoolClientIdentityProvider.COGNITO,
-        cognito.UserPoolClientIdentityProvider.GOOGLE,
-      ],
-      oAuth: {
-        callbackUrls: ['http://localhost:5173/auth/signin/callback', envs.SIGN_IN_CALLBACK],
-        logoutUrls: ['http://localhost:5173/auth/signin', envs.SIGN_OUT_CALLBACK],
-        defaultRedirectUri: envs.SIGN_IN_CALLBACK,
-      },
-    });
-
-    new cognito.UserPoolIdentityProviderGoogle(this, `${envs.APP_NAME}-google-oauth-${envs.ENV}`, {
-      userPool: userPool,
-      clientId: googleOAuthClientId,
-      clientSecretValue: new cdk.SecretValue(googleOAuthClientSecret),
-      scopes: ['profile', 'email', 'openid'],
-      attributeMapping: {
-        email: cognito.ProviderAttribute.GOOGLE_EMAIL,
-        fullname: cognito.ProviderAttribute.GOOGLE_NAME,
-        profilePicture: cognito.ProviderAttribute.GOOGLE_PICTURE,
-        custom: {
-          email_verified: cognito.ProviderAttribute.other('email_verified'),
-        },
-      },
-    });
 
     const serverLambda = new lambda.Function(this, `${envs.APP_NAME}-server-${envs.ENV}`, {
       functionName: `${envs.APP_NAME}-server-${envs.ENV}`,
@@ -218,9 +140,9 @@ export class LambdaStack extends cdk.Stack {
       ...lambdaProps,
       environment: {
         ...envs,
-        USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
-        USER_POOL_ID: userPool.userPoolId,
-        USER_POOL_DOMAIN_PREFIX: domainPrefix,
+        // USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
+        // USER_POOL_ID: userPool.userPoolId,
+        USER_POOL_DOMAIN_PREFIX: `${envs.APP_NAME}-${envs.ENV}`,
       },
     });
 
