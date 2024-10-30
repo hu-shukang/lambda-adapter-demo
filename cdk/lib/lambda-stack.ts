@@ -133,10 +133,15 @@ export class LambdaStack extends cdk.Stack {
     //   preTokenGeneration: preTokenTriggerLambda.functionArn,
     //   postConfirmation: postConfirmationTriggerLambda.functionArn,
     // };
-    this.addTrigerToUserPool(userPool, envs, {
-      PostConfirmation: postConfirmationTriggerLambda.functionArn,
-      PreTokenGeneration: preTokenTriggerLambda.functionArn,
-    });
+    this.addTrigerToUserPool(
+      userPool,
+      envs,
+      {
+        PostConfirmation: postConfirmationTriggerLambda.functionArn,
+        PreTokenGeneration: preTokenTriggerLambda.functionArn,
+      },
+      lambdaRole,
+    );
 
     // new cognito.CfnUserPoolGroup(this, `${envs.APP_NAME}-user-pool-admin-group-${envs.ENV}`, {
     //   userPoolId: userPool.userPoolId,
@@ -201,7 +206,12 @@ export class LambdaStack extends cdk.Stack {
     });
   }
 
-  private addTrigerToUserPool(userPool: cognito.IUserPool, envs: Record<string, string>, lambdaConfig: any) {
+  private addTrigerToUserPool(
+    userPool: cognito.IUserPool,
+    envs: Record<string, string>,
+    lambdaConfig: any,
+    role: iam.IRole,
+  ) {
     /*
       LambdaConfig: {
         PreSignUp: preSignUpHandler.functionArn,
@@ -241,9 +251,10 @@ export class LambdaStack extends cdk.Stack {
           LambdaConfig: {},
         },
       },
-      policy: customResource.AwsCustomResourcePolicy.fromSdkCalls({
-        resources: [`arn:aws:cognito-idp:${this.region}:${this.account}:userpool/${userPool.userPoolId}`],
-      }),
+      role: role,
+      // policy: customResource.AwsCustomResourcePolicy.fromSdkCalls({
+      //   resources: [`arn:aws:cognito-idp:${this.region}:${this.account}:userpool/${userPool.userPoolId}`],
+      // }),
     });
   }
 }
