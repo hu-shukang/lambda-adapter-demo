@@ -94,6 +94,39 @@ export class LambdaStack extends cdk.Stack {
       compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
     });
 
+    const lambdaProps = {
+      role: lambdaRole,
+      timeout: cdk.Duration.minutes(15),
+      memorySize: 2048,
+      environment: {
+        ...envs,
+      },
+    };
+
+    const postConfirmationTriggerLambda = new lambda.Function(
+      this,
+      `${envs.APP_NAME}-post-confirmation-trigger-${envs.ENV}`,
+      {
+        functionName: `${envs.APP_NAME}-post-confirmation-trigger-${envs.ENV}`,
+        description: `${envs.APP_NAME}-post-confirmation-trigger-${envs.ENV}`,
+        code: lambda.Code.fromBucket(assetBucket, `post-confirmation-${timestamp}.zip`),
+        handler: 'index.handler',
+        runtime: lambda.Runtime.NODEJS_20_X,
+        layers: [commonLayer],
+        ...lambdaProps,
+      },
+    );
+
+    const preTokenTriggerLambda = new lambda.Function(this, `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`, {
+      functionName: `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`,
+      description: `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`,
+      code: lambda.Code.fromBucket(assetBucket, `pre-token-${timestamp}.zip`),
+      handler: 'index.handler',
+      runtime: lambda.Runtime.NODEJS_20_X,
+      layers: [commonLayer],
+      ...lambdaProps,
+    });
+
     // 创建一个 Cognito 用户池
     const userPool = new cognito.UserPool(this, `${envs.APP_NAME}-user-pool-${envs.ENV}`, {
       userPoolName: `${envs.APP_NAME}-user-pool-${envs.ENV}`,
@@ -118,6 +151,10 @@ export class LambdaStack extends cdk.Stack {
         requireSymbols: false, // 需要特殊字符
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY, // 只通过电子邮件找回密码
+      lambdaTriggers: {
+        postConfirmation: postConfirmationTriggerLambda, // 用户注册成功后的触发器
+        preTokenGeneration: preTokenTriggerLambda, // 生成IDToken时的触发器
+      },
     });
     const domainPrefix = `${envs.APP_NAME}-${envs.ENV}`;
     userPool.addDomain(`${envs.APP_NAME}-user-pool-domain-${envs.ENV}`, {
@@ -164,47 +201,6 @@ export class LambdaStack extends cdk.Stack {
       },
     });
 
-    const lambdaProps = {
-      role: lambdaRole,
-      timeout: cdk.Duration.minutes(15),
-      memorySize: 2048,
-      environment: {
-        ...envs,
-        USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
-        USER_POOL_ID: userPool.userPoolId,
-        USER_POOL_DOMAIN_PREFIX: domainPrefix,
-      },
-    };
-
-    const postConfirmationTriggerLambda = new lambda.Function(
-      this,
-      `${envs.APP_NAME}-post-confirmation-trigger-${envs.ENV}`,
-      {
-        functionName: `${envs.APP_NAME}-post-confirmation-trigger-${envs.ENV}`,
-        description: `${envs.APP_NAME}-post-confirmation-trigger-${envs.ENV}`,
-        code: lambda.Code.fromBucket(assetBucket, `post-confirmation-${timestamp}.zip`),
-        handler: 'index.handler',
-        runtime: lambda.Runtime.NODEJS_20_X,
-        layers: [commonLayer],
-        ...lambdaProps,
-      },
-    );
-
-    const preTokenTriggerLambda = new lambda.Function(this, `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`, {
-      functionName: `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`,
-      description: `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`,
-      code: lambda.Code.fromBucket(assetBucket, `pre-token-${timestamp}.zip`),
-      handler: 'index.handler',
-      runtime: lambda.Runtime.NODEJS_20_X,
-      layers: [commonLayer],
-      ...lambdaProps,
-    });
-
-    // 用户注册成功后的触发器
-    userPool.addTrigger(cognito.UserPoolOperation.POST_CONFIRMATION, postConfirmationTriggerLambda);
-    // 生成IDToken时的触发器
-    userPool.addTrigger(cognito.UserPoolOperation.PRE_TOKEN_GENERATION, preTokenTriggerLambda);
-
     const serverLambda = new lambda.Function(this, `${envs.APP_NAME}-server-${envs.ENV}`, {
       functionName: `${envs.APP_NAME}-server-${envs.ENV}`,
       description: `${envs.APP_NAME}-server-${envs.ENV}`,
@@ -214,6 +210,12 @@ export class LambdaStack extends cdk.Stack {
       handler: lambda.Handler.FROM_IMAGE,
       runtime: lambda.Runtime.FROM_IMAGE,
       ...lambdaProps,
+      environment: {
+        ...envs,
+        USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
+        USER_POOL_ID: userPool.userPoolId,
+        USER_POOL_DOMAIN_PREFIX: domainPrefix,
+      },
     });
 
     // 创建 API Gateway
