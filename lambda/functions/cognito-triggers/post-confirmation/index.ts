@@ -63,7 +63,7 @@ const getProviderName = (userAttribute: AttributeType[] | undefined) => {
   let providerName = 'Cognito';
   const existingUserIdentities = userAttribute?.find((a) => a.Name === 'identities');
   if (existingUserIdentities && existingUserIdentities.Value) {
-    providerName = existingUserIdentities.Value;
+    providerName = JSON.parse(existingUserIdentities.Value)[0].providerName;
   }
   return providerName;
 };
