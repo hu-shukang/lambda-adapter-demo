@@ -9,7 +9,7 @@ import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
-import { CfnUserPool } from 'aws-cdk-lib/aws-cognito';
+import * as customResource from 'aws-cdk-lib/custom-resources';
 
 export class LambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, envs: Record<string, string>, props?: cdk.StackProps) {
@@ -127,13 +127,16 @@ export class LambdaStack extends cdk.Stack {
       layers: [commonLayer],
       ...lambdaProps,
     });
-    const cfnUserPool = userPool.node.defaultChild as CfnUserPool;
-    cfnUserPool.lambdaConfig = {
-      preTokenGeneration: preTokenTriggerLambda.functionArn,
-      postConfirmation: postConfirmationTriggerLambda.functionArn,
-    };
-    // userPool.addTrigger(cognito.UserPoolOperation.POST_CONFIRMATION, postConfirmationTriggerLambda);
-    // userPool.addTrigger(cognito.UserPoolOperation.PRE_TOKEN_GENERATION, preTokenTriggerLambda);
+
+    // const cfnUserPool = userPool.node.defaultChild as cognito.CfnUserPool;
+    // cfnUserPool.lambdaConfig = {
+    //   preTokenGeneration: preTokenTriggerLambda.functionArn,
+    //   postConfirmation: postConfirmationTriggerLambda.functionArn,
+    // };
+    this.addTrigerToUserPool(userPool, envs, {
+      PostConfirmation: postConfirmationTriggerLambda.functionArn,
+      PreTokenGeneration: preTokenTriggerLambda.functionArn,
+    });
 
     // new cognito.CfnUserPoolGroup(this, `${envs.APP_NAME}-user-pool-admin-group-${envs.ENV}`, {
     //   userPoolId: userPool.userPoolId,
@@ -195,6 +198,52 @@ export class LambdaStack extends cdk.Stack {
         'favicon.ico': staticBehavior,
         '*.png': staticBehavior,
       },
+    });
+  }
+
+  private addTrigerToUserPool(userPool: cognito.IUserPool, envs: Record<string, string>, lambdaConfig: any) {
+    /*
+      LambdaConfig: {
+        PreSignUp: preSignUpHandler.functionArn,
+        DefineAuthChallenge: defineAuthChallengeHandler.functionArn,
+        CreateAuthChallenge: createAuthChallengeHandler.functionArn,
+        VerifyAuthChallengeResponse: verifyAuthChallengeResponseHandler.functionArn,
+      },
+    */
+    new customResource.AwsCustomResource(this, `${envs.APP_NAME}-user-pool-${envs.ENV}-custom-resource`, {
+      resourceType: 'Custom::UpdateUserPool',
+      onCreate: {
+        region: this.region,
+        service: 'CognitoIdentityServiceProvider',
+        action: 'updateUserPool',
+        parameters: {
+          UserPoolId: userPool.userPoolId,
+          LambdaConfig: lambdaConfig,
+        },
+        physicalResourceId: customResource.PhysicalResourceId.of(userPool.userPoolId),
+      },
+      onUpdate: {
+        region: this.region,
+        service: 'CognitoIdentityServiceProvider',
+        action: 'updateUserPool',
+        parameters: {
+          UserPoolId: userPool.userPoolId,
+          LambdaConfig: lambdaConfig,
+        },
+        physicalResourceId: customResource.PhysicalResourceId.of(userPool.userPoolId),
+      },
+      onDelete: {
+        region: this.region,
+        service: 'CognitoIdentityServiceProvider',
+        action: 'updateUserPool',
+        parameters: {
+          UserPoolId: userPool.userPoolId,
+          LambdaConfig: {},
+        },
+      },
+      policy: customResource.AwsCustomResourcePolicy.fromSdkCalls({
+        resources: [`arn:aws:cognito-idp:${this.region}:${this.account}:userpool/${userPool.userPoolId}`],
+      }),
     });
   }
 }
