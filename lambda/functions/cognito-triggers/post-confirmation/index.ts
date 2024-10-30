@@ -73,11 +73,14 @@ const linkUser = async (event: PostConfirmationTriggerEvent, existingUser: Admin
   const linkProviderCommand = new AdminLinkProviderForUserCommand({
     UserPoolId: process.env.USER_POOL_ID,
     DestinationUser: {
-      ProviderAttributeValue: existingUser.Username,
       ProviderName: 'Cognito',
+      ProviderAttributeName: existingUser.Username,
+      ProviderAttributeValue: existingUser.Username,
     },
     SourceUser: {
       ProviderName: sourceUserProviderName,
+      ProviderAttributeName: 'Cognito_Subject',
+      ProviderAttributeValue: event.userName,
     },
   });
   await cognitoClient.send(linkProviderCommand);

@@ -151,15 +151,21 @@ export class LambdaStack extends cdk.Stack {
         requireSymbols: false, // 需要特殊字符
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY, // 只通过电子邮件找回密码
-      lambdaTriggers: {
-        postConfirmation: postConfirmationTriggerLambda, // 用户注册成功后的触发器
-        preTokenGeneration: preTokenTriggerLambda, // 生成IDToken时的触发器
-      },
+      // lambdaTriggers: {
+      //   postConfirmation: postConfirmationTriggerLambda, // 用户注册成功后的触发器
+      //   preTokenGeneration: preTokenTriggerLambda, // 生成IDToken时的触发器
+      // },
     });
     const domainPrefix = `${envs.APP_NAME}-${envs.ENV}`;
     userPool.addDomain(`${envs.APP_NAME}-user-pool-domain-${envs.ENV}`, {
       cognitoDomain: { domainPrefix: domainPrefix },
     });
+
+    postConfirmationTriggerLambda.addEnvironment('USER_POOL_ID', userPool.userPoolId);
+    preTokenTriggerLambda.addEnvironment('USER_POOL_ID', userPool.userPoolId);
+
+    userPool.addTrigger(cognito.UserPoolOperation.POST_CONFIRMATION, postConfirmationTriggerLambda);
+    userPool.addTrigger(cognito.UserPoolOperation.PRE_TOKEN_GENERATION, preTokenTriggerLambda);
 
     // new cognito.CfnUserPoolGroup(this, `${envs.APP_NAME}-user-pool-admin-group-${envs.ENV}`, {
     //   userPoolId: userPool.userPoolId,
