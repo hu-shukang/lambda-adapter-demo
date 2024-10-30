@@ -8,6 +8,8 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as cognito from 'aws-cdk-lib/aws-cognito';
+import { CfnUserPool } from 'aws-cdk-lib/aws-cognito';
 
 export class LambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, envs: Record<string, string>, props?: cdk.StackProps) {
@@ -25,6 +27,13 @@ export class LambdaStack extends cdk.Stack {
     /* web bucket */
     const assetBucketArn = cdk.Fn.importValue(`${envs.ASSET_BUCKET}-arn`);
     const assetBucket = s3.Bucket.fromBucketArn(this, envs.ASSET_BUCKET, assetBucketArn);
+
+    /* user pool */
+    const userPoolId = cdk.Fn.importValue(`${envs.APP_NAME}-user-pool-${envs.ENV}-id`);
+    const userPool = cognito.UserPool.fromUserPoolId(this, `${envs.APP_NAME}-user-pool-${envs.ENV}`, userPoolId);
+
+    /* user pool client */
+    const userPoolClientId = cdk.Fn.importValue(`${envs.APP_NAME}-client-${envs.ENV}-id`);
 
     const repository = ecr.Repository.fromRepositoryName(this, `${envs.APP_NAME}-ecr`, envs.APP_NAME);
 
@@ -89,10 +98,13 @@ export class LambdaStack extends cdk.Stack {
       memorySize: 2048,
       environment: {
         ...envs,
+        USER_POOL_ID: userPoolId,
+        USER_POOL_CLIENT_ID: userPoolClientId,
+        USER_POOL_DOMAIN_PREFIX: `${envs.APP_NAME}-${envs.ENV}`,
       },
     };
 
-    const _postConfirmationTriggerLambda = new lambda.Function(
+    const postConfirmationTriggerLambda = new lambda.Function(
       this,
       `${envs.APP_NAME}-post-confirmation-trigger-${envs.ENV}`,
       {
@@ -106,7 +118,7 @@ export class LambdaStack extends cdk.Stack {
       },
     );
 
-    const _preTokenTriggerLambda = new lambda.Function(this, `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`, {
+    const preTokenTriggerLambda = new lambda.Function(this, `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`, {
       functionName: `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`,
       description: `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`,
       code: lambda.Code.fromBucket(assetBucket, `pre-token-${timestamp}.zip`),
@@ -115,10 +127,11 @@ export class LambdaStack extends cdk.Stack {
       layers: [commonLayer],
       ...lambdaProps,
     });
-
-    // postConfirmationTriggerLambda.addEnvironment('USER_POOL_ID', userPool.userPoolId);
-    // preTokenTriggerLambda.addEnvironment('USER_POOL_ID', userPool.userPoolId);
-
+    const cfnUserPool = userPool.node.defaultChild as CfnUserPool;
+    cfnUserPool.lambdaConfig = {
+      preTokenGeneration: preTokenTriggerLambda.functionArn,
+      postConfirmation: postConfirmationTriggerLambda.functionArn,
+    };
     // userPool.addTrigger(cognito.UserPoolOperation.POST_CONFIRMATION, postConfirmationTriggerLambda);
     // userPool.addTrigger(cognito.UserPoolOperation.PRE_TOKEN_GENERATION, preTokenTriggerLambda);
 
@@ -138,12 +151,6 @@ export class LambdaStack extends cdk.Stack {
       handler: lambda.Handler.FROM_IMAGE,
       runtime: lambda.Runtime.FROM_IMAGE,
       ...lambdaProps,
-      environment: {
-        ...envs,
-        // USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
-        // USER_POOL_ID: userPool.userPoolId,
-        USER_POOL_DOMAIN_PREFIX: `${envs.APP_NAME}-${envs.ENV}`,
-      },
     });
 
     // 创建 API Gateway

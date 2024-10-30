@@ -187,20 +187,26 @@ export class InfraStack extends cdk.Stack {
       },
     });
 
-    new cognito.UserPoolIdentityProviderGoogle(this, `${envs.APP_NAME}-google-oauth-${envs.ENV}`, {
-      userPool: userPool,
-      clientId: googleOAuthClientId,
-      clientSecretValue: new cdk.SecretValue(googleOAuthClientSecret),
-      scopes: ['profile', 'email', 'openid'],
-      attributeMapping: {
-        email: cognito.ProviderAttribute.GOOGLE_EMAIL,
-        fullname: cognito.ProviderAttribute.GOOGLE_NAME,
-        profilePicture: cognito.ProviderAttribute.GOOGLE_PICTURE,
-        custom: {
-          email_verified: cognito.ProviderAttribute.other('email_verified'),
+    const googleProvider = new cognito.UserPoolIdentityProviderGoogle(
+      this,
+      `${envs.APP_NAME}-google-oauth-${envs.ENV}`,
+      {
+        userPool: userPool,
+        clientId: googleOAuthClientId,
+        clientSecretValue: new cdk.SecretValue(googleOAuthClientSecret),
+        scopes: ['profile', 'email', 'openid'],
+        attributeMapping: {
+          email: cognito.ProviderAttribute.GOOGLE_EMAIL,
+          fullname: cognito.ProviderAttribute.GOOGLE_NAME,
+          profilePicture: cognito.ProviderAttribute.GOOGLE_PICTURE,
+          custom: {
+            email_verified: cognito.ProviderAttribute.other('email_verified'),
+          },
         },
       },
-    });
+    );
+
+    userPoolClient.node.addDependency(googleProvider);
 
     new cdk.CfnOutput(this, `${envs.ASSET_BUCKET}-arn`, {
       value: assetBucket.bucketArn,
