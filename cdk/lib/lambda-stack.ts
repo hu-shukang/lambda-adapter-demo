@@ -8,8 +8,8 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as customResource from 'aws-cdk-lib/custom-resources';
+import { LambdaConfigType } from '../bin/type';
 
 export class LambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, envs: Record<string, string>, props?: cdk.StackProps) {
@@ -19,12 +19,6 @@ export class LambdaStack extends cdk.Stack {
     const lambdaRole = iam.Role.fromRoleArn(this, `${envs.APP_NAME}-lambda-role-${envs.ENV}`, envs.LAMBDA_ROLE_ARN, {
       mutable: false,
     });
-    const codepipelineRole = iam.Role.fromRoleArn(
-      this,
-      `${envs.APP_NAME}-codepipeline-role-${envs.ENV}`,
-      envs.CODE_PIPELINE_ROLE_ARN,
-      { mutable: false },
-    );
 
     /* web bucket */
     const webBucketArn = cdk.Fn.importValue(`${envs.WEB_BUCKET}-arn`);
@@ -34,11 +28,10 @@ export class LambdaStack extends cdk.Stack {
     const assetBucketArn = cdk.Fn.importValue(`${envs.ASSET_BUCKET}-arn`);
     const assetBucket = s3.Bucket.fromBucketArn(this, envs.ASSET_BUCKET, assetBucketArn);
 
-    /* user pool */
+    /** user pool id */
     const userPoolId = cdk.Fn.importValue(`${envs.APP_NAME}-user-pool-${envs.ENV}-id`);
-    const userPool = cognito.UserPool.fromUserPoolId(this, `${envs.APP_NAME}-user-pool-${envs.ENV}`, userPoolId);
 
-    /* user pool client */
+    /** user pool client id */
     const userPoolClientId = cdk.Fn.importValue(`${envs.APP_NAME}-client-${envs.ENV}-id`);
 
     const repository = ecr.Repository.fromRepositoryName(this, `${envs.APP_NAME}-ecr`, envs.APP_NAME);
@@ -110,6 +103,20 @@ export class LambdaStack extends cdk.Stack {
       },
     };
 
+    const updateCognitoTriggerLambda = new lambda.Function(
+      this,
+      `${envs.APP_NAME}-update-cognito-trigger-${envs.ENV}`,
+      {
+        functionName: `${envs.APP_NAME}-update-cognito-trigger-${envs.ENV}`,
+        description: `${envs.APP_NAME}-update-cognito-trigger-${envs.ENV}`,
+        code: lambda.Code.fromBucket(assetBucket, `update-cognito-trigger-${timestamp}.zip`),
+        handler: 'index.handler',
+        runtime: lambda.Runtime.NODEJS_20_X,
+        layers: [commonLayer],
+        ...lambdaProps,
+      },
+    );
+
     const postConfirmationTriggerLambda = new lambda.Function(
       this,
       `${envs.APP_NAME}-post-confirmation-trigger-${envs.ENV}`,
@@ -134,27 +141,10 @@ export class LambdaStack extends cdk.Stack {
       ...lambdaProps,
     });
 
-    // const cfnUserPool = userPool.node.defaultChild as cognito.CfnUserPool;
-    // cfnUserPool.lambdaConfig = {
-    //   preTokenGeneration: preTokenTriggerLambda.functionArn,
-    //   postConfirmation: postConfirmationTriggerLambda.functionArn,
-    // };
-    this.addTrigerToUserPool(
-      userPool,
-      envs,
-      {
-        PostConfirmation: postConfirmationTriggerLambda.functionArn,
-        PreTokenGeneration: preTokenTriggerLambda.functionArn,
-      },
-      codepipelineRole,
-    );
-
-    // new cognito.CfnUserPoolGroup(this, `${envs.APP_NAME}-user-pool-admin-group-${envs.ENV}`, {
-    //   userPoolId: userPool.userPoolId,
-    //   groupName: 'Admin',
-    //   description: 'Admin group with full permissions',
-    //   precedence: 1,
-    // });
+    this.addTrigerToUserPool(envs, updateCognitoTriggerLambda, lambdaRole, {
+      PostConfirmation: postConfirmationTriggerLambda.functionArn,
+      PreTokenGeneration: preTokenTriggerLambda.functionArn,
+    });
 
     const serverLambda = new lambda.Function(this, `${envs.APP_NAME}-server-${envs.ENV}`, {
       functionName: `${envs.APP_NAME}-server-${envs.ENV}`,
@@ -213,54 +203,22 @@ export class LambdaStack extends cdk.Stack {
   }
 
   private addTrigerToUserPool(
-    userPool: cognito.IUserPool,
     envs: Record<string, string>,
-    lambdaConfig: any,
+    eventHandler: lambda.IFunction,
     role: iam.IRole,
+    lambdaConfig: LambdaConfigType,
   ) {
-    /*
-      LambdaConfig: {
-        PreSignUp: preSignUpHandler.functionArn,
-        DefineAuthChallenge: defineAuthChallengeHandler.functionArn,
-        CreateAuthChallenge: createAuthChallengeHandler.functionArn,
-        VerifyAuthChallengeResponse: verifyAuthChallengeResponseHandler.functionArn,
+    const provider = new customResource.Provider(
+      this,
+      `${envs.APP_NAME}-cognito-custom-resource-provider-${envs.ENV}`,
+      {
+        onEventHandler: eventHandler,
+        role: role,
       },
-    */
-    new customResource.AwsCustomResource(this, `${envs.APP_NAME}-user-pool-${envs.ENV}-custom-resource`, {
-      resourceType: 'Custom::UpdateUserPool',
-      onCreate: {
-        region: this.region,
-        service: 'CognitoIdentityServiceProvider',
-        action: 'updateUserPool',
-        parameters: {
-          UserPoolId: userPool.userPoolId,
-          LambdaConfig: lambdaConfig,
-        },
-        physicalResourceId: customResource.PhysicalResourceId.of(userPool.userPoolId),
-      },
-      onUpdate: {
-        region: this.region,
-        service: 'CognitoIdentityServiceProvider',
-        action: 'updateUserPool',
-        parameters: {
-          UserPoolId: userPool.userPoolId,
-          LambdaConfig: lambdaConfig,
-        },
-        physicalResourceId: customResource.PhysicalResourceId.of(userPool.userPoolId),
-      },
-      onDelete: {
-        region: this.region,
-        service: 'CognitoIdentityServiceProvider',
-        action: 'updateUserPool',
-        parameters: {
-          UserPoolId: userPool.userPoolId,
-          LambdaConfig: {},
-        },
-      },
-      role: role,
-      // policy: customResource.AwsCustomResourcePolicy.fromSdkCalls({
-      //   resources: [`arn:aws:cognito-idp:${this.region}:${this.account}:userpool/${userPool.userPoolId}`],
-      // }),
+    );
+    new cdk.CustomResource(this, `${envs.APP_NAME}-cognito-custom-resource-${envs.ENV}`, {
+      serviceToken: provider.serviceToken,
+      properties: { lambdaConfig: lambdaConfig },
     });
   }
 }
