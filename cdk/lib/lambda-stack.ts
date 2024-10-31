@@ -8,7 +8,6 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import * as customResource from 'aws-cdk-lib/custom-resources';
 import { LambdaConfigType } from '../bin/type';
 
 export class LambdaStack extends cdk.Stack {
@@ -141,7 +140,7 @@ export class LambdaStack extends cdk.Stack {
       ...lambdaProps,
     });
 
-    this.addTrigerToUserPool(envs, updateCognitoTriggerLambda, lambdaRole, {
+    this.addTrigerToUserPool(envs, updateCognitoTriggerLambda, {
       PostConfirmation: postConfirmationTriggerLambda.functionArn,
       PreTokenGeneration: preTokenTriggerLambda.functionArn,
     });
@@ -205,19 +204,10 @@ export class LambdaStack extends cdk.Stack {
   private addTrigerToUserPool(
     envs: Record<string, string>,
     eventHandler: lambda.IFunction,
-    role: iam.IRole,
     lambdaConfig: LambdaConfigType,
   ) {
-    const provider = new customResource.Provider(
-      this,
-      `${envs.APP_NAME}-cognito-custom-resource-provider-${envs.ENV}`,
-      {
-        onEventHandler: eventHandler,
-        role: role,
-      },
-    );
     new cdk.CustomResource(this, `${envs.APP_NAME}-cognito-custom-resource-${envs.ENV}`, {
-      serviceToken: provider.serviceToken,
+      serviceToken: eventHandler.functionArn,
       properties: { lambdaConfig: lambdaConfig },
     });
   }
