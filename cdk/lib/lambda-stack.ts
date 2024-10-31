@@ -29,7 +29,6 @@ export class LambdaStack extends cdk.Stack {
 
     /** user pool id */
     const userPoolId = cdk.Fn.importValue(`${envs.APP_NAME}-user-pool-${envs.ENV}-id`);
-
     /** user pool client id */
     const userPoolClientId = cdk.Fn.importValue(`${envs.APP_NAME}-client-${envs.ENV}-id`);
 
