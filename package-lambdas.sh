@@ -5,10 +5,10 @@ set -euo pipefail
 # 定义一些变量
 ASSET_BUCKET=$1
 TIMESTAMP=$2
-LAMBDA_DIST_DIR="${CODEBUILD_SRC_DIR}/lambda/dist"
+LAMBDA_DIST_DIR="./lambda/dist"
 
 # 遍历 lambda/dist 目录下的所有文件夹并进行打包和上传
-for lambda_dir in $(find "${LAMBDA_DIST_DIR}" -type d -mindepth 2 -maxdepth 2); do
+for lambda_dir in $(find "${LAMBDA_DIST_DIR}" -mindepth 2 -maxdepth 2 -type d); do
   if [ -d "$lambda_dir" ]; then
     lambda_name=$(basename "$lambda_dir")
     echo "Processing $lambda_name..."
