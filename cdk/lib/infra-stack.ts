@@ -140,6 +140,7 @@ export class InfraStack extends cdk.Stack {
       },
       customAttributes: {
         permissions: new cognito.StringAttribute({ mutable: true }),
+        role: new cognito.StringAttribute({ mutable: true }),
       },
       passwordPolicy: {
         minLength: 8, // 最小密码长度
