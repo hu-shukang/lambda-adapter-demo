@@ -149,10 +149,9 @@ export class InfraStack extends cdk.Stack {
         requireSymbols: false, // 需要特殊字符
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY, // 只通过电子邮件找回密码
-      // lambdaTriggers: {
-      //   postConfirmation: postConfirmationTriggerLambda, // 用户注册成功后的触发器
-      //   preTokenGeneration: preTokenTriggerLambda, // 生成IDToken时的触发器
-      // },
+      email: cognito.UserPoolEmail.withSES({
+        fromEmail: envs.COGNITO_FROM_EMAIL,
+      }),
     });
 
     const domainPrefix = `${envs.APP_NAME}-${envs.ENV}`;

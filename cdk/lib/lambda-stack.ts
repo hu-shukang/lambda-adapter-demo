@@ -115,6 +115,20 @@ export class LambdaStack extends cdk.Stack {
       },
     );
 
+    const preAuthenticationTriggerLambda = new lambda.Function(
+      this,
+      `${envs.APP_NAME}-pre-authentication-trigger-${envs.ENV}`,
+      {
+        functionName: `${envs.APP_NAME}-pre-authentication-trigger-${envs.ENV}`,
+        description: `${envs.APP_NAME}-pre-authentication-trigger-${envs.ENV}`,
+        code: lambda.Code.fromBucket(assetBucket, `pre-authentication-${timestamp}.zip`),
+        handler: 'index.handler',
+        runtime: lambda.Runtime.NODEJS_20_X,
+        layers: [commonLayer],
+        ...lambdaProps,
+      },
+    );
+
     const postConfirmationTriggerLambda = new lambda.Function(
       this,
       `${envs.APP_NAME}-post-confirmation-trigger-${envs.ENV}`,
@@ -140,6 +154,7 @@ export class LambdaStack extends cdk.Stack {
     });
 
     this.addTrigerToUserPool(envs, updateCognitoTriggerLambda, {
+      PreAuthentication: preAuthenticationTriggerLambda.functionArn,
       PostConfirmation: postConfirmationTriggerLambda.functionArn,
       PreTokenGeneration: preTokenTriggerLambda.functionArn,
     });
