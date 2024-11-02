@@ -56,8 +56,8 @@ export const handler = async (event: PreSignUpTriggerEvent): Promise<any> => {
     const isExternalUser = existingUser.UserStatus === 'EXTERNAL_PROVIDER';
     const existingUsername = existingUser.Username as string;
     if (event.triggerSource === 'PreSignUp_SignUp' && isExternalUser) {
-      const { userId, provider } = getProviderAndUserId(existingUsername);
-      await linkUser(userId, provider, event.userName);
+      const { provider } = getProviderAndUserId(existingUsername);
+      throw new Error(`EXIST_WITH_${provider}`);
     } else if (event.triggerSource === 'PreSignUp_ExternalProvider') {
       const { userId, provider } = getProviderAndUserId(event.userName);
       await linkUser(userId, provider, existingUsername);
