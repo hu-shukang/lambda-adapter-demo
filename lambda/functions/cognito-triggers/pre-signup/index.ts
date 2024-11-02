@@ -21,7 +21,24 @@ const getUsersByEmail = async (event: PreSignUpTriggerEvent) => {
   return output.Users;
 };
 
-const linkUser = async (externalUserId: string, providerName: string, existingUsername: string) => {
+const linkUserToExternal = async (userId: string, providerName: string, existingUsername: string) => {
+  const linkProviderCommand = new AdminLinkProviderForUserCommand({
+    UserPoolId: process.env.USER_POOL_ID,
+    DestinationUser: {
+      ProviderName: providerName,
+      ProviderAttributeName: 'Cognito_Subject',
+      ProviderAttributeValue: userId,
+    },
+    SourceUser: {
+      ProviderName: 'Cognito',
+      ProviderAttributeName: 'Username',
+      ProviderAttributeValue: existingUsername,
+    },
+  });
+  await cognitoClient.send(linkProviderCommand);
+};
+
+const linkUserToCognito = async (userId: string, providerName: string, existingUsername: string) => {
   const linkProviderCommand = new AdminLinkProviderForUserCommand({
     UserPoolId: process.env.USER_POOL_ID,
     DestinationUser: {
@@ -32,7 +49,7 @@ const linkUser = async (externalUserId: string, providerName: string, existingUs
     SourceUser: {
       ProviderName: providerName,
       ProviderAttributeName: 'Cognito_Subject',
-      ProviderAttributeValue: externalUserId,
+      ProviderAttributeValue: userId,
     },
   });
   await cognitoClient.send(linkProviderCommand);
@@ -53,14 +70,15 @@ export const handler = async (event: PreSignUpTriggerEvent): Promise<any> => {
   const existingUsers = await getUsersByEmail(event);
   if (existingUsers && existingUsers.length > 0) {
     const existingUser = existingUsers[0];
+    console.log(JSON.stringify(existingUser));
     const isExternalUser = existingUser.UserStatus === 'EXTERNAL_PROVIDER';
     const existingUsername = existingUser.Username as string;
     if (event.triggerSource === 'PreSignUp_SignUp' && isExternalUser) {
       const { userId, provider } = getProviderAndUserId(existingUsername);
-      await linkUser(userId, provider, event.userName);
+      await linkUserToExternal(userId, provider, event.userName);
     } else if (event.triggerSource === 'PreSignUp_ExternalProvider') {
       const { userId, provider } = getProviderAndUserId(event.userName);
-      await linkUser(userId, provider, existingUsername);
+      await linkUserToCognito(userId, provider, existingUsername);
     }
   }
 
