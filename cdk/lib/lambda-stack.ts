@@ -8,6 +8,7 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as cognito from 'aws-cdk-lib/aws-cognito';
 import { LambdaConfigType } from '../bin/type';
 
 export class LambdaStack extends cdk.Stack {
@@ -29,6 +30,7 @@ export class LambdaStack extends cdk.Stack {
 
     /** user pool id */
     const userPoolId = cdk.Fn.importValue(`${envs.APP_NAME}-user-pool-${envs.ENV}-id`);
+    const userPool = cognito.UserPool.fromUserPoolId(this, `${envs.APP_NAME}-user-pool-${envs.ENV}`, userPoolId);
     /** user pool client id */
     const userPoolClientId = cdk.Fn.importValue(`${envs.APP_NAME}-client-${envs.ENV}-id`);
 
@@ -128,6 +130,10 @@ export class LambdaStack extends cdk.Stack {
         ...lambdaProps,
       },
     );
+    preAuthenticationTriggerLambda.addPermission('AllowCognitoInvoke', {
+      principal: new iam.ServicePrincipal('cognito-idp.amazonaws.com'),
+      sourceArn: userPool.userPoolArn,
+    });
 
     const postConfirmationTriggerLambda = new lambda.Function(
       this,
@@ -142,6 +148,10 @@ export class LambdaStack extends cdk.Stack {
         ...lambdaProps,
       },
     );
+    postConfirmationTriggerLambda.addPermission('AllowCognitoInvoke', {
+      principal: new iam.ServicePrincipal('cognito-idp.amazonaws.com'),
+      sourceArn: userPool.userPoolArn,
+    });
 
     const preTokenTriggerLambda = new lambda.Function(this, `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`, {
       functionName: `${envs.APP_NAME}-pre-token-trigger-${envs.ENV}`,
@@ -151,6 +161,10 @@ export class LambdaStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_20_X,
       layers: [commonLayer],
       ...lambdaProps,
+    });
+    preTokenTriggerLambda.addPermission('AllowCognitoInvoke', {
+      principal: new iam.ServicePrincipal('cognito-idp.amazonaws.com'),
+      sourceArn: userPool.userPoolArn,
     });
 
     this.addTrigerToUserPool(envs, updateCognitoTriggerLambda, {
