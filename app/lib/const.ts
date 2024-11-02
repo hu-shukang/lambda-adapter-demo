@@ -24,11 +24,14 @@ export const CONST = {
   ERROR_CODE: {
     AUTH: {
       USER_BLOCKED: 'USER_BLOCKED',
+      EXIST_WITH_GOOGLE: 'EXIST_WITH_Google',
     },
   },
   ERROR_MSG: {
     AUTH: {
       USER_BLOCKED: 'ユーザはブロックされました。管理者までお問い合わせください。',
+      EXIST_WITH_GOOGLE:
+        '該当メールアドレスはすでにGoogle認証により登録されました。Google認証を使用してサインインしてください。',
     },
   },
 } as const;

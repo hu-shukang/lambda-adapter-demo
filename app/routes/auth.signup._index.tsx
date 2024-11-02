@@ -7,8 +7,11 @@ import { useUserStore } from '~/stores/user.store';
 import { signUp } from 'aws-amplify/auth';
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { CONST } from '~/lib/const';
+import { useState } from 'react';
 
 export default function SignupPage() {
+  const [error, setError] = useState<string>();
   const actionData = useActionData<ActionFunction>();
   const setUsername = useUserStore((state) => state.setUsername);
   const navigate = useNavigate();
@@ -24,6 +27,10 @@ export default function SignupPage() {
       setUsername(data.username);
       navigate('/auth/signup/confirm');
     } catch (e: any) {
+      const message = e.message as string;
+      if (message.includes(CONST.ERROR_CODE.AUTH.EXIST_WITH_GOOGLE)) {
+        setError(CONST.ERROR_MSG.AUTH.EXIST_WITH_GOOGLE);
+      }
       console.log(e);
     }
   };
