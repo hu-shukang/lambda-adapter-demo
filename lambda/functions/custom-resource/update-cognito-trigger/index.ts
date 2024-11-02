@@ -1,5 +1,6 @@
 import {
   CognitoIdentityProviderClient,
+  DescribeUserPoolCommand,
   LambdaConfigType,
   UpdateUserPoolCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
@@ -55,14 +56,29 @@ const sendResponse = async (
 
 export const handler = async (event: CloudFormationCustomResourceEvent, context: Context) => {
   console.log('Event: ', JSON.stringify(event, null, 2));
-  const lambdaConfig = event.ResourceProperties.lambdaConfig as LambdaConfigType;
-  const command = new UpdateUserPoolCommand({
+
+  // 获取当前用户池配置
+  const describeCommand = new DescribeUserPoolCommand({
     UserPoolId: process.env.USER_POOL_ID,
-    LambdaConfig: event.RequestType === 'Delete' ? undefined : lambdaConfig,
   });
+  const response = await cognitoClient.send(describeCommand);
+  const currentConfig = response.UserPool;
+
+  const lambdaConfig = event.ResourceProperties.lambdaConfig as LambdaConfigType;
+
+  const updatedConfig = {
+    ...currentConfig,
+    LambdaConfig: event.RequestType === 'Delete' ? undefined : lambdaConfig,
+    UserPoolId: process.env.USER_POOL_ID,
+  };
+
+  // 移除只读属性
+  const { Id: _id, Arn: _Arn, Name: _Name, ...modifiableConfig } = updatedConfig;
+
+  const updateCommand = new UpdateUserPoolCommand(modifiableConfig);
 
   try {
-    await cognitoClient.send(command);
+    await cognitoClient.send(updateCommand);
     await sendResponse(event, context, 'SUCCESS', 'Update successful');
   } catch (e: any) {
     console.log(e);
