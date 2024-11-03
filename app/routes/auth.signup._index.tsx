@@ -9,9 +9,11 @@ import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { CONST } from '~/lib/const';
 import { useState } from 'react';
+import InfoDialog from '~/components/common/info-dialog';
 
 export default function SignupPage() {
-  const [error, setError] = useState<string>();
+  const [openInfoDialog, setOpenInfoDialog] = useState(false);
+  const [error, setError] = useState<React.ReactElement>();
   const actionData = useActionData<ActionFunction>();
   const setUsername = useUserStore((state) => state.setUsername);
   const navigate = useNavigate();
@@ -29,7 +31,7 @@ export default function SignupPage() {
     } catch (e: any) {
       const message = e.message as string;
       if (message.includes(CONST.ERROR_CODE.AUTH.EXIST_WITH_GOOGLE)) {
-        setError(CONST.ERROR_MSG.AUTH.EXIST_WITH_GOOGLE);
+        setError(() => <div>{CONST.ERROR_MSG.AUTH.EXIST_WITH_GOOGLE}</div>);
       }
       console.log(e);
     }
@@ -47,6 +49,12 @@ export default function SignupPage() {
       <h1 className="text-3xl text-center mb-4">ユーザ登録</h1>
       <h6 className="text-sm text-gray-500 text-center mb-4">ユーザを新規登録お願いします。</h6>
       <SignupForm onSubmit={onSubmit} />
+      <InfoDialog
+        open={openInfoDialog}
+        setOpen={setOpenInfoDialog}
+        content={error}
+        onSubmit={() => setOpenInfoDialog(false)}
+      />
     </div>
   );
 }
