@@ -10,14 +10,16 @@ const insertUserToDB = async (event: PostConfirmationTriggerEvent) => {
     userName,
     request: { userAttributes },
   } = event;
-  const updateExpressionList = ['#email = :email', '#sub = :sub'];
+  const updateExpressionList = ['#userName = :userName', '#sub = :sub', '#cognitoUserStatus = :cognitoUserStatus'];
   const expressionAttributeNames: Record<string, string> = {
-    '#email': 'email',
+    '#userName': 'userName',
     '#sub': 'sub',
+    '#cognitoUserStatus': 'cognitoUserStatus',
   };
   const expressionAttributeValues: Record<string, string> = {
-    ':email': userAttributes.email,
+    ':userName': userName,
     ':sub': userAttributes.sub,
+    ':cognitoUserStatus': userAttributes['cognito:user_status'],
   };
   if (userAttributes.name) {
     updateExpressionList.push('#name = :name');
@@ -28,7 +30,7 @@ const insertUserToDB = async (event: PostConfirmationTriggerEvent) => {
   const command = new UpdateCommand({
     TableName: process.env.USER_TBL!,
     Key: {
-      pk: userName,
+      pk: userAttributes.email,
       sk: 'USER_INFO',
     },
     UpdateExpression: `SET ${updateExpressionList.join(', ')}`,

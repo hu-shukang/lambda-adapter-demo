@@ -2,9 +2,12 @@ import { PreSignUpTriggerEvent } from 'aws-lambda';
 import {
   AdminLinkProviderForUserCommand,
   CognitoIdentityProviderClient,
-  ListUsersCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
 
+const client = new DynamoDBClient({});
+const ddbDocClient = DynamoDBDocumentClient.from(client);
 const cognitoClient = new CognitoIdentityProviderClient({});
 
 const getUsersByEmail = async (event: PreSignUpTriggerEvent) => {
@@ -12,13 +15,15 @@ const getUsersByEmail = async (event: PreSignUpTriggerEvent) => {
     request: { userAttributes },
   } = event;
   const { email } = userAttributes;
-  const listUsersParams = {
-    UserPoolId: process.env.USER_POOL_ID,
-    Filter: `email = "${email}"`,
-  };
-  const listUsersCommand = new ListUsersCommand(listUsersParams);
-  const output = await cognitoClient.send(listUsersCommand);
-  return output.Users;
+  const command = new GetCommand({
+    TableName: process.env.USER_TBL!,
+    Key: {
+      pk: email,
+      sk: 'USER_INFO',
+    },
+  });
+  const result = await ddbDocClient.send(command);
+  return result.Item;
 };
 
 const linkUser = async (externalUserId: string, providerName: string, existingUsername: string) => {
@@ -50,11 +55,11 @@ const getProviderAndUserId = (username: string) => {
 
 export const handler = async (event: PreSignUpTriggerEvent): Promise<any> => {
   console.log('Event: ', JSON.stringify(event, null, 2));
-  const existingUsers = await getUsersByEmail(event);
-  if (existingUsers && existingUsers.length > 0) {
-    const existingUser = existingUsers[0];
-    const isExternalUser = existingUser.UserStatus === 'EXTERNAL_PROVIDER';
-    const existingUsername = existingUser.Username as string;
+  const existingUser = await getUsersByEmail(event);
+  console.log(`existingUser: ${existingUser ? JSON.stringify(existingUser) : 'null'}`);
+  if (existingUser) {
+    const isExternalUser = existingUser.cognitoUserStatus === 'EXTERNAL_PROVIDER';
+    const existingUsername = existingUser.userName as string;
     if (event.triggerSource === 'PreSignUp_SignUp' && isExternalUser) {
       const { provider } = getProviderAndUserId(existingUsername);
       throw new Error(`EXIST_WITH_${provider}`);
