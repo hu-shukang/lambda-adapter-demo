@@ -25,7 +25,7 @@ const queryLoader = RequestWrapper.init(async ({ context, request }) => {
   .loader();
 
 const getLoader = RequestWrapper.init(async ({ context, request }) => {
-  const data = userService.get(context.payload!);
+  const data = await userService.get(context.payload!);
   return Resp.json(request, { data: data, success: true });
 })
   .withLogin()
