@@ -10,16 +10,28 @@ const insertUserToDB = async (event: PostConfirmationTriggerEvent) => {
     userName,
     request: { userAttributes },
   } = event;
-  const updateExpressionList = ['#userName = :userName', '#sub = :sub', '#cognitoUserStatus = :cognitoUserStatus'];
+  const updateExpressionList = [
+    '#userName = :userName',
+    '#sub = :sub',
+    '#cognitoUserStatus = :cognitoUserStatus',
+    '#organization = :organization',
+  ];
   const expressionAttributeNames: Record<string, string> = {
     '#userName': 'userName',
     '#sub': 'sub',
     '#cognitoUserStatus': 'cognitoUserStatus',
+    '#organization': 'organization',
   };
+  let cognitoUserStatus = userAttributes['cognito:user_status'];
+  if (userAttributes.identities) {
+    const { providerName } = JSON.parse(userAttributes.identities)[0];
+    cognitoUserStatus = `${cognitoUserStatus}:${providerName}`;
+  }
   const expressionAttributeValues: Record<string, string> = {
     ':userName': userName,
     ':sub': userAttributes.sub,
-    ':cognitoUserStatus': userAttributes['cognito:user_status'],
+    ':cognitoUserStatus': cognitoUserStatus,
+    ':organization': 'DEFAULT',
   };
   if (userAttributes.name) {
     updateExpressionList.push('#name = :name');

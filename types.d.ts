@@ -1,4 +1,4 @@
-import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
+import { IdTokenPayload } from '~/models/user.model';
 
 declare global {
   interface Window {
@@ -17,7 +17,7 @@ declare global {
 
 declare module '@remix-run/node' {
   interface AppLoadContext {
-    payload?: CognitoIdTokenPayload;
+    payload?: IdTokenPayload;
     bodyData?: any;
     paramsData?: any;
     queryData?: any;

@@ -5,7 +5,7 @@ type Props = {
   open: boolean;
   setOpen: (val: boolean) => void;
   content: React.ReactElement | undefined;
-  description?: string | undefined;
+  description: string;
   onSubmit: () => void;
 };
 
@@ -15,9 +15,9 @@ export default function InfoDialog({ open, setOpen, content, description, onSubm
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>お知らせ</DialogTitle>
-          {description && <DialogDescription>{description}</DialogDescription>}
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <div>{content}</div>
+        <div className="px-6">{content}</div>
         <DialogFooter>
           <Button onClick={onSubmit}>OK</Button>
         </DialogFooter>

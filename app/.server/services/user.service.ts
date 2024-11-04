@@ -1,5 +1,5 @@
 import { CommonService } from './common.service';
-import { UserInfoInput, UserQueryInput } from '~/models/user.model';
+import { IdTokenPayload, UserInfo, UserInfoInput, UserInfoView, UserQueryInput } from '~/models/user.model';
 import { Cognito } from '../utils/cognito.util';
 import { CONST } from '~/lib/const';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
@@ -9,6 +9,17 @@ import { DB } from '../utils/dynamodb.util';
 
 class UserService extends CommonService {
   private tableName = process.env.USER_TBL!;
+
+  public async get(payload: IdTokenPayload): Promise<UserInfoView> {
+    const output = await this.getOne(this.tableName, { pk: payload.email, sk: CONST.DB.USER_INFO });
+    const { pk, sk: _sk, ...attr } = output.Item as UserInfo;
+    const userInfoView: UserInfoView = {
+      ...attr,
+      email: pk,
+      picture: payload.picture,
+    };
+    return userInfoView;
+  }
 
   public async create(user: UserInfoInput, payload: CognitoIdTokenPayload) {
     const { username, email, ...attr } = user;

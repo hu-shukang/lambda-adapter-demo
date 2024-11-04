@@ -18,6 +18,7 @@ import {
   username,
   Expand,
 } from './common.model';
+import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 
 export const userInfoInputSchema = z.object({
   email: email,
@@ -66,7 +67,12 @@ export const tokenInputSchema = z.object({
 });
 
 export type UserInfoInput = z.infer<typeof userInfoInputSchema>;
-export type UserInfo = Expand<Omit<UserInfoInput, 'email' | 'username'> & DBKey & UpdateUserAndTime>;
+export type UserInfo = Expand<
+  Omit<UserInfoInput, 'email' | 'username'> &
+    DBKey &
+    UpdateUserAndTime & { sub: string; emplooyNo: string; cognitoUserStatus: string }
+>;
+export type UserInfoView = Expand<Omit<UserInfo, 'pk' | 'sk'> & { email: string; picture?: string }>;
 export type UserQueryInput = z.infer<typeof userQueryInputSchema>;
 export type UserEntity = Expand<DBKey & UserInfoInput>;
 export type SigninInput = z.infer<typeof signinInputSchema>;
@@ -75,3 +81,10 @@ export type SignupConfirmInput = z.infer<typeof signupConfirmInputSchema>;
 export type TokenInput = z.infer<typeof tokenInputSchema>;
 
 export type ID = z.infer<typeof idSchema>;
+
+export type IdTokenPayload = Expand<
+  CognitoIdTokenPayload & {
+    email: string; // 添加 email 字段
+    picture?: string;
+  }
+>;

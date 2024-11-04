@@ -32,8 +32,9 @@ export default function SignupPage() {
       const message = e.message as string;
       if (message.includes(CONST.ERROR_CODE.AUTH.EXIST_WITH_GOOGLE)) {
         setError(() => <div>{CONST.ERROR_MSG.AUTH.EXIST_WITH_GOOGLE}</div>);
+        setOpenInfoDialog(true);
       }
-      console.log(e);
+      console.error(e);
     }
   };
 
@@ -53,6 +54,7 @@ export default function SignupPage() {
         open={openInfoDialog}
         setOpen={setOpenInfoDialog}
         content={error}
+        description="ユーザ登録時にエラーが発生しました。"
         onSubmit={() => setOpenInfoDialog(false)}
       />
     </div>

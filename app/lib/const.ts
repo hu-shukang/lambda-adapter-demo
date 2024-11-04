@@ -31,7 +31,7 @@ export const CONST = {
     AUTH: {
       USER_BLOCKED: 'ユーザはブロックされました。管理者までお問い合わせください。',
       EXIST_WITH_GOOGLE:
-        '該当メールアドレスはすでにGoogle認証により登録されました。Google認証を使用してサインインしてください。',
+        '該当メールアドレスはすでにGoogle認証により登録されました。サインイン画面に戻ってGoogle認証を使用してサインインしてください。',
     },
   },
 } as const;

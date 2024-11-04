@@ -1,4 +1,4 @@
-import { useSubmit } from '@remix-run/react';
+import { useNavigate, useSubmit } from '@remix-run/react';
 import { LogOut, Settings, User, AlignRight, CircleHelp, ScrollText } from 'lucide-react';
 
 import { Button } from '~/components/ui/button';
@@ -14,6 +14,7 @@ import {
 
 export default function UserMenu() {
   const submit = useSubmit();
+  const navigate = useNavigate();
 
   const toSignout = () => {
     submit(null, { action: '/api/auth/signout', method: 'post' });
@@ -30,9 +31,9 @@ export default function UserMenu() {
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/account')}>
             <User />
-            <span>プロフィール</span>
+            <span>ユーザアカウント</span>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Settings />

@@ -24,11 +24,19 @@ const queryLoader = RequestWrapper.init(async ({ context, request }) => {
   .withQueryValid(userQueryInputSchema, { sort: CONST.DB.INDEXS.SK_TIME })
   .loader();
 
+const getLoader = RequestWrapper.init(async ({ context, request }) => {
+  const data = userService.get(context.payload!);
+  return Resp.json(request, { data: data, success: true });
+})
+  .withLogin()
+  .loader();
+
 export const UserAPI = {
   actions: {
     create: createAction,
   },
   loader: {
     query: queryLoader,
+    get: getLoader,
   },
 };

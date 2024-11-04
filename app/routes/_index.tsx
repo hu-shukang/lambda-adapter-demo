@@ -8,6 +8,9 @@ export default function Index() {
       <Link to={'/dashboard'}>
         <Button>Go to Dashboard</Button>
       </Link>
+      <Link to={'/account'}>
+        <Button>Go to account</Button>
+      </Link>
     </div>
   );
 }
