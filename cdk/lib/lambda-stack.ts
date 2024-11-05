@@ -98,7 +98,7 @@ export class LambdaStack extends cdk.Stack {
     // 创建SQS队列
     const logQueue = new sqs.Queue(this, envs.LOG_QUEUE, {
       queueName: envs.LOG_QUEUE,
-      visibilityTimeout: cdk.Duration.seconds(30),
+      visibilityTimeout: cdk.Duration.minutes(15),
     });
 
     const commonLayer = new lambda.LayerVersion(this, `${envs.APP_NAME}-common-layer-${envs.ENV}`, {
