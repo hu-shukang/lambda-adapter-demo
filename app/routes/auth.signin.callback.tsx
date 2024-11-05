@@ -1,37 +1,27 @@
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import 'aws-amplify/auth/enable-oauth-listener';
-import { SubmitFunction, useSubmit } from '@remix-run/react';
-import { Hub } from 'aws-amplify/utils';
+import { useSubmit } from '@remix-run/react';
 import { toSignin } from '~/lib/auth.client';
-
-type Props = {
-  submit: SubmitFunction;
-};
-
-class AuthProviderCallback extends Component<Props> {
-  private cancel: () => void;
-
-  constructor(props: Props) {
-    super(props);
-    this.cancel = Hub.listen('auth', ({ payload: { event } }) => {
-      if (event === 'signedIn') {
-        toSignin(this.props.submit);
-      }
-    });
-  }
-
-  componentWillUnmount() {
-    if (this.cancel) {
-      this.cancel();
-    }
-  }
-
-  render() {
-    return <div>auth success</div>;
-  }
-}
+import { useGlobalStore } from '~/stores/global.store';
 
 export default function AuthProviderCallbackPage() {
   const submit = useSubmit();
-  return <AuthProviderCallback submit={submit} />;
+  const redirect = useGlobalStore((state) => state.redirect);
+  const [seconds, setSeconds] = useState(3);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (seconds === 1) {
+        clearInterval(timer);
+        toSignin(submit, redirect);
+        return;
+      }
+      setSeconds((prev) => prev - 1);
+    }, 1000);
+    return () => {
+      clearInterval(timer);
+    };
+  }, [redirect, seconds, submit]);
+
+  return <div>認証は成功しました。{seconds}秒後に画面遷移します。</div>;
 }

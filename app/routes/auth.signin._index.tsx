@@ -8,6 +8,7 @@ import { toSignin } from '~/lib/auth.client';
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { CONST } from '~/lib/const';
+import { useGlobalStore } from '~/stores/global.store';
 
 export default function SigninPage() {
   const [error, setError] = useState<string>();
@@ -15,6 +16,7 @@ export default function SigninPage() {
   const [searchParams] = useSearchParams();
   const signinRequired = searchParams.get('signinRequired');
   const redirectUrl = searchParams.get('redirectUrl');
+  const setRedirect = useGlobalStore((state) => state.setRedirect);
 
   const onSubmit: SubmitHandler<SigninInput> = async (data) => {
     try {
@@ -33,6 +35,7 @@ export default function SigninPage() {
   };
 
   const signinByGoogle = async () => {
+    setRedirect(redirectUrl);
     await signOut();
     await signInWithRedirect({
       provider: 'Google',
