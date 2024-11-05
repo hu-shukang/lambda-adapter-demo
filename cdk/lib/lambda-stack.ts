@@ -130,6 +130,11 @@ export class LambdaStack extends cdk.Stack {
       ...lambdaProps,
     });
 
+    logWriteLambda.addPermission('AllowSQSInvoke', {
+      principal: new iam.ServicePrincipal('sqs.amazonaws.com'),
+      sourceArn: logQueue.queueArn,
+    });
+
     logWriteLambda.addEventSource(
       new SqsEventSource(logQueue, {
         batchSize: 10, // 每次最多处理的消息数量
