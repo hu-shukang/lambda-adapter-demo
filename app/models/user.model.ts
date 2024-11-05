@@ -72,7 +72,14 @@ export type UserInfo = Expand<
     DBKey &
     UpdateUserAndTime & { sub: string; emplooyNo: string; cognitoUserStatus: string }
 >;
-export type UserInfoView = Expand<Omit<UserInfo, 'pk' | 'sk'> & { email: string; picture?: string }>;
+export type UserInfoView = Expand<
+  Omit<UserInfo, 'pk' | 'sk' | 'cognitoUserStatus'> & {
+    email: string;
+    picture?: string;
+    provider: string;
+    passwordResetDate?: string;
+  }
+>;
 export type UserQueryInput = z.infer<typeof userQueryInputSchema>;
 export type UserEntity = Expand<DBKey & UserInfoInput>;
 export type SigninInput = z.infer<typeof signinInputSchema>;

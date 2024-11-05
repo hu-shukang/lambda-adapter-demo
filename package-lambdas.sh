@@ -7,9 +7,8 @@ ASSET_BUCKET=$1
 TIMESTAMP=$2
 LAMBDA_DIST_DIR="${CODEBUILD_SRC_DIR}/lambda/dist"
 
-# 遍历 lambda/dist 目录下的所有文件夹并进行打包和上传
-for lambda_dir in $(find "${LAMBDA_DIST_DIR}" -mindepth 2 -maxdepth 2 -type d); do
-  if [ -d "$lambda_dir" ]; then
+for lambda_dir in $(find "${LAMBDA_DIST_DIR}" -mindepth 1 -maxdepth 3 -type d); do
+  if [ -f "${lambda_dir}/index.ts" ]; then
     lambda_name=$(basename "$lambda_dir")
     echo "Processing $lambda_name..."
     cd "$lambda_dir"

@@ -30,7 +30,7 @@ export default function SignupForm({ onSubmit }: Props) {
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input placeholder="ユーザ名" {...field} />
+                <Input placeholder="ユーザID" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -42,7 +42,7 @@ export default function SignupForm({ onSubmit }: Props) {
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input placeholder="メール" {...field} />
+                <Input placeholder="メールアドレス" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -12,11 +12,16 @@ class UserService extends CommonService {
 
   public async get(payload: IdTokenPayload): Promise<UserInfoView> {
     const output = await this.getOne(this.tableName, { pk: payload.email, sk: CONST.DB.USER_INFO });
-    const { pk, sk: _sk, ...attr } = output.Item as UserInfo;
+    const { pk, sk: _sk, cognitoUserStatus, ...attr } = output.Item as UserInfo;
+    let provider = 'password';
+    if (cognitoUserStatus.startsWith('EXTERNAL_PROVIDER')) {
+      provider = cognitoUserStatus.split(':').pop() as string;
+    }
     const userInfoView: UserInfoView = {
       ...attr,
       email: pk,
       picture: payload.picture,
+      provider: provider,
     };
     return userInfoView;
   }

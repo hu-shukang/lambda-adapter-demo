@@ -36,6 +36,12 @@ export default function BreadcrumbNav() {
     <div className="container mx-auto p-6">
       <Breadcrumb>
         <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to="/">ホーム</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
           {matches
             .filter((match) => match.handle && (match.handle as any).breadcrumb)
             .map((match, index, arr) => (

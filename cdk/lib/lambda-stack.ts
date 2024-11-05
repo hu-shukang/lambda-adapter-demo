@@ -9,6 +9,8 @@ import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
+import * as sqs from 'aws-cdk-lib/aws-sqs';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { LambdaConfigType } from '../bin/type';
 
 export class LambdaStack extends cdk.Stack {
@@ -69,6 +71,15 @@ export class LambdaStack extends cdk.Stack {
       sortKey: { name: 'organization', type: dynamodb.AttributeType.STRING },
     });
 
+    // DynamoDB -- logTable
+    const _logTable = new dynamodb.Table(this, envs.LOG_TBL, {
+      tableName: envs.LOG_TBL,
+      partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'createTime', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST, // 按需计费模式
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // 销毁堆栈时销毁表
+    });
+
     // DynamoDB -- permissionTable
     const permissionTable = new dynamodb.Table(this, envs.PERMISSION_TBL, {
       tableName: envs.PERMISSION_TBL,
@@ -82,6 +93,12 @@ export class LambdaStack extends cdk.Stack {
       indexName: 'SK_TIME',
       partitionKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'updateTime', type: dynamodb.AttributeType.STRING },
+    });
+
+    // 创建SQS队列
+    const logQueue = new sqs.Queue(this, envs.LOG_QUEUE, {
+      queueName: envs.LOG_QUEUE,
+      visibilityTimeout: cdk.Duration.seconds(30),
     });
 
     const commonLayer = new lambda.LayerVersion(this, `${envs.APP_NAME}-common-layer-${envs.ENV}`, {
@@ -102,6 +119,22 @@ export class LambdaStack extends cdk.Stack {
         USER_POOL_DOMAIN_PREFIX: `${envs.APP_NAME}-${envs.ENV}`,
       },
     };
+
+    const logWriteLambda = new lambda.Function(this, `${envs.APP_NAME}-log-write-${envs.ENV}`, {
+      functionName: `${envs.APP_NAME}-log-write-${envs.ENV}`,
+      description: `${envs.APP_NAME}-log-write-${envs.ENV}`,
+      code: lambda.Code.fromBucket(assetBucket, `log-write-${timestamp}.zip`),
+      handler: 'index.handler',
+      runtime: lambda.Runtime.NODEJS_20_X,
+      layers: [commonLayer],
+      ...lambdaProps,
+    });
+
+    logWriteLambda.addEventSource(
+      new SqsEventSource(logQueue, {
+        batchSize: 10, // 每次最多处理的消息数量
+      }),
+    );
 
     const updateCognitoTriggerLambda = new lambda.Function(
       this,

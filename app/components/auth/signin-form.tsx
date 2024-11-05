@@ -31,7 +31,7 @@ export default function SigninForm({ onSubmit, signinByGoogle }: Props) {
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input placeholder="ユーザ名" {...field} />
+                <Input placeholder="ユーザID・メールアドレス" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
