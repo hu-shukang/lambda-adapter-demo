@@ -8,7 +8,7 @@ TIMESTAMP=$2
 LAMBDA_DIST_DIR="${CODEBUILD_SRC_DIR}/lambda/dist"
 
 for lambda_dir in $(find "${LAMBDA_DIST_DIR}" -mindepth 1 -maxdepth 3 -type d); do
-  if [ -f "${lambda_dir}/index.ts" ]; then
+  if [ -f "${lambda_dir}/index.js" ]; then
     lambda_name=$(basename "$lambda_dir")
     echo "Processing $lambda_name..."
     cd "$lambda_dir"
