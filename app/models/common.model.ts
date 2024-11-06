@@ -43,3 +43,7 @@ export const organizationPriority = z.preprocess(
 export const pk = z.string().uuid();
 
 export const pkNullable = z.string().uuid().optional();
+
+export const picture = z.string().url();
+
+export const employeeNo = z.string();
