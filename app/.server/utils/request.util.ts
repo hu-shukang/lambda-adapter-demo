@@ -3,6 +3,14 @@ import { ZodSchema } from 'zod';
 import { Cookie } from './cookie.util';
 import { Cognito } from './cognito.util';
 import { BaseError } from '~/models/error.model';
+import { IdTokenPayload } from '~/models/user.model';
+import { SQS } from './sqs.util';
+import { UserActionLog } from '~/models/log.model';
+import { dateUtil } from '~/lib/date.util';
+
+type RequestOptions = {
+  actionLog: boolean;
+};
 
 export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
   private func: T;
@@ -87,13 +95,13 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
     return this;
   }
 
-  private invoke() {
+  private invoke(options?: RequestOptions | undefined) {
     const originalFunc = this.func;
     const newFunc = async (args: Parameters<T>[0]) => {
       const idToken = await Cookie.idToken.parse(args.request.headers.get('Cookie'));
       try {
         if (idToken) {
-          args.context.payload = await Cognito.verifier.verify(idToken);
+          args.context.payload = (await Cognito.verifier.verify(idToken)) as IdTokenPayload;
         }
       } catch (e) {
         console.log(e);
@@ -103,7 +111,18 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
         return redirect('/auth/signin?signinRequired=true', { status: 301, headers: headers });
       }
       try {
-        return await originalFunc({ ...args });
+        const resp = await originalFunc({ ...args });
+        if (options?.actionLog && args.context.payload) {
+          const action: UserActionLog = {
+            email: args.context.payload.email,
+            name: args.context.payload['cognito:username'],
+            ip: args.request.headers.get('X-Forwarded-For') as string,
+            action: '',
+            time: dateUtil.utc(),
+          };
+          await SQS.log.sendUserAction(action);
+        }
+        return resp;
       } catch (e: any) {
         if (e instanceof BaseError) {
           return json({ error: e.message, code: e.code }, { status: e.status });
@@ -115,13 +134,13 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
     return newFunc;
   }
 
-  public action() {
-    this.func = this.invoke() as T;
+  public action(options?: RequestOptions | undefined) {
+    this.func = this.invoke(options) as T;
     return this.func as ActionFunction;
   }
 
-  public loader() {
-    this.func = this.invoke() as T;
+  public loader(options?: RequestOptions | undefined) {
+    this.func = this.invoke(options) as T;
     return this.func as LoaderFunction;
   }
 }

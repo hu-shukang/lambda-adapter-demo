@@ -99,6 +99,7 @@ export class LambdaStack extends cdk.Stack {
     const logQueue = new sqs.Queue(this, envs.LOG_QUEUE, {
       queueName: envs.LOG_QUEUE,
       visibilityTimeout: cdk.Duration.minutes(15),
+      fifo: true,
     });
 
     const commonLayer = new lambda.LayerVersion(this, `${envs.APP_NAME}-common-layer-${envs.ENV}`, {
@@ -117,6 +118,7 @@ export class LambdaStack extends cdk.Stack {
         USER_POOL_ID: userPoolId,
         USER_POOL_CLIENT_ID: userPoolClientId,
         USER_POOL_DOMAIN_PREFIX: `${envs.APP_NAME}-${envs.ENV}`,
+        LOG_SQS_URL: logQueue.queueUrl,
       },
     };
 
@@ -129,11 +131,6 @@ export class LambdaStack extends cdk.Stack {
       layers: [commonLayer],
       ...lambdaProps,
     });
-
-    // logWriteLambda.addPermission('AllowSQSInvoke', {
-    //   principal: new iam.ServicePrincipal('sqs.amazonaws.com'),
-    //   sourceArn: logQueue.queueArn,
-    // });
 
     logWriteLambda.addEventSource(
       new SqsEventSource(logQueue, {
