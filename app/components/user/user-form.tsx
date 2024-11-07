@@ -7,6 +7,8 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { PlusIcon, MinusIcon } from '@radix-ui/react-icons';
+import OrganizationSelect from '../common/organization-select';
 
 type Props = {
   onSubmit: SubmitHandler<UserInfoInput>;
@@ -15,7 +17,7 @@ type Props = {
   submitButtonText?: string | undefined;
 };
 
-export default function UserForm({ onSubmit, defaultValues, submitButtonText }: Props) {
+export default function UserForm({ onSubmit, organizations, defaultValues, submitButtonText }: Props) {
   const form = useForm<UserInfoInput>({
     defaultValues: {
       email: '',
@@ -36,7 +38,7 @@ export default function UserForm({ onSubmit, defaultValues, submitButtonText }: 
           control={form.control}
           name="email"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="w-[300px]">
               <FormLabel>メールアドレス</FormLabel>
               <FormControl>
                 <Input placeholder="メールアドレス" {...field} />
@@ -50,7 +52,7 @@ export default function UserForm({ onSubmit, defaultValues, submitButtonText }: 
           control={form.control}
           name="name"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="w-[300px]">
               <FormLabel>ユーザ名</FormLabel>
               <FormControl>
                 <Input placeholder="ユーザ名" {...field} />
@@ -64,7 +66,7 @@ export default function UserForm({ onSubmit, defaultValues, submitButtonText }: 
           control={form.control}
           name="employeeNo"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="w-[300px]">
               <FormLabel>社員番号</FormLabel>
               <FormControl>
                 <Input placeholder="社員番号" {...field} />
@@ -78,7 +80,7 @@ export default function UserForm({ onSubmit, defaultValues, submitButtonText }: 
           control={form.control}
           name="status"
           render={({ field }) => (
-            <FormItem className="space-y-2">
+            <FormItem className="w-[300px]">
               <FormLabel>ステータス</FormLabel>
               <FormControl>
                 <RadioGroup
@@ -111,14 +113,20 @@ export default function UserForm({ onSubmit, defaultValues, submitButtonText }: 
             <FormItem className="space-y-2">
               <FormLabel>所属</FormLabel>
               {fields.map((field, index) => (
-                <div key={field.id} className="flex space-x-2">
+                <div key={field.id} className="flex gap-[10px]">
                   <FormField
                     control={form.control}
                     name={`organizations.${index}.organization`}
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="w-[145px]">
                         <FormControl>
-                          <Input placeholder="組織" {...field} />
+                          <OrganizationSelect
+                            organizations={organizations}
+                            selected={organizations.find((o) => o.pk === field.value)}
+                            onSelectChanged={(val) => {
+                              form.setValue(`organizations.${index}.organization`, val?.pk || '');
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -128,7 +136,7 @@ export default function UserForm({ onSubmit, defaultValues, submitButtonText }: 
                     control={form.control}
                     name={`organizations.${index}.position`}
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="w-[145px]">
                         <FormControl>
                           <Input placeholder="役職" {...field} />
                         </FormControl>
@@ -137,15 +145,16 @@ export default function UserForm({ onSubmit, defaultValues, submitButtonText }: 
                     )}
                   />
                   <Button
-                    type="button"
+                    variant="outline"
+                    size="icon"
                     onClick={() => remove(index)}
                     disabled={fields.length === 1} // 确保至少有一个组织信息
                   >
-                    删除
+                    <MinusIcon />
                   </Button>
                   {fields.length - 1 === index && (
-                    <Button type="button" onClick={() => append({ organization: '', position: '' })}>
-                      追加
+                    <Button variant="outline" size="icon" onClick={() => append({ organization: '', position: '' })}>
+                      <PlusIcon />
                     </Button>
                   )}
                 </div>

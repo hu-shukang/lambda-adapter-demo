@@ -30,7 +30,7 @@ export default function UserAddPage() {
       <div className="mb-2">
         <Title text="ユーザを新規作成" />
       </div>
-      <div className="w-[300px]">
+      <div>
         <UserForm onSubmit={onSubmit} organizations={loaderData?.data || []} />
       </div>
     </div>

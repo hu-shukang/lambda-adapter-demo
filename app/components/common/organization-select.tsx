@@ -46,7 +46,7 @@ export default function OrganizationSelect({ organizations, selected, onSelectCh
           <Button
             variant="outline"
             role="combobox"
-            className={cn('justify-between', !selected && 'text-muted-foreground')}
+            className={cn('justify-between', !selected && 'text-muted-foreground', 'w-[145px]')}
           >
             {selected ? selected?.name : '組織選択'}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

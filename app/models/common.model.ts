@@ -10,7 +10,7 @@ export const idToken = z.string();
 export const refreshToken = z.string();
 /* zod schema define */
 export const username = z.string({ required_error: '必須項目です' }).min(1, 'ユーザIDは必須');
-export const employeeNo = z.string({ required_error: '必須項目です' });
+export const employeeNo = z.string({ required_error: '必須項目です' }).min(1, '社員番号は必須');
 export const name = z.string({ required_error: '必須項目です' }).min(1, 'ユーザ名は必須');
 export const email = z.string({ required_error: '必須項目です' }).email({ message: 'メール形式不正' });
 export const status = z.enum(CONST.USER.STATUS.LIST, { required_error: '必須項目です' });
