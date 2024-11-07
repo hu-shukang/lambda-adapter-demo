@@ -5,6 +5,7 @@ import { OrganizationAPI } from '~/.server/apis/organization.api';
 import Title from '~/components/common/title';
 import OrganizationDeleteConfirm from '~/components/organization/organization-delete-confirm';
 import OrganizationList from '~/components/organization/organization-list';
+import OrganizationTree from '~/components/organization/organization-tree';
 import { Button } from '~/components/ui/button';
 import { OrganizationInfo } from '~/models/organization.model';
 
@@ -65,7 +66,13 @@ export default function OrganizationPage() {
           </Link>
         </div>
       </div>
-      <OrganizationList data={loaderData?.data || []} updateHandler={updateHandler} removeHandler={removeHandler} />
+      {type === 'table' && (
+        <OrganizationList data={loaderData?.data || []} updateHandler={updateHandler} removeHandler={removeHandler} />
+      )}
+      {type === 'tree' && (
+        <OrganizationTree data={loaderData?.data || []} updateHandler={updateHandler} removeHandler={removeHandler} />
+      )}
+
       {deleteTarget && (
         <OrganizationDeleteConfirm
           open={deleteConfirmOpen}
