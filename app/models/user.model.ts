@@ -18,7 +18,6 @@ import {
   username,
   Expand,
   picture,
-  employeeNo,
 } from './common.model';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 
@@ -71,7 +70,6 @@ export const tokenInputSchema = z.object({
 export const accountUpdateInputSchema = z.object({
   name: name,
   picture: picture,
-  employeeNo: employeeNo,
 });
 
 export type UserInfoInput = z.infer<typeof userInfoInputSchema>;

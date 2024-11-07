@@ -1,6 +1,8 @@
 import { LoaderFunction } from '@remix-run/node';
 import { UIMatch, useRouteLoaderData } from '@remix-run/react';
-import { UserInfoView } from '~/models/user.model';
+import { SubmitHandler } from 'react-hook-form';
+import AccountForm from '~/components/account/AccountForm';
+import { AccountUpdateInput, UserInfoView } from '~/models/user.model';
 
 export const handle = {
   breadcrumb: (_match: UIMatch) => ({
@@ -16,5 +18,13 @@ export default function AccountUpdatePage() {
   if (!userInfoView) {
     return <div>no user</div>;
   }
-  return 'account update page';
+
+  const onSubmit: SubmitHandler<AccountUpdateInput> = async (data) => {
+    console.log(data);
+  };
+  return (
+    <div>
+      <AccountForm onSubmit={onSubmit} defaultValues={userInfoView} />
+    </div>
+  );
 }
