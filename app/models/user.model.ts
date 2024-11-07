@@ -8,7 +8,6 @@ import {
   email,
   idToken,
   nameFilter,
-  organization,
   organizationFilter,
   password,
   refreshToken,
@@ -18,15 +17,20 @@ import {
   username,
   Expand,
   picture,
+  employeeNo,
+  organization,
+  position,
 } from './common.model';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 
+export const userOrganizationInputSchema = z.object({ organization, position });
+
 export const userInfoInputSchema = z.object({
   email: email,
-  username: username,
+  employeeNo: employeeNo,
   name: name,
   status: status,
-  organization: organization,
+  organizations: z.array(userOrganizationInputSchema).min(1),
 });
 
 export const userQueryInputSchema = z.object({
@@ -72,6 +76,7 @@ export const accountUpdateInputSchema = z.object({
   picture: picture,
 });
 
+export type UserOrganizationInput = z.infer<typeof userOrganizationInputSchema>;
 export type UserInfoInput = z.infer<typeof userInfoInputSchema>;
 export type UserInfo = Expand<
   Omit<UserInfoInput, 'email' | 'username'> &
