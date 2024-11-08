@@ -6,9 +6,12 @@ import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 import { dateUtil } from '~/lib/date.util';
 import { QueryCommand, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
 import { DB } from '../utils/dynamodb.util';
+import { TagInfo } from '~/models/tag.model';
+import { v7 } from 'uuid';
 
 class UserService extends CommonService {
   private tableName = process.env.USER_TBL!;
+  private tagTableName = process.env.TAG_TBL!;
 
   public async get(payload: IdTokenPayload): Promise<UserInfoView> {
     const output = await this.getOne(this.tableName, { pk: payload.email, sk: CONST.DB.USER_INFO });
@@ -30,6 +33,19 @@ class UserService extends CommonService {
     const cognitoResult = await Cognito.Admin.createUser(user.employeeNo, user.email, { name: user.name });
     const userAttributes = cognitoResult.User?.Attributes;
     const sub = userAttributes?.find((a) => a.Name === 'sub')?.Value;
+
+    const tagQueryCommand = new QueryCommand({
+      TableName: this.tagTableName,
+      IndexName: CONST.DB.INDEXS.SK_TIME,
+      KeyConditionExpression: 'sk = :sk',
+      ExpressionAttributeValues: {
+        ':sk': CONST.TAG.POSITION,
+      },
+    });
+    const tagQueryResult = await DB.client.send(tagQueryCommand);
+    const tagList = (tagQueryResult.Items || []) as TagInfo[];
+    const newPositions = user.organizations.filter((o) => !tagList.some((t) => t.name === o.position));
+
     const command = new TransactWriteCommand({
       TransactItems: [
         {
@@ -41,7 +57,7 @@ class UserService extends CommonService {
               email: user.email,
               employeeNo: user.employeeNo,
               status: user.status,
-              cognitoUserStatus: 'COGNITO',
+              cognitoUserStatus: 'CONFIRMED',
               sub: sub,
               updateTime: dateUtil.utc(),
               updateUser: payload['cognito:username'],
@@ -57,6 +73,17 @@ class UserService extends CommonService {
               position: o.position,
               updateTime: dateUtil.utc(),
               updateUser: payload['cognito:username'],
+            },
+          },
+        })),
+        ...newPositions.map((o) => ({
+          Put: {
+            TableName: this.tagTableName,
+            Item: {
+              pk: v7(),
+              sk: CONST.TAG.POSITION,
+              name: o.position,
+              updateTime: dateUtil.utc(),
             },
           },
         })),

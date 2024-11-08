@@ -17,7 +17,7 @@ class TagService extends CommonService {
     );
   }
 
-  public query(category: string) {
+  public async query(category: string) {
     const command = new QueryCommand({
       TableName: this.tableName,
       IndexName: CONST.DB.INDEXS.SK_TIME,
@@ -26,7 +26,8 @@ class TagService extends CommonService {
         ':sk': category,
       },
     });
-    return DB.client.send(command);
+    const result = await DB.client.send(command);
+    return result.Items || [];
   }
 }
 
