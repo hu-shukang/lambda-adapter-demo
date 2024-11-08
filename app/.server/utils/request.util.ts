@@ -7,6 +7,7 @@ import { IdTokenPayload } from '~/models/user.model';
 import { SQS } from './sqs.util';
 import { UserActionLog } from '~/models/log.model';
 import { dateUtil } from '~/lib/date.util';
+import { formDataToObject } from './form.util';
 
 type RequestOptions = {
   actionLog: boolean;
@@ -27,7 +28,7 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
     const originalFunc = this.func;
     const newFunc = async (args: Parameters<T>[0]) => {
       const formData = await args.request.formData();
-      const form = Object.fromEntries(formData);
+      const form = formDataToObject(formData);
       const parseResult = schema.safeParse(form);
       if (!parseResult.success) {
         return json({ error: 'Invalid request body', details: parseResult.error.errors }, { status: 400 });
