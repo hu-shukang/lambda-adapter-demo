@@ -35,7 +35,7 @@ export default function UserPage() {
       <UserQueryForm onSubmit={querySubmit} />
       <UserList
         data={queryData.data || []}
-        organizations={organizationDataLoader?.data || []}
+        organizations={organizationDataLoader?.data.organizations || []}
         updateHandler={updateHandler}
         removeHandler={removeHandler}
       />

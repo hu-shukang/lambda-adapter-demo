@@ -5,6 +5,7 @@ export const CONST = {
     ORGANIZATION_INFO: 'ORGANIZATION_INFO',
     USER: 'USER',
     USER_INFO: 'USER_INFO',
+    USER_ORG: 'USER_ORG',
     PERMISSION_INFO: 'PERMISSION_INFO',
     ROLE_INFO: 'ROLE_INFO',
     INDEXS: {
@@ -20,6 +21,10 @@ export const CONST = {
       ACTIVE: 'ACTIVE',
       BLOCK: 'BLOCK',
     },
+  },
+  TAG: {
+    LIST: ['POSITION'],
+    POSITION: 'POSITION',
   },
   ERROR_CODE: {
     AUTH: {

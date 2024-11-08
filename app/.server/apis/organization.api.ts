@@ -8,6 +8,8 @@ import { RequestWrapper } from '../utils/request.util';
 import { organizationService } from '../services/organization.service';
 import { Resp } from '../utils/response.util';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
+import { tagService } from '../services/tag.service';
+import { CONST } from '~/lib/const';
 
 const deleteAction = RequestWrapper.init(async ({ request, context }) => {
   const { pk } = context.bodyData as OrganizationOne;
@@ -48,8 +50,9 @@ const getLoader = RequestWrapper.init(async ({ context, request }) => {
   .loader();
 
 const queryLoader = RequestWrapper.init(async ({ request }) => {
-  const items = await organizationService.query();
-  return Resp.json(request, { success: true, data: items });
+  const organizations = await organizationService.query();
+  const tags = await tagService.query(CONST.TAG.POSITION);
+  return Resp.json(request, { success: true, data: { organizations, tags } });
 }).loader();
 
 export const OrganizationAPI = {

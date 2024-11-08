@@ -80,6 +80,21 @@ export class LambdaStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY, // 销毁堆栈时销毁表
     });
 
+    // DynamoDB -- tagTable
+    const tagTable = new dynamodb.Table(this, envs.TAG_TBL, {
+      tableName: envs.TAG_TBL,
+      partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST, // 按需计费模式
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // 销毁堆栈时销毁表
+    });
+
+    tagTable.addGlobalSecondaryIndex({
+      indexName: 'SK_TIME',
+      partitionKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'updateTime', type: dynamodb.AttributeType.STRING },
+    });
+
     // DynamoDB -- permissionTable
     const permissionTable = new dynamodb.Table(this, envs.PERMISSION_TBL, {
       tableName: envs.PERMISSION_TBL,

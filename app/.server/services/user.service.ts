@@ -4,7 +4,7 @@ import { Cognito } from '../utils/cognito.util';
 import { CONST } from '~/lib/const';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 import { dateUtil } from '~/lib/date.util';
-import { QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { QueryCommand, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
 import { DB } from '../utils/dynamodb.util';
 
 class UserService extends CommonService {
@@ -27,15 +27,42 @@ class UserService extends CommonService {
   }
 
   public async create(user: UserInfoInput, payload: CognitoIdTokenPayload) {
-    const { username, email, ...attr } = user;
-    const cognitoResult = await Cognito.Admin.createUser(username, email, { name: attr.name });
+    const cognitoResult = await Cognito.Admin.createUser(user.employeeNo, user.email, { name: user.name });
     const userAttributes = cognitoResult.User?.Attributes;
     const sub = userAttributes?.find((a) => a.Name === 'sub')?.Value;
-    await this.createOne(
-      this.tableName,
-      { pk: username, sk: CONST.DB.USER_INFO },
-      { ...attr, email: email, sub: sub, updateTime: dateUtil.utc(), updateUser: payload['cognito:username'] },
-    );
+    const command = new TransactWriteCommand({
+      TransactItems: [
+        {
+          Put: {
+            TableName: this.tableName,
+            Item: {
+              pk: user.email,
+              sk: CONST.DB.USER_INFO,
+              email: user.email,
+              employeeNo: user.employeeNo,
+              status: user.status,
+              cognitoUserStatus: 'COGNITO',
+              sub: sub,
+              updateTime: dateUtil.utc(),
+              updateUser: payload['cognito:username'],
+            },
+          },
+        },
+        ...user.organizations.map((o) => ({
+          Put: {
+            TableName: this.tableName,
+            Item: {
+              pk: user.email,
+              sk: `${CONST.DB.USER_ORG}#${o.organization}`,
+              position: o.position,
+              updateTime: dateUtil.utc(),
+              updateUser: payload['cognito:username'],
+            },
+          },
+        })),
+      ],
+    });
+    return await DB.client.send(command);
   }
 
   public async query(query: UserQueryInput) {

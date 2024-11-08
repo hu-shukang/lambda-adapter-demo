@@ -9,15 +9,22 @@ import { Button } from '../ui/button';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { PlusIcon, MinusIcon } from '@radix-ui/react-icons';
 import OrganizationSelect from '../common/organization-select';
+import { TagInfo } from '~/models/tag.model';
+import MultipleSelector from '../ui/multiple-selector';
+import { useMemo } from 'react';
 
 type Props = {
   onSubmit: SubmitHandler<UserInfoInput>;
   organizations: OrganizationInfo[];
+  tags: TagInfo[];
   defaultValues?: UserInfo | undefined;
   submitButtonText?: string | undefined;
 };
 
-export default function UserForm({ onSubmit, organizations, defaultValues, submitButtonText }: Props) {
+export default function UserForm({ onSubmit, organizations, tags, defaultValues, submitButtonText }: Props) {
+  const tagOptions = useMemo(() => {
+    return tags.map((t) => ({ label: t.name, value: t.pk }));
+  }, [tags]);
   const form = useForm<UserInfoInput>({
     defaultValues: {
       email: '',
@@ -138,18 +145,27 @@ export default function UserForm({ onSubmit, organizations, defaultValues, submi
                     render={({ field }) => (
                       <FormItem className="w-[145px]">
                         <FormControl>
-                          <Input placeholder="役職" {...field} />
+                          <MultipleSelector
+                            defaultOptions={tagOptions}
+                            placeholder="役職"
+                            creatable
+                            emptyIndicator={
+                              <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
+                                no results found.
+                              </p>
+                            }
+                            value={[tagOptions.find((t) => t.value === field.value)!]}
+                            onChange={(val) => {
+                              console.log(val);
+                              form.setValue(`organizations.${index}.position`, val.length > 0 ? val[0].value : '');
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => remove(index)}
-                    disabled={fields.length === 1} // 确保至少有一个组织信息
-                  >
+                  <Button variant="outline" size="icon" onClick={() => remove(index)} disabled={fields.length === 1}>
                     <MinusIcon />
                   </Button>
                   {fields.length - 1 === index && (
