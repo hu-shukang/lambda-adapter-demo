@@ -66,6 +66,18 @@ export const signupConfirmInputSchema = z.object({
   confirmationCode: confirmationCode,
 });
 
+export const resetPasswordInputSchema = z
+  .object({
+    username: username,
+    confirmationCode: confirmationCode,
+    password: password,
+    rePassword: rePassword,
+  })
+  .refine((data) => data.password === data.rePassword, {
+    message: 'パスワード不一致',
+    path: ['rePassword'],
+  });
+
 export const tokenInputSchema = z.object({
   idToken: idToken,
   refreshToken: refreshToken,
@@ -97,6 +109,7 @@ export type UserEntity = Expand<DBKey & UserInfoInput>;
 export type SigninInput = z.infer<typeof signinInputSchema>;
 export type SignupInput = z.infer<typeof signupInputSchema>;
 export type SignupConfirmInput = z.infer<typeof signupConfirmInputSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordInputSchema>;
 export type TokenInput = z.infer<typeof tokenInputSchema>;
 export type AccountUpdateInput = z.infer<typeof accountUpdateInputSchema>;
 
