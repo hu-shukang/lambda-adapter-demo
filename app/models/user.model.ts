@@ -66,7 +66,11 @@ export const signupConfirmInputSchema = z.object({
   confirmationCode: confirmationCode,
 });
 
-export const resetPasswordInputSchema = z
+export const resetPasswordInputSchema = z.object({
+  username: username,
+});
+
+export const confirmResetPasswordInputSchema = z
   .object({
     username: username,
     confirmationCode: confirmationCode,
@@ -110,6 +114,7 @@ export type SigninInput = z.infer<typeof signinInputSchema>;
 export type SignupInput = z.infer<typeof signupInputSchema>;
 export type SignupConfirmInput = z.infer<typeof signupConfirmInputSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordInputSchema>;
+export type ConfirmResetPasswordInput = z.infer<typeof confirmResetPasswordInputSchema>;
 export type TokenInput = z.infer<typeof tokenInputSchema>;
 export type AccountUpdateInput = z.infer<typeof accountUpdateInputSchema>;
 

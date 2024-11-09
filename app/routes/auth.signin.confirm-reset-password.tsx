@@ -1,20 +1,25 @@
-import { useNavigate } from '@remix-run/react';
-import { resetPassword } from 'aws-amplify/auth';
+import { useLocation, useNavigate } from '@remix-run/react';
+import { confirmResetPassword } from 'aws-amplify/auth';
 import { AlertCircle } from 'lucide-react';
 import { useState } from 'react';
 import { SubmitHandler } from 'react-hook-form';
-import ResetPasswordForm from '~/components/auth/reset-password-form';
+import ConfirmResetPasswordForm from '~/components/auth/confirm-reset-password-form';
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
-import { ResetPasswordInput } from '~/models/user.model';
+import { ConfirmResetPasswordInput } from '~/models/user.model';
 
 export default function ResetPasswordPage() {
   const [error, setError] = useState<string>();
   const navigate = useNavigate();
+  const { state } = useLocation();
 
-  const onSubmit: SubmitHandler<ResetPasswordInput> = async (data) => {
+  const onSubmit: SubmitHandler<ConfirmResetPasswordInput> = async (data) => {
     try {
-      await resetPassword({ username: data.username });
-      navigate('/auth/sign/confirm-reset-password', { state: data });
+      await confirmResetPassword({
+        username: data.username,
+        confirmationCode: data.confirmationCode,
+        newPassword: data.password,
+      });
+      navigate('/auth/signin');
     } catch (e: any) {
       const message = e.message;
       setError(message);
@@ -30,11 +35,11 @@ export default function ResetPasswordPage() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      <h1 className="text-3xl text-center mb-4">パスワードリセット</h1>
+      <h1 className="text-3xl text-center mb-4">パスワードリセット確認</h1>
       <h6 className="text-sm text-gray-500 text-center mb-4">
         リセットボタンを押下して、メールも認証コードを取得します。
       </h6>
-      <ResetPasswordForm onSubmit={onSubmit} />
+      <ConfirmResetPasswordForm onSubmit={onSubmit} username={state.username} />
     </div>
   );
 }

@@ -1,20 +1,21 @@
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { ResetPasswordInput, resetPasswordInputSchema } from '~/models/user.model';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '../ui/input-otp';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { ConfirmResetPasswordInput, confirmResetPasswordInputSchema } from '~/models/user.model';
 
 type Props = {
-  onSubmit: SubmitHandler<ResetPasswordInput>;
+  username: string;
+  onSubmit: SubmitHandler<ConfirmResetPasswordInput>;
 };
 
-export default function ConfirmResetPasswordForm({ onSubmit }: Props) {
-  const form = useForm<ResetPasswordInput>({
-    resolver: zodResolver(resetPasswordInputSchema),
+export default function ConfirmResetPasswordForm({ username, onSubmit }: Props) {
+  const form = useForm<ConfirmResetPasswordInput>({
+    resolver: zodResolver(confirmResetPasswordInputSchema),
     defaultValues: {
-      username: '',
+      username: username,
       confirmationCode: '',
       password: '',
       rePassword: '',
