@@ -8,6 +8,7 @@ import { QueryCommand, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
 import { DB } from '../utils/dynamodb.util';
 import { TagInfo } from '~/models/tag.model';
 import { v7 } from 'uuid';
+import { Mail } from '../utils/mail.util';
 
 class UserService extends CommonService {
   private tableName = process.env.USER_TBL!;
@@ -29,9 +30,11 @@ class UserService extends CommonService {
     return userInfoView;
   }
 
-  public async create(user: UserInfoInput, payload: CognitoIdTokenPayload) {
-    const cognitoResult = await Cognito.Admin.createUser(user.employeeNo, user.email, { name: user.name });
-    const userAttributes = cognitoResult.User?.Attributes;
+  public async create(userInput: UserInfoInput, payload: CognitoIdTokenPayload) {
+    const { user, initPassword } = await Cognito.Admin.createUser(userInput.employeeNo, userInput.email, {
+      name: userInput.name,
+    });
+    const userAttributes = user?.Attributes;
     const sub = userAttributes?.find((a) => a.Name === 'sub')?.Value;
 
     const tagQueryCommand = new QueryCommand({
@@ -44,7 +47,7 @@ class UserService extends CommonService {
     });
     const tagQueryResult = await DB.client.send(tagQueryCommand);
     const tagList = (tagQueryResult.Items || []) as TagInfo[];
-    const newPositions = user.organizations.filter((o) => !tagList.some((t) => t.name === o.position));
+    const newPositions = userInput.organizations.filter((o) => !tagList.some((t) => t.name === o.position));
 
     const command = new TransactWriteCommand({
       TransactItems: [
@@ -52,11 +55,11 @@ class UserService extends CommonService {
           Put: {
             TableName: this.tableName,
             Item: {
-              pk: user.email,
+              pk: userInput.email,
               sk: CONST.DB.USER_INFO,
-              email: user.email,
-              employeeNo: user.employeeNo,
-              status: user.status,
+              email: userInput.email,
+              employeeNo: userInput.employeeNo,
+              status: userInput.status,
               cognitoUserStatus: 'CONFIRMED',
               sub: sub,
               updateTime: dateUtil.utc(),
@@ -64,11 +67,11 @@ class UserService extends CommonService {
             },
           },
         },
-        ...user.organizations.map((o) => ({
+        ...userInput.organizations.map((o) => ({
           Put: {
             TableName: this.tableName,
             Item: {
-              pk: user.email,
+              pk: userInput.email,
               sk: `${CONST.DB.USER_ORG}#${o.organization}`,
               position: o.position,
               updateTime: dateUtil.utc(),
@@ -89,7 +92,9 @@ class UserService extends CommonService {
         })),
       ],
     });
-    return await DB.client.send(command);
+    const dbResult = await DB.client.send(command);
+    await Mail.sendText([userInput.email], `初期パスワード：${initPassword}`);
+    return dbResult;
   }
 
   public async query(query: UserQueryInput) {

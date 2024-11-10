@@ -21,7 +21,8 @@ export default function SigninPage() {
   const onSubmit: SubmitHandler<SigninInput> = async (data) => {
     try {
       await signOut();
-      await signIn({ ...data });
+      const signInResult = await signIn({ ...data });
+      console.log(signInResult); // CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED
       toSignin(submit, redirectUrl);
     } catch (e: any) {
       const message = e.message;

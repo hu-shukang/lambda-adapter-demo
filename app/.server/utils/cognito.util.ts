@@ -3,6 +3,7 @@ import {
   AdminCreateUserCommand,
   AdminDeleteUserCommand,
   AdminRemoveUserFromGroupCommand,
+  AdminSetUserPasswordCommand,
   AdminUpdateUserAttributesCommand,
   AttributeType,
   CognitoIdentityProviderClient,
@@ -10,6 +11,7 @@ import {
   InitiateAuthCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 import { CognitoJwtVerifier } from 'aws-jwt-verify';
+import { randomString } from './string.util';
 
 const client = new CognitoIdentityProviderClient({
   region: process.env.REGION,
@@ -99,7 +101,18 @@ const createUserByAdmin = async (username: string, email: string, attributes?: R
     UserAttributes: userAttributes,
     MessageAction: 'SUPPRESS',
   });
-  return client.send(command);
+  const createResult = await client.send(command);
+  const initPassword = randomString(12);
+  const setPasswordCommand = new AdminSetUserPasswordCommand({
+    UserPoolId: process.env.USER_POOL_ID!,
+    Username: username,
+    Password: initPassword,
+  });
+  await client.send(setPasswordCommand);
+  return {
+    user: createResult.User,
+    initPassword: initPassword,
+  };
 };
 
 const updateUserByAdmin = async (username: string, attributes: AttributeType[]) => {
