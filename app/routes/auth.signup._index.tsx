@@ -13,12 +13,14 @@ import InfoDialog from '~/components/common/info-dialog';
 
 export default function SignupPage() {
   const [openInfoDialog, setOpenInfoDialog] = useState(false);
+  const [progressing, setProgressing] = useState(false);
   const [error, setError] = useState<React.ReactElement>();
   const actionData = useActionData<ActionFunction>();
   const setUsername = useUserStore((state) => state.setUsername);
   const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<SignupInput> = async (data) => {
+    setProgressing(true);
     try {
       const result = await signUp({
         username: data.username,
@@ -35,11 +37,13 @@ export default function SignupPage() {
         setOpenInfoDialog(true);
       }
       console.error(e);
+    } finally {
+      setProgressing(false);
     }
   };
 
   return (
-    <div className="md:w-[350px]">
+    <div className="w-full md:w-[350px]">
       {actionData?.error && (
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
@@ -49,7 +53,7 @@ export default function SignupPage() {
       )}
       <h1 className="text-3xl text-center mb-4">ユーザ登録</h1>
       <h6 className="text-sm text-gray-500 text-center mb-4">ユーザを新規登録お願いします。</h6>
-      <SignupForm onSubmit={onSubmit} />
+      <SignupForm onSubmit={onSubmit} progressing={progressing} />
       <InfoDialog
         open={openInfoDialog}
         setOpen={setOpenInfoDialog}

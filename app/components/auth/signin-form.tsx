@@ -10,10 +10,11 @@ import Separator from '../ui/separator';
 
 type Props = {
   onSubmit: SubmitHandler<SigninInput>;
+  progressing: boolean;
   signinByGoogle: () => void;
 };
 
-export default function SigninForm({ onSubmit, signinByGoogle }: Props) {
+export default function SigninForm({ onSubmit, signinByGoogle, progressing }: Props) {
   const form = useForm<SigninInput>({
     defaultValues: {
       username: '',
@@ -49,7 +50,7 @@ export default function SigninForm({ onSubmit, signinByGoogle }: Props) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" loading={progressing}>
           サインイン
         </Button>
         <Link to="/auth/signup">

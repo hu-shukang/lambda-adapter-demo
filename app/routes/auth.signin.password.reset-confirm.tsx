@@ -27,7 +27,7 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="md:w-[350px]">
+    <div className="w-full md:w-[350px]">
       {error && (
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />

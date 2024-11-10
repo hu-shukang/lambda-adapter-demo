@@ -7,10 +7,11 @@ import { useUserStore } from '~/stores/user.store';
 import { Button } from '../ui/button';
 
 type Props = {
+  progressing: boolean;
   onSubmit: SubmitHandler<SignupConfirmInput>;
 };
 
-export default function SignupConfirmForm({ onSubmit }: Props) {
+export default function SignupConfirmForm({ progressing, onSubmit }: Props) {
   const username = useUserStore((state) => state.username);
   const form = useForm<SignupConfirmInput>({
     resolver: zodResolver(signupConfirmInputSchema),
@@ -44,7 +45,7 @@ export default function SignupConfirmForm({ onSubmit }: Props) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="flex w-full">
+        <Button type="submit" className="flex w-full" loading={progressing}>
           提出
         </Button>
       </form>

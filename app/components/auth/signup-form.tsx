@@ -7,10 +7,11 @@ import { Button } from '../ui/button';
 import { Link } from '@remix-run/react';
 
 type Props = {
+  progressing: boolean;
   onSubmit: SubmitHandler<SignupInput>;
 };
 
-export default function SignupForm({ onSubmit }: Props) {
+export default function SignupForm({ progressing, onSubmit }: Props) {
   const form = useForm<SignupInput>({
     defaultValues: {
       username: '',
@@ -76,7 +77,7 @@ export default function SignupForm({ onSubmit }: Props) {
           新規登録
         </Button>
         <Link to="/auth/signin">
-          <Button variant="outline" className="flex w-full mt-4">
+          <Button variant="outline" className="flex w-full mt-4" loading={progressing}>
             サインイン画面に戻る
           </Button>
         </Link>

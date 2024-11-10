@@ -12,6 +12,7 @@ import { useGlobalStore } from '~/stores/global.store';
 
 export default function SigninPage() {
   const [error, setError] = useState<string>();
+  const [progressing, setProgressing] = useState(true);
   const submit = useSubmit();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -21,6 +22,7 @@ export default function SigninPage() {
 
   const onSubmit: SubmitHandler<SigninInput> = async (data) => {
     try {
+      setProgressing(true);
       await signOut();
       const signInResult = await signIn({ ...data });
       if (signInResult.nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED') {
@@ -36,6 +38,8 @@ export default function SigninPage() {
       } else {
         setError('ユーザ名かパスワードは正しくありません。');
       }
+    } finally {
+      setProgressing(false);
     }
   };
 
@@ -54,7 +58,7 @@ export default function SigninPage() {
   }, [signinRequired]);
 
   return (
-    <div className="md:w-[350px]">
+    <div className="w-full md:w-[350px]">
       {error && (
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
@@ -64,7 +68,7 @@ export default function SigninPage() {
       )}
       <h1 className="text-3xl text-center mb-4">サインイン</h1>
       <h6 className="text-sm text-gray-500 text-center mb-4">ユーザ名とパスワードをご入力ください。</h6>
-      <SigninForm onSubmit={onSubmit} signinByGoogle={signinByGoogle} />
+      <SigninForm onSubmit={onSubmit} signinByGoogle={signinByGoogle} progressing={progressing} />
     </div>
   );
 }
