@@ -12,7 +12,7 @@ import { useGlobalStore } from '~/stores/global.store';
 
 export default function SigninPage() {
   const [error, setError] = useState<string>();
-  const [progressing, setProgressing] = useState(true);
+  const [progressing, setProgressing] = useState(false);
   const submit = useSubmit();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
