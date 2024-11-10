@@ -70,6 +70,17 @@ export const resetPasswordInputSchema = z.object({
   username: username,
 });
 
+export const confirmSigninInputSchema = z
+  .object({
+    username: username,
+    password: password,
+    rePassword: rePassword,
+  })
+  .refine((data) => data.password === data.rePassword, {
+    message: 'パスワード不一致',
+    path: ['rePassword'],
+  });
+
 export const confirmResetPasswordInputSchema = z
   .object({
     username: username,
@@ -115,6 +126,7 @@ export type SignupInput = z.infer<typeof signupInputSchema>;
 export type SignupConfirmInput = z.infer<typeof signupConfirmInputSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordInputSchema>;
 export type ConfirmResetPasswordInput = z.infer<typeof confirmResetPasswordInputSchema>;
+export type ConfirmSigninInput = z.infer<typeof confirmSigninInputSchema>;
 export type TokenInput = z.infer<typeof tokenInputSchema>;
 export type AccountUpdateInput = z.infer<typeof accountUpdateInputSchema>;
 

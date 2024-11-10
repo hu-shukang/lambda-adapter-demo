@@ -1,4 +1,4 @@
-import { useSearchParams, useSubmit } from '@remix-run/react';
+import { useNavigate, useSearchParams, useSubmit } from '@remix-run/react';
 import { SubmitHandler } from 'react-hook-form';
 import SigninForm from '~/components/auth/signin-form';
 import { SigninInput } from '~/models/user.model';
@@ -13,6 +13,7 @@ import { useGlobalStore } from '~/stores/global.store';
 export default function SigninPage() {
   const [error, setError] = useState<string>();
   const submit = useSubmit();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const signinRequired = searchParams.get('signinRequired');
   const redirectUrl = searchParams.get('redirectUrl');
@@ -22,8 +23,11 @@ export default function SigninPage() {
     try {
       await signOut();
       const signInResult = await signIn({ ...data });
-      console.log(signInResult); // CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED
-      toSignin(submit, redirectUrl);
+      if (signInResult.nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED') {
+        navigate('/auth/signin/password/confirm', { state: { username: data.username } });
+      } else {
+        toSignin(submit, redirectUrl);
+      }
     } catch (e: any) {
       const message = e.message;
       console.log(message);

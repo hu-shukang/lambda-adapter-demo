@@ -57,11 +57,13 @@ export default function SigninForm({ onSubmit, signinByGoogle }: Props) {
             新規登録
           </Button>
         </Link>
-        <Link to="/auth/signin/reset-password">
-          <Button variant="outline" className="w-full mt-4">
-            パスワード忘れ
-          </Button>
-        </Link>
+        <div className="w-full text-right">
+          <Link to="/auth/signin/password/reset">
+            <Button variant="link" className="p-0 ml-auto">
+              パスワードは忘れました
+            </Button>
+          </Link>
+        </div>
         <Separator text="あるいは" />
         <Button type="button" variant="outline" className="w-full" onClick={signinByGoogle}>
           <RiGoogleFill size={20} className="mr-2 text-primary" />

@@ -14,7 +14,7 @@ export default function ResetPasswordPage() {
   const onSubmit: SubmitHandler<ResetPasswordInput> = async (data) => {
     try {
       await resetPassword({ username: data.username });
-      navigate('/auth/sign/confirm-reset-password', { state: data });
+      navigate('/auth/sign/password/reset-confirm', { state: data });
     } catch (e: any) {
       const message = e.message;
       setError(message);
