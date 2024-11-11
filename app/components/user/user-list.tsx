@@ -40,22 +40,16 @@ const getColumns = ({ organizations, updateHandler, removeHandler }: Props): Col
       cell: ({ row }) => <div className="text-center">{row.index + 1}</div>,
     },
     {
-      accessorKey: 'pk',
-      meta: { displayName: 'ユーザID' },
-      header: 'ユーザID',
-      cell: ({ row }) => <div>{row.getValue('pk')}</div>,
+      accessorKey: 'employeeNo',
+      meta: { displayName: '社員番号' },
+      header: '社員番号',
+      cell: ({ row }) => <div>{row.getValue('employeeNo')}</div>,
     },
     {
       accessorKey: 'name',
       meta: { displayName: 'ユーザ名' },
       header: 'ユーザ名',
       cell: ({ row }) => <div>{row.getValue('name')}</div>,
-    },
-    {
-      accessorKey: 'organization',
-      meta: { displayName: '組織' },
-      header: '組織',
-      cell: ({ row }) => <div>{organizationMap.get(row.getValue('organization'))?.name}</div>,
     },
     {
       accessorKey: 'email',

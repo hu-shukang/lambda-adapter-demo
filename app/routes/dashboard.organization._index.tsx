@@ -67,10 +67,18 @@ export default function OrganizationPage() {
         </div>
       </div>
       {type === 'table' && (
-        <OrganizationList data={loaderData?.data || []} updateHandler={updateHandler} removeHandler={removeHandler} />
+        <OrganizationList
+          data={loaderData?.data.organizations || []}
+          updateHandler={updateHandler}
+          removeHandler={removeHandler}
+        />
       )}
       {type === 'tree' && (
-        <OrganizationTree data={loaderData?.data || []} updateHandler={updateHandler} removeHandler={removeHandler} />
+        <OrganizationTree
+          data={loaderData?.data.organizations || []}
+          updateHandler={updateHandler}
+          removeHandler={removeHandler}
+        />
       )}
 
       {deleteTarget && (

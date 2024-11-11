@@ -6,6 +6,7 @@ export const CONST = {
     USER: 'USER',
     USER_INFO: 'USER_INFO',
     USER_ORG: 'USER_ORG',
+    ORG_USER: 'ORG_USER',
     PERMISSION_INFO: 'PERMISSION_INFO',
     ROLE_INFO: 'ROLE_INFO',
     INDEXS: {

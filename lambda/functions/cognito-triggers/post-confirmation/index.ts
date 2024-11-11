@@ -11,12 +11,10 @@ const ddbDocClient = DynamoDBDocumentClient.from(client);
 
 const insertUserToDB = async (event: PostConfirmationTriggerEvent) => {
   const {
-    userName,
     request: { userAttributes },
   } = event;
   // updateTime: dateUtil.utc(), updateUser: payload['cognito:username']
   const updateExpressionList = [
-    '#userName = :userName',
     '#sub = :sub',
     '#cognitoUserStatus = :cognitoUserStatus',
     '#organization = :organization',
@@ -24,7 +22,6 @@ const insertUserToDB = async (event: PostConfirmationTriggerEvent) => {
     '#updateUser = :updateUser',
   ];
   const expressionAttributeNames: Record<string, string> = {
-    '#userName': 'userName',
     '#sub': 'sub',
     '#cognitoUserStatus': 'cognitoUserStatus',
     '#organization': 'organization',
@@ -37,7 +34,6 @@ const insertUserToDB = async (event: PostConfirmationTriggerEvent) => {
     cognitoUserStatus = `${cognitoUserStatus}:${providerName}`;
   }
   const expressionAttributeValues: Record<string, string> = {
-    ':userName': userName,
     ':sub': userAttributes.sub,
     ':cognitoUserStatus': cognitoUserStatus,
     ':organization': 'DEFAULT',
