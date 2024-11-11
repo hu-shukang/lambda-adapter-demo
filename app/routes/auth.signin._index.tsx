@@ -23,7 +23,7 @@ export default function SigninPage() {
       setProgressing(true);
       await signOut();
       const signInResult = await signIn({ ...data });
-      if (signInResult.nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED') {
+      if (signInResult.nextStep.signInStep === CONST.USER.COGNITO_STATUS.CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED) {
         navigate('/auth/signin/password/confirm', { state: { username: data.username } });
       } else {
         toSignin(submit, redirectUrl);

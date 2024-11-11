@@ -22,6 +22,9 @@ export const CONST = {
       ACTIVE: 'ACTIVE',
       BLOCK: 'BLOCK',
     },
+    COGNITO_STATUS: {
+      CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED: 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED',
+    },
   },
   TAG: {
     LIST: ['POSITION'],

@@ -58,11 +58,13 @@ export const handler = async (event: PreSignUpTriggerEvent): Promise<any> => {
   const existingUser = await getUsersByEmail(event);
   console.log(`existingUser: ${existingUser ? JSON.stringify(existingUser) : 'null'}`);
   if (existingUser) {
-    const isExternalUser = existingUser.cognitoUserStatus === 'EXTERNAL_PROVIDER';
+    const cognitoUserStatus = existingUser.cognitoUserStatus;
     const existingEmployeeNo = existingUser.employeeNo as string;
-    if (event.triggerSource === 'PreSignUp_SignUp' && isExternalUser) {
+    if (event.triggerSource === 'PreSignUp_SignUp' && cognitoUserStatus === 'EXTERNAL_PROVIDER') {
       const { provider } = getProviderAndUserId(existingEmployeeNo);
       throw new Error(`EXIST_WITH_${provider}`);
+    } else if (cognitoUserStatus === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED') {
+      throw new Error(`INIT_PASSWORD`);
     } else if (event.triggerSource === 'PreSignUp_ExternalProvider') {
       const { userId, provider } = getProviderAndUserId(event.userName);
       await linkUser(userId, provider, existingEmployeeNo);

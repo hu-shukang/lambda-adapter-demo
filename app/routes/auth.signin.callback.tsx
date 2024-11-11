@@ -10,7 +10,7 @@ export default function AuthProviderCallbackPage() {
   const [seconds, setSeconds] = useState(3);
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    const timer = setInterval(async () => {
       if (seconds === 1) {
         clearInterval(timer);
         toSignin(submit, redirect);
