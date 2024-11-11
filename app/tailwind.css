@@ -128,7 +128,12 @@ body {
 }
 
 .toast[data-type='error'] {
-  --border: 0 93.5% 81.8%;
+  --border: 0 96.3% 89.4%;
   --background: 0 93.3% 94.1%;
   --foreground: 0 84.2% 60.2%;
+}
+
+.toast[data-type='error'] button[data-close-button] {
+  background: hsl(var(--background));
+  border-color: hsl(var(--border));
 }
