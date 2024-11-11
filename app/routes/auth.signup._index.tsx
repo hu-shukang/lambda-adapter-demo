@@ -5,16 +5,12 @@ import SignupForm from '~/components/auth/signup-form';
 import { SignupInput } from '~/models/user.model';
 import { useUserStore } from '~/stores/user.store';
 import { signUp } from 'aws-amplify/auth';
-import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
 import { CONST } from '~/lib/const';
-import { useState } from 'react';
-import InfoDialog from '~/components/common/info-dialog';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 export default function SignupPage() {
-  const [openInfoDialog, setOpenInfoDialog] = useState(false);
   const [progressing, setProgressing] = useState(false);
-  const [error, setError] = useState<React.ReactElement>();
   const actionData = useActionData<ActionFunction>();
   const setUsername = useUserStore((state) => state.setUsername);
   const navigate = useNavigate();
@@ -33,8 +29,7 @@ export default function SignupPage() {
     } catch (e: any) {
       const message = e.message as string;
       if (message.includes(CONST.ERROR_CODE.AUTH.EXIST_WITH_GOOGLE)) {
-        setError(() => <div>{CONST.ERROR_MSG.AUTH.EXIST_WITH_GOOGLE}</div>);
-        setOpenInfoDialog(true);
+        toast.error(CONST.ERROR_MSG.AUTH.EXIST_WITH_GOOGLE);
       }
       console.error(e);
     } finally {
@@ -42,25 +37,17 @@ export default function SignupPage() {
     }
   };
 
+  useEffect(() => {
+    if (actionData?.error) {
+      toast.error(actionData?.error);
+    }
+  }, [actionData]);
+
   return (
     <div className="w-full md:w-[350px]">
-      {actionData?.error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{actionData?.error}</AlertDescription>
-        </Alert>
-      )}
       <h1 className="text-3xl text-center mb-4">ユーザ登録</h1>
       <h6 className="text-sm text-gray-500 text-center mb-4">ユーザを新規登録お願いします。</h6>
       <SignupForm onSubmit={onSubmit} progressing={progressing} />
-      <InfoDialog
-        open={openInfoDialog}
-        setOpen={setOpenInfoDialog}
-        content={error}
-        description="ユーザ登録時にエラーが発生しました。"
-        onSubmit={() => setOpenInfoDialog(false)}
-      />
     </div>
   );
 }

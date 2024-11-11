@@ -126,3 +126,9 @@ body {
     bottom: calc(var(--node-item-height) / 2);
   }
 }
+
+.toast[data-type='error'] {
+  --border: 0 93.5% 81.8%;
+  --background: 0 93.3% 94.1%;
+  --foreground: 0 84.2% 60.2%;
+}

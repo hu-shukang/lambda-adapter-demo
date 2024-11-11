@@ -1,44 +1,33 @@
 import { useLocation, useNavigate, useSubmit } from '@remix-run/react';
 import { confirmSignIn } from 'aws-amplify/auth';
-import { AlertCircle } from 'lucide-react';
-import { useState } from 'react';
 import { SubmitHandler } from 'react-hook-form';
-import ConfirmSigninForm from '~/components/auth/confirm-signin-form';
-import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
+import PasswordForm from '~/components/auth/password-form';
 import { toSignin } from '~/lib/auth.client';
-import { ConfirmSigninInput } from '~/models/user.model';
+import { PasswordInput } from '~/models/user.model';
+import { toast } from 'sonner';
 
 export default function InitPasswordConfirmPage() {
-  const [error, setError] = useState<string>();
   const navigate = useNavigate();
   const submit = useSubmit();
   const { state } = useLocation();
 
-  if (!state.username) {
-    return navigate('/auth/signin');
-  }
-
-  const onSubmit: SubmitHandler<ConfirmSigninInput> = async (data) => {
+  const onSubmit: SubmitHandler<PasswordInput> = async (data) => {
+    if (!state?.username) {
+      return navigate('/auth/signin');
+    }
     try {
       await confirmSignIn({ challengeResponse: data.password });
       toSignin(submit);
     } catch (e: any) {
-      setError(e.message);
+      toast.error(e.message);
     }
   };
 
   return (
     <div className="w-full md:w-[350px]">
-      {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
       <h1 className="text-3xl text-center mb-4">パスワード変更</h1>
       <h6 className="text-sm text-gray-500 text-center mb-4">パスワードをご入力ください。</h6>
-      <ConfirmSigninForm onSubmit={onSubmit} username={state.username} />
+      <PasswordForm onSubmit={onSubmit} />
     </div>
   );
 }

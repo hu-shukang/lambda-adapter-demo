@@ -5,13 +5,11 @@ import { SigninInput } from '~/models/user.model';
 import { signIn, signOut, signInWithRedirect } from 'aws-amplify/auth';
 import { useEffect, useState } from 'react';
 import { toSignin } from '~/lib/auth.client';
-import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
 import { CONST } from '~/lib/const';
 import { useGlobalStore } from '~/stores/global.store';
+import { toast } from 'sonner';
 
 export default function SigninPage() {
-  const [error, setError] = useState<string>();
   const [progressing, setProgressing] = useState(false);
   const submit = useSubmit();
   const navigate = useNavigate();
@@ -34,9 +32,9 @@ export default function SigninPage() {
       const message = e.message;
       console.log(message);
       if (message.includes(CONST.ERROR_CODE.AUTH.USER_BLOCKED)) {
-        setError(CONST.ERROR_MSG.AUTH.USER_BLOCKED);
+        toast.error(CONST.ERROR_MSG.AUTH.USER_BLOCKED);
       } else {
-        setError('ユーザ名かパスワードは正しくありません。');
+        toast.error('ユーザ名かパスワードは正しくありません。');
       }
     } finally {
       setProgressing(false);
@@ -53,21 +51,14 @@ export default function SigninPage() {
 
   useEffect(() => {
     if (signinRequired) {
-      setError('お先にサインインしてください。');
+      toast.error('お先にサインインしてください。');
     }
   }, [signinRequired]);
 
   return (
     <div className="w-full md:w-[350px]">
-      {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
       <h1 className="text-3xl text-center mb-4">サインイン</h1>
-      <h6 className="text-sm text-gray-500 text-center mb-4">ユーザ名とパスワードをご入力ください。</h6>
+      <h6 className="text-sm text-gray-500 text-center mb-4">ユーザIDとパスワードをご入力ください。</h6>
       <SigninForm onSubmit={onSubmit} signinByGoogle={signinByGoogle} progressing={progressing} />
     </div>
   );

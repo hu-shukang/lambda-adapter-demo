@@ -4,6 +4,7 @@ import styles from './tailwind.css?url';
 import { Amplify } from 'aws-amplify';
 import { Resp } from './.server/utils/response.util';
 import { useEffect } from 'react';
+import { Toaster } from '~/components/ui/sonner';
 
 export const links: LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -85,6 +86,7 @@ export default function App() {
 
   return (
     <>
+      <Toaster position="top-center" closeButton={true} />
       <Outlet />
       <script
         dangerouslySetInnerHTML={{

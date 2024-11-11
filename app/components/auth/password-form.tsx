@@ -1,20 +1,18 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { ConfirmSigninInput, confirmSigninInputSchema } from '~/models/user.model';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form';
-import { Input } from '../ui/input';
 import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { PasswordInput, passwordInputSchema } from '~/models/user.model';
 
 type Props = {
-  onSubmit: SubmitHandler<ConfirmSigninInput>;
-  username: string;
+  onSubmit: SubmitHandler<PasswordInput>;
 };
 
-export default function ConfirmSigninForm({ username, onSubmit }: Props) {
-  const form = useForm<ConfirmSigninInput>({
-    resolver: zodResolver(confirmSigninInputSchema),
+export default function PasswordForm({ onSubmit }: Props) {
+  const form = useForm<PasswordInput>({
+    resolver: zodResolver(passwordInputSchema),
     defaultValues: {
-      username: username,
       password: '',
       rePassword: '',
     },
@@ -23,18 +21,6 @@ export default function ConfirmSigninForm({ username, onSubmit }: Props) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input placeholder="ユーザID" {...field} disabled />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           control={form.control}
           name="password"
@@ -60,7 +46,7 @@ export default function ConfirmSigninForm({ username, onSubmit }: Props) {
           )}
         />
         <Button type="submit" className="flex w-full">
-          パスワード更新
+          パスワードリセット
         </Button>
       </form>
     </Form>

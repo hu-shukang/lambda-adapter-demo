@@ -1,17 +1,17 @@
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { ResetPasswordInput, resetPasswordInputSchema } from '~/models/user.model';
+import { UsernameInput, usernameInputSchema } from '~/models/user.model';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 
 type Props = {
-  onSubmit: SubmitHandler<ResetPasswordInput>;
+  onSubmit: SubmitHandler<UsernameInput>;
 };
 
-export default function ResetPasswordForm({ onSubmit }: Props) {
-  const form = useForm<ResetPasswordInput>({
-    resolver: zodResolver(resetPasswordInputSchema),
+export default function UsernameForm({ onSubmit }: Props) {
+  const form = useForm<UsernameInput>({
+    resolver: zodResolver(usernameInputSchema),
     defaultValues: {
       username: '',
     },
@@ -26,14 +26,14 @@ export default function ResetPasswordForm({ onSubmit }: Props) {
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input placeholder="ユーザID" {...field} />
+                <Input placeholder="ユーザID・メールアドレス" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <Button type="submit" className="flex w-full">
-          リセット
+          次へ
         </Button>
       </form>
     </Form>
