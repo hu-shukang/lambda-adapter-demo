@@ -3,7 +3,7 @@ import {
   AdminLinkProviderForUserCommand,
   CognitoIdentityProviderClient,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { getUser } from '/opt/nodejs/utils';
+import { getUser, queryUserByEmail } from '/opt/nodejs/utils';
 
 const cognitoClient = new CognitoIdentityProviderClient({});
 
@@ -36,18 +36,26 @@ const getProviderAndUserId = (username: string) => {
 
 export const handler = async (event: PreSignUpTriggerEvent): Promise<any> => {
   console.log('Event: ', JSON.stringify(event, null, 2));
-  const existingUser = await getUser(event.userName);
-  console.log(`existingUser: ${existingUser ? JSON.stringify(existingUser) : 'null'}`);
-  if (existingUser) {
+  const {
+    request: {
+      userAttributes: { email },
+    },
+    userName,
+    triggerSource,
+  } = event;
+  const output = await queryUserByEmail(email, 'USER_INFO');
+  console.log(`query output: ${output ? JSON.stringify(output) : 'null'}`);
+  if (output) {
+    const existingUser = output[0];
     const cognitoUserStatus = existingUser.cognitoUserStatus;
     const existingEmployeeNo = existingUser.employeeNo as string;
-    if (event.triggerSource === 'PreSignUp_SignUp' && cognitoUserStatus === 'EXTERNAL_PROVIDER') {
+    if (triggerSource === 'PreSignUp_SignUp' && cognitoUserStatus === 'EXTERNAL_PROVIDER') {
       const { provider } = getProviderAndUserId(existingEmployeeNo);
       throw new Error(`EXIST_WITH_${provider}`);
     } else if (cognitoUserStatus === 'FORCE_CHANGE_PASSWORD') {
       throw new Error(`FORCE_CHANGE_PASSWORD`);
-    } else if (event.triggerSource === 'PreSignUp_ExternalProvider') {
-      const { userId, provider } = getProviderAndUserId(event.userName);
+    } else if (triggerSource === 'PreSignUp_ExternalProvider') {
+      const { userId, provider } = getProviderAndUserId(userName);
       await linkUser(userId, provider, existingEmployeeNo);
     }
   }
