@@ -97,7 +97,7 @@ export const accountUpdateInputSchema = z.object({
 export type UserOrganizationInput = z.infer<typeof userOrganizationInputSchema>;
 export type UserInfoInput = z.infer<typeof userInfoInputSchema>;
 export type UserInfo = Expand<
-  Omit<UserInfoInput, 'email' | 'username'> &
+  Omit<UserInfoInput, 'username'> &
     DBKey &
     UpdateUserAndTime & { sub: string; employeeNo: string; cognitoUserStatus: string }
 >;
@@ -125,7 +125,8 @@ export type ID = z.infer<typeof idSchema>;
 
 export type IdTokenPayload = Expand<
   CognitoIdTokenPayload & {
-    email: string; // 添加 email 字段
+    employeeNo: string;
+    email: string;
     picture?: string;
   }
 >;

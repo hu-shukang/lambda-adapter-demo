@@ -3,28 +3,9 @@ import {
   AdminLinkProviderForUserCommand,
   CognitoIdentityProviderClient,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
+import { getUser } from '/opt/nodejs/utils';
 
-const client = new DynamoDBClient({});
-const ddbDocClient = DynamoDBDocumentClient.from(client);
 const cognitoClient = new CognitoIdentityProviderClient({});
-
-const getUsersByEmail = async (event: PreSignUpTriggerEvent) => {
-  const {
-    request: { userAttributes },
-  } = event;
-  const { email } = userAttributes;
-  const command = new GetCommand({
-    TableName: process.env.USER_TBL!,
-    Key: {
-      pk: email,
-      sk: 'USER_INFO',
-    },
-  });
-  const result = await ddbDocClient.send(command);
-  return result.Item;
-};
 
 const linkUser = async (externalUserId: string, providerName: string, existingUsername: string) => {
   const linkProviderCommand = new AdminLinkProviderForUserCommand({
@@ -55,7 +36,7 @@ const getProviderAndUserId = (username: string) => {
 
 export const handler = async (event: PreSignUpTriggerEvent): Promise<any> => {
   console.log('Event: ', JSON.stringify(event, null, 2));
-  const existingUser = await getUsersByEmail(event);
+  const existingUser = await getUser(event.userName);
   console.log(`existingUser: ${existingUser ? JSON.stringify(existingUser) : 'null'}`);
   if (existingUser) {
     const cognitoUserStatus = existingUser.cognitoUserStatus;

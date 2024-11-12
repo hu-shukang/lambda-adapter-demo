@@ -54,10 +54,22 @@ export const updateUser = async (userAttributes: Record<string, string>) => {
   }
 
   if (transactItems.length > 0) {
-    console.log('transactItems', transactItems);
+    console.log('transactItems', JSON.stringify(transactItems));
     const transactCommand = new TransactWriteCommand({
       TransactItems: transactItems,
     });
     await DB.client.send(transactCommand);
   }
+};
+
+export const getUser = async (pk: string) => {
+  const command = new GetCommand({
+    TableName: process.env.USER_TBL!,
+    Key: {
+      pk: pk,
+      sk: 'USER_INFO',
+    },
+  });
+  const resp = await DB.client.send(command);
+  return resp.Item;
 };

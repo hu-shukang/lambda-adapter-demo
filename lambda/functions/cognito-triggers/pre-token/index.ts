@@ -7,12 +7,12 @@ const ddbDocClient = DynamoDBDocumentClient.from(client);
 
 export const handler = async (event: PreTokenGenerationTriggerEvent): Promise<any> => {
   console.log('Event: ', JSON.stringify(event, null, 2));
-  const { email } = event.request.userAttributes;
+  const { userName } = event;
   const command = new QueryCommand({
     TableName: process.env.USER_TBL!,
     KeyConditionExpression: 'pk = :pk',
     ExpressionAttributeValues: {
-      ':pk': email,
+      ':pk': userName,
     },
   });
   const dbResult = await ddbDocClient.send(command);

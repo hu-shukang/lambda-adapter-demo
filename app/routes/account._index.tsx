@@ -43,7 +43,7 @@ export default function AccountPage() {
           </div>
           <div className="space-x-2 h-[35px] leading-[35px]">
             <span className="inline-block font-semibold w-[125px]">所属</span>
-            <span>{userInfoView.organization}</span>
+            <span>所属</span>
           </div>
           <div className="space-x-2 h-[35px] leading-[35px]">
             <span className="inline-block font-semibold w-[125px]">役職</span>

@@ -15,15 +15,14 @@ class UserService extends CommonService {
   private tagTableName = process.env.TAG_TBL!;
 
   public async get(payload: IdTokenPayload): Promise<UserInfoView> {
-    const output = await this.getOne(this.tableName, { pk: payload.email, sk: CONST.DB.USER_INFO });
-    const { pk, sk: _sk, cognitoUserStatus, ...attr } = output.Item as UserInfo;
+    const output = await this.getOne(this.tableName, { pk: payload.employeeNo, sk: CONST.DB.USER_INFO });
+    const { pk: _pk, sk: _sk, cognitoUserStatus, ...attr } = output.Item as UserInfo;
     let provider = 'password';
     if (cognitoUserStatus.startsWith('EXTERNAL_PROVIDER')) {
       provider = cognitoUserStatus.split(':').pop() as string;
     }
     const userInfoView: UserInfoView = {
       ...attr,
-      email: pk,
       picture: payload.picture,
       provider: provider,
     };
@@ -56,7 +55,7 @@ class UserService extends CommonService {
           Put: {
             TableName: this.tableName,
             Item: {
-              pk: userInput.email,
+              pk: userInput.employeeNo,
               sk: CONST.DB.USER_INFO,
               email: userInput.email,
               employeeNo: userInput.employeeNo,
@@ -73,7 +72,7 @@ class UserService extends CommonService {
           Put: {
             TableName: this.tableName,
             Item: {
-              pk: userInput.email,
+              pk: userInput.employeeNo,
               sk: `${CONST.DB.USER_ORG}#${o.organization}`,
               position: o.position,
               updateTime: dateUtil.utc(),
@@ -86,7 +85,7 @@ class UserService extends CommonService {
             TableName: this.tableName,
             Item: {
               pk: o.organization,
-              sk: `${CONST.DB.ORG_USER}#${userInput.email}`,
+              sk: `${CONST.DB.ORG_USER}#${userInput.employeeNo}`,
               email: userInput.email,
               position: o.position,
               employeeNo: userInput.employeeNo,
