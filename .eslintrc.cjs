@@ -19,7 +19,7 @@ module.exports = {
     commonjs: true,
     es6: true,
   },
-  ignorePatterns: ['!**/.server', '!**/.client', '**/components/ui/**'],
+  ignorePatterns: ['!**/.server', '!**/.client', '**/components/ui/**', 'lambda'],
 
   // Base config
   extends: ['eslint:recommended', 'plugin:prettier/recommended'],

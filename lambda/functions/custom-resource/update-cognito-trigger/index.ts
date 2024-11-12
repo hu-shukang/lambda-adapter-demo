@@ -39,9 +39,11 @@ const sendResponse = async (
   return new Promise<boolean>((resolve, reject) => {
     const request = https.request(options, (response) => {
       console.log(`Status Code: ${response.statusCode}`);
-      response.statusCode === 200
-        ? resolve(true)
-        : reject(new Error(`Failed to send response: ${response.statusCode}`));
+      if (response.statusCode === 200) {
+        resolve(true);
+      } else {
+        reject(new Error(`Failed to send response: ${response.statusCode}`));
+      }
     });
 
     request.on('error', (error) => {
