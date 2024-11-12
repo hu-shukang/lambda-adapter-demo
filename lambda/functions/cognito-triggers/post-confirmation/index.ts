@@ -1,4 +1,4 @@
-import { updateUser } from '/opt/nodejs/dist/utils';
+import { updateUser } from '/opt/nodejs/utils';
 import { PostConfirmationTriggerEvent } from 'aws-lambda';
 
 export const handler = async (event: PostConfirmationTriggerEvent): Promise<any> => {

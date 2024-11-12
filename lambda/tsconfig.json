@@ -10,11 +10,10 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
     "rootDir": "./",
     "baseUrl": ".",
     "paths": {
-      "/opt/nodejs/dist/*": ["common-layer/nodejs/*"]
+      "/opt/nodejs/*": ["common-layer/nodejs/*"]
     }
   },
   "exclude": ["node_modules", "**/*.test.ts"],

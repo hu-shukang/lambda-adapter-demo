@@ -6,3 +6,4 @@ node_modules
 cdk.out
 dist
 stats.html
+lambda/**/*.js

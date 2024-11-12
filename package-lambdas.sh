@@ -5,7 +5,7 @@ set -euo pipefail
 # 定义一些变量
 ASSET_BUCKET=$1
 TIMESTAMP=$2
-LAMBDA_DIST_DIR="${CODEBUILD_SRC_DIR}/lambda/dist"
+LAMBDA_DIST_DIR="${CODEBUILD_SRC_DIR}/lambda/functions"
 
 for lambda_dir in $(find "${LAMBDA_DIST_DIR}" -mindepth 1 -maxdepth 3 -type d); do
   if [ -f "${lambda_dir}/index.js" ]; then
