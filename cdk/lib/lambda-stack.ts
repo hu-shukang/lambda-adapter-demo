@@ -65,11 +65,11 @@ export class LambdaStack extends cdk.Stack {
       sortKey: { name: 'updateTime', type: dynamodb.AttributeType.STRING },
     });
 
-    // userTable.addGlobalSecondaryIndex({
-    //   indexName: 'EMAIL_USER',
-    //   partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
-    //   sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
-    // });
+    userTable.addGlobalSecondaryIndex({
+      indexName: 'EMAIL_USER',
+      partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
+    });
 
     // DynamoDB -- logTable
     const _logTable = new dynamodb.Table(this, envs.LOG_TBL, {
