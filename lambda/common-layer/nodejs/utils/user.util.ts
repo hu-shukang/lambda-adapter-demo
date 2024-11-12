@@ -78,7 +78,7 @@ export const queryUserByEmail = async (email: string, sk?: string) => {
   const command = new QueryCommand({
     TableName: process.env.USER_TBL!,
     IndexName: 'EMAIL_USER',
-    KeyConditionExpression: `email = :email${sk ? 'AND sk = :sk' : ''}`,
+    KeyConditionExpression: `email = :email${sk ? ' AND sk = :sk' : ''}`,
     ExpressionAttributeValues: {
       ':email': email,
       ':sk': sk,

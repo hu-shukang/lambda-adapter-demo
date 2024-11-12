@@ -63,6 +63,8 @@ export default function AuthProviderCallbackPage() {
   const [searchParams, _] = useSearchParams();
 
   useEffect(() => {
+    console.log(searchParams.size);
+    console.log('----------------------');
     const errorDesc = searchParams.get('error_description');
     if (errorDesc) {
       const regex = /error\s+(\w+)/;
