@@ -63,8 +63,8 @@ export const handler = async (event: PreSignUpTriggerEvent): Promise<any> => {
     if (event.triggerSource === 'PreSignUp_SignUp' && cognitoUserStatus === 'EXTERNAL_PROVIDER') {
       const { provider } = getProviderAndUserId(existingEmployeeNo);
       throw new Error(`EXIST_WITH_${provider}`);
-    } else if (cognitoUserStatus === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED') {
-      throw new Error(`INIT_PASSWORD`);
+    } else if (cognitoUserStatus === 'FORCE_CHANGE_PASSWORD') {
+      throw new Error(`FORCE_CHANGE_PASSWORD`);
     } else if (event.triggerSource === 'PreSignUp_ExternalProvider') {
       const { userId, provider } = getProviderAndUserId(event.userName);
       await linkUser(userId, provider, existingEmployeeNo);

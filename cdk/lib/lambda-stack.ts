@@ -213,10 +213,29 @@ export class LambdaStack extends cdk.Stack {
       sourceArn: userPool.userPoolArn,
     });
 
+    const postAuthenticationTriggerLambda = new lambda.Function(
+      this,
+      `${envs.APP_NAME}-post-authentication-trigger-${envs.ENV}`,
+      {
+        functionName: `${envs.APP_NAME}-post-authentication-trigger-${envs.ENV}`,
+        description: `${envs.APP_NAME}-post-authentication-trigger-${envs.ENV}`,
+        code: lambda.Code.fromBucket(assetBucket, `post-authentication-${timestamp}.zip`),
+        handler: 'index.handler',
+        runtime: lambda.Runtime.NODEJS_20_X,
+        layers: [commonLayer],
+        ...lambdaProps,
+      },
+    );
+    postAuthenticationTriggerLambda.addPermission('AllowCognitoInvoke', {
+      principal: new iam.ServicePrincipal('cognito-idp.amazonaws.com'),
+      sourceArn: userPool.userPoolArn,
+    });
+
     this.addTrigerToUserPool(envs, updateCognitoTriggerLambda, {
       PreSignUp: preSignupTriggerLambda.functionArn,
       PostConfirmation: postConfirmationTriggerLambda.functionArn,
       PreTokenGeneration: preTokenTriggerLambda.functionArn,
+      PostAuthentication: postAuthenticationTriggerLambda.functionArn,
     });
 
     const serverLambda = new lambda.Function(this, `${envs.APP_NAME}-server-${envs.ENV}`, {

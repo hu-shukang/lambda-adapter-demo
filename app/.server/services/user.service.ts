@@ -36,6 +36,7 @@ class UserService extends CommonService {
     });
     const userAttributes = user?.Attributes;
     const sub = userAttributes?.find((a) => a.Name === 'sub')?.Value;
+    const cognitoUserStatus = user?.UserStatus;
 
     const tagQueryCommand = new QueryCommand({
       TableName: this.tagTableName,
@@ -61,7 +62,7 @@ class UserService extends CommonService {
               employeeNo: userInput.employeeNo,
               name: userInput.name,
               status: userInput.status,
-              cognitoUserStatus: CONST.USER.COGNITO_STATUS.CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED,
+              cognitoUserStatus: cognitoUserStatus,
               sub: sub,
               updateTime: dateUtil.utc(),
               updateUser: payload['cognito:username'],
@@ -91,7 +92,7 @@ class UserService extends CommonService {
               employeeNo: userInput.employeeNo,
               name: userInput.name,
               status: userInput.status,
-              cognitoUserStatus: CONST.USER.COGNITO_STATUS.CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED,
+              cognitoUserStatus: cognitoUserStatus,
               sub: sub,
               updateTime: dateUtil.utc(),
               updateUser: payload['cognito:username'],
