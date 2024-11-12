@@ -10,8 +10,13 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "rootDir": "./",
+    "baseUrl": ".",
+    "paths": {
+      "/opt/nodejs/dist/*": ["common-layer/nodejs/*"]
+    }
   },
   "exclude": ["node_modules", "**/*.test.ts"],
-  "include": ["**/functions/**/*.ts"]
+  "include": ["./**/*.ts"]
 }
