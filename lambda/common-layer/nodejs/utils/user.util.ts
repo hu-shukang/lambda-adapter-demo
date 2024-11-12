@@ -54,8 +54,9 @@ export const updateUser = async (userAttributes: Record<string, string>) => {
   }
 
   if (transactItems.length > 0) {
+    console.log('transactItems', transactItems);
     const transactCommand = new TransactWriteCommand({
-      TransactItems: [],
+      TransactItems: transactItems,
     });
     await DB.client.send(transactCommand);
   }
