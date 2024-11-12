@@ -66,9 +66,9 @@ export class LambdaStack extends cdk.Stack {
     });
 
     userTable.addGlobalSecondaryIndex({
-      indexName: 'ORGANIZATION_USER',
-      partitionKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'organization', type: dynamodb.AttributeType.STRING },
+      indexName: 'EMAIL_USER',
+      partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
     });
 
     // DynamoDB -- logTable

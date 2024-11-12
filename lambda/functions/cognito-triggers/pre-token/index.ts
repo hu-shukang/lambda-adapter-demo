@@ -1,27 +1,24 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { PreTokenGenerationTriggerEvent } from 'aws-lambda';
+import { queryUserByEmail } from '/opt/nodejs/utils';
 
 const client = new DynamoDBClient({});
 const ddbDocClient = DynamoDBDocumentClient.from(client);
 
 export const handler = async (event: PreTokenGenerationTriggerEvent): Promise<any> => {
   console.log('Event: ', JSON.stringify(event, null, 2));
-  const { userName } = event;
-  const command = new QueryCommand({
-    TableName: process.env.USER_TBL!,
-    KeyConditionExpression: 'pk = :pk',
-    ExpressionAttributeValues: {
-      ':pk': userName,
+  const {
+    request: {
+      userAttributes: { email },
     },
-  });
-  const dbResult = await ddbDocClient.send(command);
-  const user = dbResult.Items;
-  if (!user) {
+  } = event;
+  const items = await queryUserByEmail(email);
+  if (!items) {
     throw new Error('get token failed');
   }
-  const userInfo = user.find((u) => u.sk === 'USER_INFO')!;
-  const userOrgs = user.filter((u) => u.sk.startsWith('USER_ORG'));
+  const userInfo = items.find((u) => u.sk === 'USER_INFO')!;
+  const userOrgs = items.filter((u) => u.sk.startsWith('USER_ORG'));
 
   if (userInfo.status === 'BLOCKED') {
     throw new Error('USER_BLOCKED');

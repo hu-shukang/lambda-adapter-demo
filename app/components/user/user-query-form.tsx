@@ -40,7 +40,7 @@ export default function UserQueryForm({ onSubmit, defaultValues }: Props) {
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="SK_TIME">作成順</SelectItem>
-                    <SelectItem value="ORGANIZATION_USER">組織順</SelectItem>
+                    <SelectItem value="EMAIL_USER">組織順</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

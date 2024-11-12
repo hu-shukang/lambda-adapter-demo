@@ -73,3 +73,15 @@ export const getUser = async (pk: string) => {
   const resp = await DB.client.send(command);
   return resp.Item;
 };
+
+export const queryUserByEmail = async (email: string) => {
+  const command = new QueryCommand({
+    TableName: process.env.USER_TBL!,
+    KeyConditionExpression: 'email = :email',
+    ExpressionAttributeValues: {
+      ':email': email,
+    },
+  });
+  const resp = await DB.client.send(command);
+  return resp.Items;
+};

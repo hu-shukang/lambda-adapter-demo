@@ -131,7 +131,7 @@ class UserService extends CommonService {
       expressionAttributeValues[':name'] = query.name;
     }
     if (query.organization) {
-      if (query.sort === CONST.DB.INDEXS.ORGANIZATION_USER) {
+      if (query.sort === CONST.DB.INDEXS.EMAIL_USER) {
         keyConditionExpression.push('organization = :organization');
       } else {
         filterExpression.push('organization = :organization');
