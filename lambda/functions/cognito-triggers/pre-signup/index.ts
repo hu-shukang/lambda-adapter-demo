@@ -45,7 +45,7 @@ export const handler = async (event: PreSignUpTriggerEvent): Promise<any> => {
   } = event;
   const output = await queryUserByEmail(email, 'USER_INFO');
   console.log(`query output: ${output ? JSON.stringify(output) : 'null'}`);
-  if (output) {
+  if (output && output.length > 0) {
     const existingUser = output[0];
     const cognitoUserStatus = existingUser.cognitoUserStatus;
     const existingEmployeeNo = existingUser.employeeNo as string;
@@ -57,6 +57,8 @@ export const handler = async (event: PreSignUpTriggerEvent): Promise<any> => {
     } else if (triggerSource === 'PreSignUp_ExternalProvider') {
       const { userId, provider } = getProviderAndUserId(userName);
       await linkUser(userId, provider, existingEmployeeNo);
+    } else {
+      throw new Error(`EXIST_WITH_COGNITO`);
     }
   }
 

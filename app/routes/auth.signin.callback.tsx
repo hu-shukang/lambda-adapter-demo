@@ -1,6 +1,6 @@
 import 'aws-amplify/auth/enable-oauth-listener';
 import { ReactElement, useEffect, useState } from 'react';
-import { Link, useSearchParams, useSubmit } from '@remix-run/react';
+import { Link, SubmitFunction, useLocation, useSubmit } from '@remix-run/react';
 import { Button } from '~/components/ui/button';
 import { useGlobalStore } from '~/stores/global.store';
 import { toSignin } from '~/lib/auth.client';
@@ -45,10 +45,7 @@ function LoginFail() {
   );
 }
 
-function LoginSuccess() {
-  const submit = useSubmit();
-  const redirect = useGlobalStore((state) => state.redirect);
-
+function LoginSuccess(submit: SubmitFunction, redirect: string | null | undefined) {
   return (
     <div>
       <div>認証成功しました。下記のボタンを押下してお入りください。</div>
@@ -58,13 +55,13 @@ function LoginSuccess() {
 }
 
 export default function AuthProviderCallbackPage() {
-  // const [seconds, setSeconds] = useState(3);
   const [message, setMessage] = useState<ReactElement>(AuthProgressing());
-  const [searchParams, _] = useSearchParams();
+  const location = useLocation();
+  const submit = useSubmit();
+  const redirect = useGlobalStore((state) => state.redirect);
 
   useEffect(() => {
-    console.log(searchParams.size);
-    console.log('----------------------');
+    const searchParams = new URLSearchParams(location.search);
     const errorDesc = searchParams.get('error_description');
     if (errorDesc) {
       const regex = /error\s+(\w+)/;
@@ -77,11 +74,10 @@ export default function AuthProviderCallbackPage() {
       } else {
         setMessage(LoginFail());
       }
+    } else {
+      setMessage(LoginSuccess(submit, redirect));
     }
-    if (searchParams.size === 0) {
-      setMessage(LoginSuccess());
-    }
-  }, [searchParams]);
+  }, [location, redirect, submit]);
 
   return message;
 }
