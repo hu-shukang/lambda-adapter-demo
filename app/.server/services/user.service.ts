@@ -9,7 +9,12 @@ import { DB } from '../utils/dynamodb.util';
 import { TagInfo } from '~/models/tag.model';
 import { v7 } from 'uuid';
 import { Mail } from '../utils/mail.util';
-import { EmailAlreadyUsedError, EmployeeNoAlreadyUsedError } from '~/models/error.model';
+import {
+  DeleteSelfError,
+  EmailAlreadyUsedError,
+  EmployeeNoAlreadyUsedError,
+  UserNotFoundError,
+} from '~/models/error.model';
 
 class UserService extends CommonService {
   private tableName = process.env.USER_TBL!;
@@ -17,9 +22,12 @@ class UserService extends CommonService {
 
   public async get(payload: IdTokenPayload): Promise<UserInfoView> {
     const output = await this.getOne(this.tableName, { pk: payload.employeeNo, sk: CONST.DB.USER_INFO });
+    if (!output.Item) {
+      throw new UserNotFoundError();
+    }
     const { pk: _pk, sk: _sk, cognitoUserStatus, ...attr } = output.Item as UserInfo;
-    let provider = 'password';
-    if (cognitoUserStatus.startsWith('EXTERNAL_PROVIDER')) {
+    let provider: string = CONST.COGNITO.PASSWORD;
+    if (cognitoUserStatus.startsWith(CONST.COGNITO.EXTERNAL_PROVIDER)) {
       provider = cognitoUserStatus.split(':').pop() as string;
     }
     const userInfoView: UserInfoView = {
@@ -128,14 +136,14 @@ class UserService extends CommonService {
     return dbResult;
   }
 
-  public async delete(employeeNo: string) {
+  public async delete(employeeNo: string, payload: CognitoIdTokenPayload) {
     // Query all organization relations
     const queryCommand = new QueryCommand({
       TableName: this.tableName,
       IndexName: CONST.DB.INDEXS.USER_SK,
-      KeyConditionExpression: 'pk = :pk',
+      KeyConditionExpression: 'employeeNo = :employeeNo',
       ExpressionAttributeValues: {
-        ':pk': employeeNo,
+        ':employeeNo': employeeNo,
       },
     });
     const userDataResult = await DB.client.send(queryCommand);
@@ -143,23 +151,16 @@ class UserService extends CommonService {
     if (userDataList.length === 0) {
       throw new UserNotFoundError();
     }
+    // can not delete self
+    if (userDataList.some((item) => item.pk === payload.employeeNo)) {
+      throw new DeleteSelfError();
+    }
     // Delete user from Cognito
     await Cognito.Admin.deleteUser(employeeNo);
 
     // Delete all related records in DynamoDB
     const command = new TransactWriteCommand({
       TransactItems: [
-        // Delete user info
-        {
-          Delete: {
-            TableName: this.tableName,
-            Key: {
-              pk: employeeNo,
-              sk: CONST.DB.USER_INFO,
-            },
-          },
-        },
-        // Delete user-org relations
         ...userDataList.map((item) => ({
           Delete: {
             TableName: this.tableName,

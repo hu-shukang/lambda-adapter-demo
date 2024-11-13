@@ -44,6 +44,10 @@ export const idSchema = z.object({
   id: z.string(),
 });
 
+export const employeeNoInputSchema = z.object({
+  employeeNo: employeeNo,
+});
+
 export const signinInputSchema = z.object({
   username: username,
   password: password,
@@ -120,6 +124,7 @@ export type PasswordInput = z.infer<typeof passwordInputSchema>;
 export type ConfirmationCodeInput = z.infer<typeof confirmationCodeInputSchema>;
 export type TokenInput = z.infer<typeof tokenInputSchema>;
 export type AccountUpdateInput = z.infer<typeof accountUpdateInputSchema>;
+export type EmployeeNoInput = z.infer<typeof employeeNoInputSchema>;
 
 export type ID = z.infer<typeof idSchema>;
 

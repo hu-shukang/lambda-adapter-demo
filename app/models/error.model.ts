@@ -53,3 +53,10 @@ export class UserNotFoundError extends BaseError {
     super('UserNotFound', 400, 'UserNotFoundError', 'ユーザが見つからない');
   }
 }
+
+// delete self
+export class DeleteSelfError extends BaseError {
+  constructor() {
+    super('DeleteSelf', 400, 'DeleteSelfError', '自分自身を削除できない');
+  }
+}
