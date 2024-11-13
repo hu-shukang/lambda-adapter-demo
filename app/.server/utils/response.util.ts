@@ -51,7 +51,7 @@ const sendJson = async (request: Request, data: any, init?: number | ResponseIni
   }
   await refreshIdTokenCookie(request, headers, payload);
   respInit.headers = headers;
-  return json(data, respInit);
+  return Response.json(data, respInit);
 };
 
 const sendRedirect = async (request: Request, url: string, init?: number | ResponseInit) => {

@@ -19,9 +19,17 @@ type Props = {
   tags: TagInfo[];
   defaultValues?: UserInfo | undefined;
   submitButtonText?: string | undefined;
+  progressing: boolean;
 };
 
-export default function UserForm({ onSubmit, organizations, tags, defaultValues, submitButtonText }: Props) {
+export default function UserForm({
+  onSubmit,
+  organizations,
+  tags,
+  defaultValues,
+  submitButtonText,
+  progressing,
+}: Props) {
   const [tagList, setTagList] = useState(tags);
   const form = useForm<UserInfoInput>({
     defaultValues: {
@@ -174,7 +182,9 @@ export default function UserForm({ onSubmit, organizations, tags, defaultValues,
           )}
         />
 
-        <Button type="submit">{submitButtonText || '新規作成'}</Button>
+        <Button type="submit" loading={progressing}>
+          {submitButtonText || '新規作成'}
+        </Button>
       </form>
     </Form>
   );

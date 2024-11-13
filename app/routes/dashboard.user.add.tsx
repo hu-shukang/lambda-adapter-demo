@@ -1,5 +1,5 @@
 import { ActionFunction, LoaderFunction } from '@remix-run/node';
-import { UIMatch, useActionData, useRouteLoaderData, useSubmit } from '@remix-run/react';
+import { UIMatch, useActionData, useNavigation, useRouteLoaderData, useSubmit } from '@remix-run/react';
 import { useEffect } from 'react';
 import { SubmitHandler } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -22,6 +22,7 @@ export default function UserAddPage() {
   const loaderData = useRouteLoaderData<LoaderFunction>('routes/dashboard.user');
   const actionData = useActionData<ActionFunction>();
   const submit = useSubmit();
+  const navigation = useNavigation();
 
   const onSubmit: SubmitHandler<UserInfoInput> = async (data) => {
     const formData = getFormDataFromObject(data);
@@ -44,6 +45,7 @@ export default function UserAddPage() {
           onSubmit={onSubmit}
           organizations={loaderData?.data.organizations || []}
           tags={loaderData?.data.tags || []}
+          progressing={navigation.state === 'submitting'}
         />
       </div>
     </div>

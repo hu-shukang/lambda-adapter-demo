@@ -1,4 +1,4 @@
-import { ActionFunction, json, LoaderFunction, redirect } from '@remix-run/node';
+import { ActionFunction, LoaderFunction, redirect } from '@remix-run/node';
 import { ZodSchema } from 'zod';
 import { Cookie } from './cookie.util';
 import { Cognito } from './cognito.util';
@@ -31,7 +31,7 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
       const form = formDataToObject(formData);
       const parseResult = schema.safeParse(form);
       if (!parseResult.success) {
-        return json({ error: 'Invalid request body', details: parseResult.error.errors }, { status: 400 });
+        return Response.json({ error: 'Invalid request body', details: parseResult.error.errors }, { status: 400 });
       }
       console.log(`[bodyData]: ${JSON.stringify(parseResult.data)}`);
       args.context.bodyData = parseResult.data;
@@ -47,7 +47,10 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
     const newFunc = async (args: Parameters<T>[0]) => {
       const parseResult = schema.safeParse(args.params);
       if (!parseResult.success) {
-        return json({ error: 'Invalid request path parameters', details: parseResult.error.errors }, { status: 400 });
+        return Response.json(
+          { error: 'Invalid request path parameters', details: parseResult.error.errors },
+          { status: 400 },
+        );
       }
       console.log(`[paramsData]: ${JSON.stringify(parseResult.data)}`);
       args.context.paramsData = parseResult.data;
@@ -68,7 +71,10 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
       }
       const parseResult = schema.safeParse(data);
       if (!parseResult.success) {
-        return json({ error: 'Invalid request query strings', details: parseResult.error.errors }, { status: 400 });
+        return Response.json(
+          { error: 'Invalid request query strings', details: parseResult.error.errors },
+          { status: 400 },
+        );
       }
       console.log(`[queryData]: ${JSON.stringify(parseResult.data)}`);
       args.context.queryData = parseResult.data;
@@ -126,9 +132,9 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
         return resp;
       } catch (e: any) {
         if (e instanceof BaseError) {
-          return json({ error: e.message, code: e.code }, { status: e.status });
+          return Response.json({ error: e.message, code: e.code }, { status: e.status });
         } else {
-          throw json({ error: e.message, code: '' }, { status: 500 });
+          throw e;
         }
       }
     };

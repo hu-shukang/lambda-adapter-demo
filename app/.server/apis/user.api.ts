@@ -1,7 +1,14 @@
 import { RequestWrapper } from '../utils/request.util';
 import { Resp } from '../utils/response.util';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
-import { UserInfoInput, userInfoInputSchema, UserQueryInput, userQueryInputSchema } from '~/models/user.model';
+import {
+  EmployeeNoInput,
+  employeeNoInputSchema,
+  UserInfoInput,
+  userInfoInputSchema,
+  UserQueryInput,
+  userQueryInputSchema,
+} from '~/models/user.model';
 import { userService } from '../services/user.service';
 import { CONST } from '~/lib/const';
 
@@ -13,6 +20,15 @@ const createAction = RequestWrapper.init(async ({ context, request }) => {
 })
   .withLogin()
   .withBodyValid(userInfoInputSchema)
+  .action();
+
+const deleteAction = RequestWrapper.init(async ({ context, request }) => {
+  const form = context.bodyData as EmployeeNoInput;
+  await userService.delete(form.employeeNo, context.payload!);
+  return Resp.json(request, { success: true });
+})
+  .withLogin()
+  .withBodyValid(employeeNoInputSchema)
   .action();
 
 const queryLoader = RequestWrapper.init(async ({ context, request }) => {
@@ -34,6 +50,7 @@ const getLoader = RequestWrapper.init(async ({ context, request }) => {
 export const UserAPI = {
   actions: {
     create: createAction,
+    delete: deleteAction,
   },
   loader: {
     query: queryLoader,
