@@ -128,7 +128,7 @@ export class RequestWrapper<T extends LoaderFunction | ActionFunction> {
         if (e instanceof BaseError) {
           return json({ error: e.message, code: e.code }, { status: e.status });
         } else {
-          throw e;
+          throw json({ error: e.message, code: '' }, { status: 500 });
         }
       }
     };

@@ -1,6 +1,8 @@
-import { LoaderFunction } from '@remix-run/node';
-import { UIMatch, useRouteLoaderData, useSubmit } from '@remix-run/react';
+import { ActionFunction, LoaderFunction } from '@remix-run/node';
+import { UIMatch, useActionData, useRouteLoaderData, useSubmit } from '@remix-run/react';
+import { useEffect } from 'react';
 import { SubmitHandler } from 'react-hook-form';
+import { toast } from 'sonner';
 import { UserAPI } from '~/.server/apis/user.api';
 import Title from '~/components/common/title';
 import UserForm from '~/components/user/user-form';
@@ -18,12 +20,19 @@ export const action = UserAPI.actions.create;
 
 export default function UserAddPage() {
   const loaderData = useRouteLoaderData<LoaderFunction>('routes/dashboard.user');
+  const actionData = useActionData<ActionFunction>();
   const submit = useSubmit();
 
   const onSubmit: SubmitHandler<UserInfoInput> = async (data) => {
     const formData = getFormDataFromObject(data);
     submit(formData, { method: 'POST' });
   };
+
+  useEffect(() => {
+    if (actionData?.error) {
+      toast.error(actionData.error);
+    }
+  }, [actionData]);
 
   return (
     <div className="page-container">

@@ -32,3 +32,24 @@ export class OrganizationSelfParentError extends BaseError {
     super('OrganizationSelfParent', 400, 'OrganizationSelfParentError', '自分を親組織にすることができない');
   }
 }
+
+// employeeNo is already used
+export class EmployeeNoAlreadyUsedError extends BaseError {
+  constructor() {
+    super('EmployeeNoAlreadyUsed', 400, 'EmployeeNoAlreadyUsedError', '社員番号が既に使用されている');
+  }
+}
+
+// email is already used
+export class EmailAlreadyUsedError extends BaseError {
+  constructor() {
+    super('EmailAlreadyUsed', 400, 'EmailAlreadyUsedError', 'メールアドレスが既に使用されている');
+  }
+}
+
+// user not found
+export class UserNotFoundError extends BaseError {
+  constructor() {
+    super('UserNotFound', 400, 'UserNotFoundError', 'ユーザが見つからない');
+  }
+}

@@ -9,6 +9,7 @@ import { DB } from '../utils/dynamodb.util';
 import { TagInfo } from '~/models/tag.model';
 import { v7 } from 'uuid';
 import { Mail } from '../utils/mail.util';
+import { EmailAlreadyUsedError, EmployeeNoAlreadyUsedError } from '~/models/error.model';
 
 class UserService extends CommonService {
   private tableName = process.env.USER_TBL!;
@@ -30,6 +31,16 @@ class UserService extends CommonService {
   }
 
   public async create(userInput: UserInfoInput, payload: CognitoIdTokenPayload) {
+    const userQueryResult = await this.queryByEmail(userInput.email);
+    if (userQueryResult.length > 0) {
+      throw new EmailAlreadyUsedError();
+    }
+
+    const userQueryResult2 = await this.getOne(this.tableName, { pk: userInput.employeeNo, sk: CONST.DB.USER_INFO });
+    if (userQueryResult2.Item) {
+      throw new EmployeeNoAlreadyUsedError();
+    }
+
     const { user, initPassword } = await Cognito.Admin.createUser(userInput.employeeNo, userInput.email, {
       name: userInput.name,
     });
@@ -75,6 +86,7 @@ class UserService extends CommonService {
               pk: userInput.employeeNo,
               sk: `${CONST.DB.USER_ORG}#${o.organization}`,
               position: o.position,
+              employeeNo: userInput.employeeNo,
               updateTime: dateUtil.utc(),
               updateUser: payload['cognito:username'],
             },
@@ -116,6 +128,54 @@ class UserService extends CommonService {
     return dbResult;
   }
 
+  public async delete(employeeNo: string) {
+    // Query all organization relations
+    const queryCommand = new QueryCommand({
+      TableName: this.tableName,
+      IndexName: CONST.DB.INDEXS.USER_SK,
+      KeyConditionExpression: 'pk = :pk',
+      ExpressionAttributeValues: {
+        ':pk': employeeNo,
+      },
+    });
+    const userDataResult = await DB.client.send(queryCommand);
+    const userDataList = userDataResult.Items || [];
+    if (userDataList.length === 0) {
+      throw new UserNotFoundError();
+    }
+    // Delete user from Cognito
+    await Cognito.Admin.deleteUser(employeeNo);
+
+    // Delete all related records in DynamoDB
+    const command = new TransactWriteCommand({
+      TransactItems: [
+        // Delete user info
+        {
+          Delete: {
+            TableName: this.tableName,
+            Key: {
+              pk: employeeNo,
+              sk: CONST.DB.USER_INFO,
+            },
+          },
+        },
+        // Delete user-org relations
+        ...userDataList.map((item) => ({
+          Delete: {
+            TableName: this.tableName,
+            Key: {
+              pk: item.pk,
+              sk: item.sk,
+            },
+          },
+        })),
+      ],
+    });
+
+    await DB.client.send(command);
+    return true;
+  }
+
   public async query(query: UserQueryInput) {
     const keyConditionExpression = ['sk = :sk'];
     const filterExpression = [];
@@ -145,6 +205,20 @@ class UserService extends CommonService {
       KeyConditionExpression: keyConditionExpression.join(' AND '),
       FilterExpression: filterExpression.length > 0 ? filterExpression.join(' AND ') : undefined,
       ExpressionAttributeValues: expressionAttributeValues,
+    });
+    const result = await DB.client.send(command);
+    return result.Items || [];
+  }
+
+  public async queryByEmail(email: string, sk?: string) {
+    const command = new QueryCommand({
+      TableName: this.tableName,
+      IndexName: CONST.DB.INDEXS.EMAIL_USER,
+      KeyConditionExpression: `email = :email${sk ? ' AND sk = :sk' : ''}`,
+      ExpressionAttributeValues: {
+        ':email': email,
+        ':sk': sk,
+      },
     });
     const result = await DB.client.send(command);
     return result.Items || [];

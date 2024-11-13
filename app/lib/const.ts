@@ -14,6 +14,7 @@ export const CONST = {
       ORGANIZATION_PARENT: 'ORGANIZATION_PARENT',
       EMAIL_USER: 'EMAIL_USER',
       SK_TIME: 'SK_TIME',
+      USER_SK: 'USER_SK',
     },
   },
   USER: {
