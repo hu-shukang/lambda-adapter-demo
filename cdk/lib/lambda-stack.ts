@@ -10,6 +10,7 @@ import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { LambdaConfigType } from '../bin/type';
 
@@ -21,6 +22,8 @@ export class LambdaStack extends cdk.Stack {
     const lambdaRole = iam.Role.fromRoleArn(this, `${envs.APP_NAME}-lambda-role-${envs.ENV}`, envs.LAMBDA_ROLE_ARN, {
       mutable: false,
     });
+
+    const databaseUrl = ssm.StringParameter.valueForStringParameter(this, `/${envs.APP_NAME}/${envs.ENV}/db/url`);
 
     /* web bucket */
     const webBucketArn = cdk.Fn.importValue(`${envs.WEB_BUCKET}-arn`);
@@ -130,16 +133,25 @@ export class LambdaStack extends cdk.Stack {
       compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
     });
 
+    const prismaLayer = new lambda.LayerVersion(this, `${envs.APP_NAME}-prisma-layer-${envs.ENV}`, {
+      layerVersionName: `${envs.APP_NAME}-prisma-layer-${envs.ENV}`,
+      code: lambda.Code.fromBucket(assetBucket, `prisma-layer-${timestamp}.zip`),
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
+    });
+
     const lambdaProps = {
       role: lambdaRole,
       timeout: cdk.Duration.minutes(15),
       memorySize: 2048,
+      layers: [commonLayer, prismaLayer],
       environment: {
         ...envs,
         USER_POOL_ID: userPoolId,
         USER_POOL_CLIENT_ID: userPoolClientId,
         USER_POOL_DOMAIN_PREFIX: `${envs.APP_NAME}-${envs.ENV}`,
         LOG_SQS_URL: logQueue.queueUrl,
+        DATABASE_URL: databaseUrl,
       },
     };
 
@@ -149,7 +161,6 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromBucket(assetBucket, `log-write-${timestamp}.zip`),
       handler: 'index.handler',
       runtime: lambda.Runtime.NODEJS_20_X,
-      layers: [commonLayer],
       ...lambdaProps,
     });
 
@@ -168,7 +179,6 @@ export class LambdaStack extends cdk.Stack {
         code: lambda.Code.fromBucket(assetBucket, `update-cognito-trigger-${timestamp}.zip`),
         handler: 'index.handler',
         runtime: lambda.Runtime.NODEJS_20_X,
-        layers: [commonLayer],
         ...lambdaProps,
       },
     );
@@ -179,7 +189,6 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromBucket(assetBucket, `pre-signup-${timestamp}.zip`),
       handler: 'index.handler',
       runtime: lambda.Runtime.NODEJS_20_X,
-      layers: [commonLayer],
       ...lambdaProps,
     });
     preSignupTriggerLambda.addPermission('AllowCognitoInvoke', {
@@ -196,7 +205,6 @@ export class LambdaStack extends cdk.Stack {
         code: lambda.Code.fromBucket(assetBucket, `post-confirmation-${timestamp}.zip`),
         handler: 'index.handler',
         runtime: lambda.Runtime.NODEJS_20_X,
-        layers: [commonLayer],
         ...lambdaProps,
       },
     );
@@ -211,7 +219,6 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromBucket(assetBucket, `pre-token-${timestamp}.zip`),
       handler: 'index.handler',
       runtime: lambda.Runtime.NODEJS_20_X,
-      layers: [commonLayer],
       ...lambdaProps,
     });
     preTokenTriggerLambda.addPermission('AllowCognitoInvoke', {
@@ -228,7 +235,6 @@ export class LambdaStack extends cdk.Stack {
         code: lambda.Code.fromBucket(assetBucket, `post-authentication-${timestamp}.zip`),
         handler: 'index.handler',
         runtime: lambda.Runtime.NODEJS_20_X,
-        layers: [commonLayer],
         ...lambdaProps,
       },
     );
