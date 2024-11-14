@@ -1,17 +1,8 @@
 import { z } from 'zod';
-import {
-  UpdateUserAndTime,
-  DBKey,
-  organizationName,
-  organizationPriority,
-  pkNullable,
-  pk,
-  Expand,
-} from './common.model';
+import { UpdateUserAndTime, DBKey, organizationName, pkNullable, pk, Expand } from './common.model';
 
 export const organizationInputSchema = z.object({
   name: organizationName,
-  priority: organizationPriority,
   parent: pkNullable,
 });
 

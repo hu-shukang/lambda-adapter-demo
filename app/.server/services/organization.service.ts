@@ -1,102 +1,81 @@
-import { OrganizationInfo, OrganizationInput, OrganizationOne } from '~/models/organization.model';
-import { CommonService } from './common.service';
+import { OrganizationInput } from '~/models/organization.model';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 import { v7 } from 'uuid';
-import { CONST } from '~/lib/const';
 import { dateUtil } from '~/lib/date.util';
-import { QueryCommand } from '@aws-sdk/lib-dynamodb';
-import { DB } from '../utils/dynamodb.util';
 import {
   OrganizationDeadLockError,
   OrganizationHasChildError,
   OrganizationNotFoundError,
   OrganizationSelfParentError,
 } from '~/models/error.model';
-import lodash from 'lodash';
+import { CommonService } from './common.service';
+import { Organization } from '@prisma/client';
 
 class OrganizationService extends CommonService {
-  private tableName = process.env.USER_TBL!;
-
   /**
    * 組織を新規作成
    * @param input 組織情報
    * @param payload idToken payload
    * @returns 作成結果
    */
-  public create(input: OrganizationInput, payload: CognitoIdTokenPayload) {
-    return this.createOne(
-      this.tableName,
-      { pk: v7(), sk: CONST.DB.ORGANIZATION_INFO },
-      {
-        ...input,
-        updateUser: payload['cognito:username'],
+  public async create(input: OrganizationInput, payload: CognitoIdTokenPayload) {
+    return await this.prisma.organization.create({
+      data: {
+        id: v7(),
+        name: input.name,
+        parentId: input.parent,
         updateTime: dateUtil.utc(),
+        updateUser: payload['cognito:username'],
       },
-    );
+    });
   }
 
   /**
    * 組織を全部取得する
    * @returns 組織リスト
    */
-  public async query(): Promise<OrganizationInfo[]> {
-    const command = new QueryCommand({
-      TableName: this.tableName,
-      IndexName: CONST.DB.INDEXS.ORGANIZATION_PRIORITY_ORDER,
-      KeyConditionExpression: 'sk = :sk',
-      ExpressionAttributeValues: {
-        ':sk': CONST.DB.ORGANIZATION_INFO,
-      },
-      ScanIndexForward: true,
-    });
-    const result = await DB.client.send(command);
-    if (!result.Items) {
-      return [];
-    }
-    const data = result.Items as OrganizationInfo[];
-    return lodash.sortBy(data, ['priority', 'updateTime']);
+  public async query(): Promise<Organization[]> {
+    return await this.prisma.organization.findMany();
   }
 
-  public async delete(pk: string) {
-    const queryCommand = new QueryCommand({
-      TableName: this.tableName,
-      IndexName: CONST.DB.INDEXS.ORGANIZATION_PARENT,
-      KeyConditionExpression: 'parent = :parent',
-      ExpressionAttributeValues: {
-        ':parent': pk,
-      },
-      Limit: 1,
-    });
-    const queryResult = await DB.client.send(queryCommand);
-    if (queryResult.Count && queryResult.Count > 0) {
+  public async delete(id: string) {
+    const children = await this.prisma.organization.findMany({ where: { parentId: id } });
+    if (children.length > 0) {
       throw new OrganizationHasChildError();
     }
-    return this.deleteOne(this.tableName, { pk: pk, sk: CONST.DB.ORGANIZATION_INFO });
+    return await this.prisma.organization.delete({ where: { id: id } });
   }
 
-  public async update(pk: string, input: OrganizationInput, payload: CognitoIdTokenPayload) {
+  public async update(id: string, input: OrganizationInput, payload: CognitoIdTokenPayload) {
+    if (id === input.parent) {
+      throw new OrganizationSelfParentError();
+    }
     if (input.parent) {
-      if (pk === input.parent) {
-        throw new OrganizationSelfParentError();
-      }
-      const item = await this.get({ pk: input.parent });
+      const item = await this.prisma.organization.findUnique({ where: { id: input.parent } });
       if (!item) {
         throw new OrganizationNotFoundError();
       }
-      if (item.parent === pk) {
+      if (item.parentId === id) {
         throw new OrganizationDeadLockError();
       }
     }
-
-    const key = { pk: pk, sk: CONST.DB.ORGANIZATION_INFO };
-    const updateTarget = { ...input, updateUser: payload['cognito:username'], updateTime: dateUtil.utc() };
-    return this.updateOne(this.tableName, key, updateTarget);
+    return await this.prisma.organization.update({
+      where: { id: id },
+      data: {
+        name: input.name,
+        parentId: input.parent,
+        updateTime: dateUtil.utc(),
+        updateUser: payload['cognito:username'],
+      },
+    });
   }
 
-  public async get(input: OrganizationOne) {
-    const { pk } = input;
-    const result = await this.getOne(this.tableName, { pk: pk, sk: CONST.DB.ORGANIZATION_INFO });
-    return result.Item;
+  public async get(id: string): Promise<Organization> {
+    const item = await this.prisma.organization.findUnique({ where: { id: id } });
+    if (!item) {
+      throw new OrganizationNotFoundError();
+    }
+    return item;
   }
 }
 

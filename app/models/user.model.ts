@@ -12,7 +12,6 @@ import {
   password,
   refreshToken,
   rePassword,
-  sort,
   UpdateUserAndTime,
   username,
   Expand,
@@ -30,11 +29,11 @@ export const userInfoInputSchema = z.object({
   employeeNo: employeeNo,
   name: name,
   status: status,
+  enterDay: z.string().datetime(),
   organizations: z.array(userOrganizationInputSchema).min(1),
 });
 
 export const userQueryInputSchema = z.object({
-  sort: sort,
   organization: organizationFilter,
   status: statusFilter,
   name: nameFilter,

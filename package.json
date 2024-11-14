@@ -6,7 +6,7 @@
   "scripts": {
     "prisma:studio": "npx prisma studio -y",
     "prisma:generate": "npx prisma generate",
-    "prisma:migrate": "npx prisma migrate dev --name init",
+    "prisma:migrate": "npx prisma migrate dev",
     "build": "remix vite:build",
     "build:lambda": "tsc --project lambda/tsconfig.json",
     "dev": "remix vite:dev",
@@ -22,10 +22,8 @@
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.666.0",
-    "@aws-sdk/client-dynamodb": "^3.665.0",
     "@aws-sdk/client-ses": "^3.687.0",
     "@aws-sdk/client-sqs": "^3.682.0",
-    "@aws-sdk/lib-dynamodb": "^3.665.0",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-checkbox": "^1.1.2",

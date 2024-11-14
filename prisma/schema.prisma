@@ -8,10 +8,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Tag {
+  id         String   @id
+  category   String
+  name       String
+  updateTime DateTime
+  updateUser String
+
+  @@index([category, updateTime], name: "idx_category_updatetime")
+}
+
 model Organization {
   id            String             @id
   name          String
-  description   String
   updateTime    DateTime
   updateUser    String
   parent        Organization?      @relation("OrganizationToOrganization", fields: [parentId], references: [id])
@@ -37,9 +46,10 @@ model UserOrganization {
   userId         String
   organization   Organization @relation(fields: [organizationId], references: [id])
   organizationId String
-  role           String
+  position       String
   updateTime     DateTime
   updateUser     String
 
   @@id([userId, organizationId])
+  @@index([organizationId])
 }

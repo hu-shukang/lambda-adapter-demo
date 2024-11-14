@@ -16,7 +16,6 @@ export const email = z.string({ required_error: '必須項目です' }).email({ 
 export const status = z.enum(CONST.USER.STATUS.LIST, { required_error: '必須項目です' });
 export const organization = z.string({ required_error: '必須項目です' }).uuid({ message: '組織は必須' });
 export const position = z.string({ required_error: '必須項目です' }).min(1, '必須項目です');
-export const sort = z.enum(['SK_TIME', 'EMAIL_USER'], { required_error: '必須項目です' });
 export const organizationFilter = z.string().uuid().optional();
 export const statusFilter = z.enum(CONST.USER.STATUS.LIST).optional();
 export const nameFilter = z.string().optional();

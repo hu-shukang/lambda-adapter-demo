@@ -1,228 +1,101 @@
 import { CommonService } from './common.service';
-import { IdTokenPayload, UserInfo, UserInfoInput, UserInfoView, UserQueryInput } from '~/models/user.model';
+import { IdTokenPayload, UserInfoInput, UserQueryInput } from '~/models/user.model';
 import { Cognito } from '../utils/cognito.util';
-import { CONST } from '~/lib/const';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 import { dateUtil } from '~/lib/date.util';
-import { QueryCommand, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
-import { DB } from '../utils/dynamodb.util';
-import { TagInfo } from '~/models/tag.model';
-import { v7 } from 'uuid';
 import { Mail } from '../utils/mail.util';
-import {
-  DeleteSelfError,
-  EmailAlreadyUsedError,
-  EmployeeNoAlreadyUsedError,
-  UserNotFoundError,
-} from '~/models/error.model';
+import { UserNotFoundError } from '~/models/error.model';
+import { User } from '@prisma/client';
 
 class UserService extends CommonService {
-  private tableName = process.env.USER_TBL!;
-  private tagTableName = process.env.TAG_TBL!;
-
-  public async get(payload: IdTokenPayload): Promise<UserInfoView> {
-    const output = await this.getOne(this.tableName, { pk: payload.employeeNo, sk: CONST.DB.USER_INFO });
-    if (!output.Item) {
+  public async get(payload: IdTokenPayload): Promise<User> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.employeeNo },
+      include: { organizations: true },
+    });
+    if (!user) {
       throw new UserNotFoundError();
     }
-    const { pk: _pk, sk: _sk, cognitoUserStatus, ...attr } = output.Item as UserInfo;
-    let provider: string = CONST.COGNITO.PASSWORD;
-    if (cognitoUserStatus.startsWith(CONST.COGNITO.EXTERNAL_PROVIDER)) {
-      provider = cognitoUserStatus.split(':').pop() as string;
-    }
-    const userInfoView: UserInfoView = {
-      ...attr,
-      picture: payload.picture,
-      provider: provider,
-    };
-    return userInfoView;
+    return user;
   }
 
   public async create(userInput: UserInfoInput, payload: CognitoIdTokenPayload) {
-    const userQueryResult = await this.queryByEmail(userInput.email);
-    if (userQueryResult.length > 0) {
-      throw new EmailAlreadyUsedError();
-    }
-
-    const userQueryResult2 = await this.getOne(this.tableName, { pk: userInput.employeeNo, sk: CONST.DB.USER_INFO });
-    if (userQueryResult2.Item) {
-      throw new EmployeeNoAlreadyUsedError();
-    }
-
     const { user, initPassword } = await Cognito.Admin.createUser(userInput.employeeNo, userInput.email, {
       name: userInput.name,
     });
-    const userAttributes = user?.Attributes;
-    const sub = userAttributes?.find((a) => a.Name === 'sub')?.Value;
-    const cognitoUserStatus = user?.UserStatus;
-
-    const tagQueryCommand = new QueryCommand({
-      TableName: this.tagTableName,
-      IndexName: CONST.DB.INDEXS.SK_TIME,
-      KeyConditionExpression: 'sk = :sk',
-      ExpressionAttributeValues: {
-        ':sk': CONST.TAG.POSITION,
+    const result = await this.prisma.user.create({
+      data: {
+        id: userInput.employeeNo,
+        name: userInput.name,
+        email: userInput.email,
+        status: userInput.status,
+        cognitoUserStatus: user?.UserStatus || 'NONE',
+        enterDay: userInput.enterDay,
+        updateTime: dateUtil.utc(),
+        updateUser: payload['cognito:username'],
+        organizations: {
+          create: userInput.organizations.map((o) => ({
+            position: o.position,
+            organizationId: o.organization,
+            updateTime: dateUtil.utc(),
+            updateUser: payload['cognito:username'],
+          })),
+        },
       },
     });
-    const tagQueryResult = await DB.client.send(tagQueryCommand);
-    const tagList = (tagQueryResult.Items || []) as TagInfo[];
-    const newPositions = userInput.organizations.filter((o) => !tagList.some((t) => t.name === o.position));
-
-    const command = new TransactWriteCommand({
-      TransactItems: [
-        {
-          Put: {
-            TableName: this.tableName,
-            Item: {
-              pk: userInput.employeeNo,
-              sk: CONST.DB.USER_INFO,
-              email: userInput.email,
-              employeeNo: userInput.employeeNo,
-              name: userInput.name,
-              status: userInput.status,
-              cognitoUserStatus: cognitoUserStatus,
-              sub: sub,
-              updateTime: dateUtil.utc(),
-              updateUser: payload['cognito:username'],
-            },
-          },
-        },
-        ...userInput.organizations.map((o) => ({
-          Put: {
-            TableName: this.tableName,
-            Item: {
-              pk: userInput.employeeNo,
-              sk: `${CONST.DB.USER_ORG}#${o.organization}`,
-              position: o.position,
-              employeeNo: userInput.employeeNo,
-              updateTime: dateUtil.utc(),
-              updateUser: payload['cognito:username'],
-            },
-          },
-        })),
-        ...userInput.organizations.map((o) => ({
-          Put: {
-            TableName: this.tableName,
-            Item: {
-              pk: o.organization,
-              sk: `${CONST.DB.ORG_USER}#${userInput.employeeNo}`,
-              email: userInput.email,
-              position: o.position,
-              employeeNo: userInput.employeeNo,
-              name: userInput.name,
-              status: userInput.status,
-              cognitoUserStatus: cognitoUserStatus,
-              sub: sub,
-              updateTime: dateUtil.utc(),
-              updateUser: payload['cognito:username'],
-            },
-          },
-        })),
-        ...newPositions.map((o) => ({
-          Put: {
-            TableName: this.tagTableName,
-            Item: {
-              pk: v7(),
-              sk: CONST.TAG.POSITION,
-              name: o.position,
-              updateTime: dateUtil.utc(),
-            },
-          },
-        })),
-      ],
-    });
-    const dbResult = await DB.client.send(command);
     await Mail.sendText([userInput.email], `初期パスワード：${initPassword}`);
-    return dbResult;
+    return result;
   }
 
-  public async delete(employeeNo: string, payload: CognitoIdTokenPayload) {
-    // Query all organization relations
-    const queryCommand = new QueryCommand({
-      TableName: this.tableName,
-      IndexName: CONST.DB.INDEXS.USER_SK,
-      KeyConditionExpression: 'employeeNo = :employeeNo',
-      ExpressionAttributeValues: {
-        ':employeeNo': employeeNo,
-      },
-    });
-    const userDataResult = await DB.client.send(queryCommand);
-    const userDataList = userDataResult.Items || [];
-    if (userDataList.length === 0) {
-      throw new UserNotFoundError();
-    }
-    // can not delete self
-    if (userDataList.some((item) => item.pk === payload.employeeNo)) {
-      throw new DeleteSelfError();
-    }
-    // Delete user from Cognito
-    await Cognito.Admin.deleteUser(employeeNo);
-
-    // Delete all related records in DynamoDB
-    const command = new TransactWriteCommand({
-      TransactItems: [
-        ...userDataList.map((item) => ({
-          Delete: {
-            TableName: this.tableName,
-            Key: {
-              pk: item.pk,
-              sk: item.sk,
-            },
+  public async delete(employeeNo: string, payload: IdTokenPayload) {
+    await this.prisma.$transaction(async (tx) => {
+      const deleteResult = await tx.user.deleteMany({
+        where: {
+          id: employeeNo,
+          NOT: {
+            id: payload.employeeNo,
           },
-        })),
-      ],
+        },
+      });
+      if (deleteResult.count === 0) {
+        throw new UserNotFoundError();
+      }
+      await Cognito.Admin.deleteUser(employeeNo);
     });
-
-    await DB.client.send(command);
-    return true;
   }
 
   public async query(query: UserQueryInput) {
-    const keyConditionExpression = ['sk = :sk'];
-    const filterExpression = [];
-    const expressionAttributeValues: Record<string, any> = {
-      ':sk': CONST.DB.USER_INFO,
-    };
-    if (query.status) {
-      filterExpression.push('status = :status');
-      expressionAttributeValues[':status'] = query.status;
-    }
+    // 构建动态 where 条件
+    const where: any = {};
+
+    // 按名称搜索
     if (query.name) {
-      filterExpression.push('begins_with(name, :name)');
-      expressionAttributeValues[':name'] = query.name;
+      where.name = {
+        startsWith: query.name,
+        mode: 'insensitive',
+      };
     }
+
+    // 按状态过滤
+    if (query.status) {
+      where.status = query.status;
+    }
+
+    // 按组织过滤
     if (query.organization) {
-      if (query.sort === CONST.DB.INDEXS.EMAIL_USER) {
-        keyConditionExpression.push('organization = :organization');
-      } else {
-        filterExpression.push('organization = :organization');
-      }
-      expressionAttributeValues[':organization'] = query.organization;
+      where.organizations = {
+        some: {
+          organizationId: query.organization,
+        },
+      };
     }
 
-    const command = new QueryCommand({
-      TableName: this.tableName,
-      IndexName: query.sort,
-      KeyConditionExpression: keyConditionExpression.join(' AND '),
-      FilterExpression: filterExpression.length > 0 ? filterExpression.join(' AND ') : undefined,
-      ExpressionAttributeValues: expressionAttributeValues,
-    });
-    const result = await DB.client.send(command);
-    return result.Items || [];
-  }
-
-  public async queryByEmail(email: string, sk?: string) {
-    const command = new QueryCommand({
-      TableName: this.tableName,
-      IndexName: CONST.DB.INDEXS.EMAIL_USER,
-      KeyConditionExpression: `email = :email${sk ? ' AND sk = :sk' : ''}`,
-      ExpressionAttributeValues: {
-        ':email': email,
-        ':sk': sk,
+    return await this.prisma.user.findMany({
+      where,
+      include: {
+        organizations: true,
       },
     });
-    const result = await DB.client.send(command);
-    return result.Items || [];
   }
 }
 
