@@ -21,6 +21,12 @@ phases:
       - aws s3 sync build/client s3://$WEB_BUCKET/ --delete --acl bucket-owner-full-control
       # Build Lambda and layer
       - echo "Build Lambda And Layer..."
+      - cd ${CODEBUILD_SRC_DIR}/lambda/common-layer/nodejs
+      - npm ci --omit=dev
+      - cd ${CODEBUILD_SRC_DIR}/lambda/prisma-layer/nodejs
+      - npm ci --omit=dev
+      - npm run generate
+      - cd ${CODEBUILD_SRC_DIR}
       - npm run build:lambda
       - chmod +x package-lambdas.sh
       - bash package-lambdas.sh $ASSET_BUCKET $TIMESTAMP
