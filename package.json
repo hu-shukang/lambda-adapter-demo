@@ -4,6 +4,9 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
+    "prisma:studio": "npx prisma studio -y",
+    "prisma:generate": "npx prisma generate",
+    "prisma:migrate": "npx prisma migrate dev --name init",
     "build": "remix vite:build",
     "build:lambda": "tsc --project lambda/tsconfig.json",
     "dev": "remix vite:dev",
@@ -63,7 +66,9 @@
     "uuid": "^10.0.0",
     "vaul": "^1.1.0",
     "zod": "^3.23.8",
-    "zustand": "^5.0.1"
+    "zustand": "^5.0.1",
+    "@prisma/client": "5.22.0",
+    "@prisma/extension-accelerate": "1.2.1"
   },
   "devDependencies": {
     "@remix-run/dev": "^2.14.0",

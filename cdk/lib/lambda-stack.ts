@@ -144,7 +144,6 @@ export class LambdaStack extends cdk.Stack {
       role: lambdaRole,
       timeout: cdk.Duration.minutes(15),
       memorySize: 2048,
-      layers: [commonLayer, prismaLayer],
       environment: {
         ...envs,
         USER_POOL_ID: userPoolId,
@@ -161,6 +160,7 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromBucket(assetBucket, `log-write-${timestamp}.zip`),
       handler: 'index.handler',
       runtime: lambda.Runtime.NODEJS_20_X,
+      layers: [commonLayer, prismaLayer],
       ...lambdaProps,
     });
 
@@ -179,6 +179,7 @@ export class LambdaStack extends cdk.Stack {
         code: lambda.Code.fromBucket(assetBucket, `update-cognito-trigger-${timestamp}.zip`),
         handler: 'index.handler',
         runtime: lambda.Runtime.NODEJS_20_X,
+        layers: [commonLayer, prismaLayer],
         ...lambdaProps,
       },
     );
@@ -189,6 +190,7 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromBucket(assetBucket, `pre-signup-${timestamp}.zip`),
       handler: 'index.handler',
       runtime: lambda.Runtime.NODEJS_20_X,
+      layers: [commonLayer, prismaLayer],
       ...lambdaProps,
     });
     preSignupTriggerLambda.addPermission('AllowCognitoInvoke', {
@@ -205,6 +207,7 @@ export class LambdaStack extends cdk.Stack {
         code: lambda.Code.fromBucket(assetBucket, `post-confirmation-${timestamp}.zip`),
         handler: 'index.handler',
         runtime: lambda.Runtime.NODEJS_20_X,
+        layers: [commonLayer, prismaLayer],
         ...lambdaProps,
       },
     );
@@ -219,6 +222,7 @@ export class LambdaStack extends cdk.Stack {
       code: lambda.Code.fromBucket(assetBucket, `pre-token-${timestamp}.zip`),
       handler: 'index.handler',
       runtime: lambda.Runtime.NODEJS_20_X,
+      layers: [commonLayer, prismaLayer],
       ...lambdaProps,
     });
     preTokenTriggerLambda.addPermission('AllowCognitoInvoke', {
@@ -235,6 +239,7 @@ export class LambdaStack extends cdk.Stack {
         code: lambda.Code.fromBucket(assetBucket, `post-authentication-${timestamp}.zip`),
         handler: 'index.handler',
         runtime: lambda.Runtime.NODEJS_20_X,
+        layers: [commonLayer, prismaLayer],
         ...lambdaProps,
       },
     );

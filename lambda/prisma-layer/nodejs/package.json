@@ -2,11 +2,6 @@
   "name": "nodejs",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {
-    "studio": "npx prisma studio -y",
-    "generate": "npx prisma generate",
-    "migrate": "npx prisma migrate dev --name init"
-  },
   "dependencies": {
     "@prisma/client": "5.22.0",
     "@prisma/extension-accelerate": "1.2.1"

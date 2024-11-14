@@ -1,6 +1,5 @@
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -9,15 +8,15 @@ datasource db {
 }
 
 model Organization {
-  id            String             @id
-  name          String
-  description   String
-  updateTime    DateTime
-  updateUser    String
-  parent        Organization?      @relation("OrganizationToOrganization", fields: [parentId], references: [id])
-  children      Organization[]     @relation("OrganizationToOrganization")
-  parentId      String?
-  organizations UserOrganization[]
+  id                 String             @id
+  name               String
+  description        String
+  updateTime         DateTime
+  updateUser         String
+  parentId           String?
+  Organization       Organization?      @relation("OrganizationToOrganization", fields: [parentId], references: [id])
+  other_Organization Organization[]     @relation("OrganizationToOrganization")
+  UserOrganization   UserOrganization[]
 }
 
 model User {
@@ -29,17 +28,17 @@ model User {
   cognitoUserStatus String
   updateTime        DateTime
   updateUser        String
-  organizations     UserOrganization[]
+  UserOrganization  UserOrganization[]
 }
 
 model UserOrganization {
-  user           User         @relation(fields: [userId], references: [id])
   userId         String
-  organization   Organization @relation(fields: [organizationId], references: [id])
   organizationId String
   role           String
   updateTime     DateTime
   updateUser     String
+  Organization   Organization @relation(fields: [organizationId], references: [id])
+  User           User         @relation(fields: [userId], references: [id])
 
   @@id([userId, organizationId])
 }

@@ -63,6 +63,10 @@ export class InfraStack extends cdk.Stack {
             type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
             value: envs.ECR_REPOSITORY_URI,
           },
+          DATABASE_URL: {
+            type: codebuild.BuildEnvironmentVariableType.PARAMETER_STORE,
+            value: `/${envs.APP_NAME}/${envs.ENV}/db/url`,
+          },
         },
       },
     });
