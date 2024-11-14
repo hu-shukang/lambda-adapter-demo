@@ -26,6 +26,7 @@ phases:
       - cd ${CODEBUILD_SRC_DIR}/lambda/prisma-layer/nodejs
       - npm ci --omit=dev
       - npm run generate
+      - cd ${CODEBUILD_SRC_DIR}
       - npm run build:lambda
       - chmod +x package-lambdas.sh
       - bash package-lambdas.sh $ASSET_BUCKET $TIMESTAMP
