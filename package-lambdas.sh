@@ -19,16 +19,11 @@ for lambda_dir in $(find "${LAMBDA_DIST_DIR}" -mindepth 1 -maxdepth 3 -type d); 
 done
 
 # common layer 打包和上传
-cd ${CODEBUILD_SRC_DIR}/lambda/common-layer/nodejs
-npm ci --omit=dev
 cd ${CODEBUILD_SRC_DIR}/lambda/common-layer
 zip -rq common-layer-${TIMESTAMP}.zip .
 aws s3 cp common-layer-${TIMESTAMP}.zip s3://$ASSET_BUCKET/common-layer-${TIMESTAMP}.zip --acl bucket-owner-full-control
 
 # prisma layer 打包和上传
-cd ${CODEBUILD_SRC_DIR}/lambda/prisma-layer/nodejs
-npm ci --omit=dev
-npm run generate
 cd ${CODEBUILD_SRC_DIR}/lambda/prisma-layer
 zip -rq prisma-layer-${TIMESTAMP}.zip .
 aws s3 cp prisma-layer-${TIMESTAMP}.zip s3://$ASSET_BUCKET/prisma-layer-${TIMESTAMP}.zip --acl bucket-owner-full-control
