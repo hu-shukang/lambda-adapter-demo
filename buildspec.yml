@@ -4,6 +4,7 @@ phases:
   install:
     commands:
       - npm ci
+      - npm run prisma:generate
       - mkdir artifact
   pre_build:
     commands:
