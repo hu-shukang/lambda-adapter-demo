@@ -6,6 +6,7 @@
   "scripts": {
     "prisma:studio": "npx prisma studio -y",
     "prisma:generate": "npx prisma generate",
+    "prisma:migrate:init": "npx prisma migrate dev --name init",
     "prisma:migrate": "npx prisma migrate dev",
     "build": "remix vite:build",
     "build:lambda": "tsc --project lambda/tsconfig.json",

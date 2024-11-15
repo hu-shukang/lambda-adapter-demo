@@ -5,5 +5,6 @@ WORKDIR "/var/task/build"
 ADD package.json /var/task/package.json
 ADD package-lock.json /var/task/package-lock.json
 RUN npm ci --omit=dev
+RUN npm run prisma:generate
 ADD build/server /var/task/build/server
 CMD ["npm", "run", "start"]

@@ -9,11 +9,12 @@ datasource db {
 }
 
 model Tag {
-  id         String   @id
-  category   String
-  name       String
-  updateTime DateTime
-  updateUser String
+  id               String             @id
+  category         String
+  name             String
+  updateTime       DateTime
+  updateUser       String
+  UserOrganization UserOrganization[]
 
   @@index([category, updateTime], name: "idx_category_updatetime")
 }
@@ -49,6 +50,7 @@ model UserOrganization {
   position       String
   updateTime     DateTime
   updateUser     String
+  tag            Tag          @relation(fields: [position], references: [id])
 
   @@id([userId, organizationId])
   @@index([organizationId])

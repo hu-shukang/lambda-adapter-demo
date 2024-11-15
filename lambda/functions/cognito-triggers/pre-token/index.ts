@@ -1,10 +1,5 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { PreTokenGenerationTriggerEvent } from 'aws-lambda';
-import { queryUserByEmail } from '/opt/nodejs/utils';
-
-const client = new DynamoDBClient({});
-const ddbDocClient = DynamoDBDocumentClient.from(client);
+import { PrismaClient } from '@prisma/client';
 
 export const handler = async (event: PreTokenGenerationTriggerEvent): Promise<any> => {
   console.log('Event: ', JSON.stringify(event, null, 2));
@@ -13,22 +8,26 @@ export const handler = async (event: PreTokenGenerationTriggerEvent): Promise<an
       userAttributes: { email },
     },
   } = event;
-  const items = await queryUserByEmail(email);
-  if (!items) {
+  const prisma = new PrismaClient();
+  const user = await prisma.user.findUnique({
+    where: {
+      email: email,
+    },
+    include: { organizations: true },
+  });
+  if (user === null) {
     throw new Error('get token failed');
   }
-  const userInfo = items.find((u) => u.sk === 'USER_INFO')!;
-  const userOrgs = items.filter((u) => u.sk.startsWith('USER_ORG'));
 
-  if (userInfo.status === 'BLOCKED') {
+  if (user.status === 'BLOCKED') {
     throw new Error('USER_BLOCKED');
   }
 
   event.response.claimsOverrideDetails = {
     claimsToAddOrOverride: {
-      organizations: userOrgs.map<string>((uo) => uo.sk.split('#').pop()).join(','),
-      employeeNo: userInfo.employeeNo,
-      status: userInfo.status,
+      organizations: user.organizations.map((org) => org.organizationId).join(','),
+      employeeNo: user.id,
+      status: user.status,
     },
   };
 

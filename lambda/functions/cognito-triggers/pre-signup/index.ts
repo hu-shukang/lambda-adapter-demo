@@ -3,7 +3,7 @@ import {
   AdminLinkProviderForUserCommand,
   CognitoIdentityProviderClient,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { getUser, queryUserByEmail } from '/opt/nodejs/utils';
+import { PrismaClient } from '@prisma/client';
 
 const cognitoClient = new CognitoIdentityProviderClient({});
 
@@ -43,20 +43,22 @@ export const handler = async (event: PreSignUpTriggerEvent): Promise<any> => {
     userName,
     triggerSource,
   } = event;
-  const output = await queryUserByEmail(email, 'USER_INFO');
-  console.log(`query output: ${output ? JSON.stringify(output) : 'null'}`);
-  if (output && output.length > 0) {
-    const existingUser = output[0];
-    const cognitoUserStatus = existingUser.cognitoUserStatus;
-    const existingEmployeeNo = existingUser.employeeNo as string;
+  const prisma = new PrismaClient();
+  const user = await prisma.user.findUnique({
+    where: {
+      email: email,
+    },
+  });
+  if (user != null) {
+    const cognitoUserStatus = user.cognitoUserStatus;
     if (triggerSource === 'PreSignUp_SignUp' && cognitoUserStatus === 'EXTERNAL_PROVIDER') {
-      const { provider } = getProviderAndUserId(existingEmployeeNo);
+      const { provider } = getProviderAndUserId(user.id);
       throw new Error(`EXIST_WITH_${provider}`);
     } else if (cognitoUserStatus === 'FORCE_CHANGE_PASSWORD') {
       throw new Error(`FORCE_CHANGE_PASSWORD`);
     } else if (triggerSource === 'PreSignUp_ExternalProvider') {
       const { userId, provider } = getProviderAndUserId(userName);
-      await linkUser(userId, provider, existingEmployeeNo);
+      await linkUser(userId, provider, user.id);
     } else {
       throw new Error(`EXIST_WITH_COGNITO`);
     }

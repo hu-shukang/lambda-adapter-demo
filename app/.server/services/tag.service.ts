@@ -2,32 +2,27 @@ import { TagInfoInput } from '~/models/tag.model';
 import { CommonService } from './common.service';
 import { v7 } from 'uuid';
 import { dateUtil } from '~/lib/date.util';
-import { DB } from '../utils/dynamodb.util';
-import { QueryCommand } from '@aws-sdk/lib-dynamodb';
-import { CONST } from '~/lib/const';
+import { IdTokenPayload } from '~/models/user.model';
 
 class TagService extends CommonService {
-  private tableName = process.env.TAG_TBL!;
-
-  public create(input: TagInfoInput) {
-    return this.createOne(
-      this.tableName,
-      { pk: v7(), sk: input.category },
-      { name: input.name, updateTime: dateUtil.utc() },
-    );
+  public async create(input: TagInfoInput, payload: IdTokenPayload) {
+    return await this.prisma.tag.create({
+      data: {
+        id: v7(),
+        name: input.name,
+        category: input.category,
+        updateTime: dateUtil.utc(),
+        updateUser: payload['cognito:username'],
+      },
+    });
   }
 
   public async query(category: string) {
-    const command = new QueryCommand({
-      TableName: this.tableName,
-      IndexName: CONST.DB.INDEXS.SK_TIME,
-      KeyConditionExpression: 'sk = :sk',
-      ExpressionAttributeValues: {
-        ':sk': category,
+    return await this.prisma.tag.findMany({
+      where: {
+        category: category,
       },
     });
-    const result = await DB.client.send(command);
-    return result.Items || [];
   }
 }
 
