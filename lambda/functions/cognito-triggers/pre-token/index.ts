@@ -8,7 +8,7 @@ export const handler = async (event: PreTokenGenerationTriggerEvent): Promise<an
       userAttributes: { email },
     },
   } = event;
-  const prisma = new PrismaClient();
+  const prisma = new PrismaClient({ log: ['query', 'error', 'info', 'warn'] });
   const user = await prisma.user.findUnique({
     where: {
       email: email,

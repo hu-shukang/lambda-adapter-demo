@@ -6,7 +6,7 @@ export const handler = async (event: PostConfirmationTriggerEvent): Promise<any>
   const {
     request: { userAttributes },
   } = event;
-  const prisma = new PrismaClient();
+  const prisma = new PrismaClient({ log: ['query', 'error', 'info', 'warn'] });
   await prisma.user.update({
     where: {
       email: userAttributes.email,

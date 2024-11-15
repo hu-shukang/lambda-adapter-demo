@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
 RUN npm ci --omit=dev
-RUN npx prisma generate
+RUN npx prisma generate --no-engine
 COPY build/server ./build/server
 
 # 运行阶段

@@ -27,7 +27,7 @@ phases:
       - cd ${CODEBUILD_SRC_DIR}/lambda/prisma-layer/nodejs
       - npm ci --omit=dev
       - npx prisma db pull
-      - npx prisma generate
+      - npx prisma generate --no-engine
       - cd ${CODEBUILD_SRC_DIR}
       - npm run build:lambda
       - chmod +x package-lambdas.sh

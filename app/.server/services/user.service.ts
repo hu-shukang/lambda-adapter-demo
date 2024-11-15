@@ -8,15 +8,11 @@ import { UserNotFoundError } from '~/models/error.model';
 import { User } from '@prisma/client';
 
 class UserService extends CommonService {
-  public async get(payload: IdTokenPayload): Promise<User> {
-    const user = await this.prisma.user.findUnique({
+  public async get(payload: IdTokenPayload): Promise<User | null> {
+    return this.prisma.user.findUnique({
       where: { id: payload.employeeNo },
       include: { organizations: true },
     });
-    if (!user) {
-      throw new UserNotFoundError();
-    }
-    return user;
   }
 
   public async create(userInput: UserInfoInput, payload: CognitoIdTokenPayload) {

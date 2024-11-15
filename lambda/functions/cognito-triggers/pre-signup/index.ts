@@ -43,7 +43,7 @@ export const handler = async (event: PreSignUpTriggerEvent): Promise<any> => {
     userName,
     triggerSource,
   } = event;
-  const prisma = new PrismaClient();
+  const prisma = new PrismaClient({ log: ['query', 'error', 'info', 'warn'] });
   const user = await prisma.user.findUnique({
     where: {
       email: email,
