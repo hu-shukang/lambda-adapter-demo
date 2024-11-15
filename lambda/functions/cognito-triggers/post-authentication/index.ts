@@ -7,7 +7,7 @@ export const handler = async (event: PostAuthenticationTriggerEvent): Promise<an
     request: { userAttributes },
   } = event;
   const prisma = new PrismaClient({ log: ['query', 'error', 'info', 'warn'] });
-  await prisma.user.update({
+  await prisma.user.updateMany({
     where: {
       email: userAttributes.email,
     },
