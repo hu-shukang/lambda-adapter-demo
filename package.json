@@ -4,7 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "prisma:studio": "npx prisma studio -y",
+    "prisma:studio": "npx prisma studio",
     "prisma:generate": "npx prisma generate",
     "prisma:migrate:init": "npx prisma migrate dev --name init",
     "prisma:migrate": "npx prisma migrate dev",
