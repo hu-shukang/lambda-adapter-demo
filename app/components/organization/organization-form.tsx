@@ -22,7 +22,6 @@ export default function OrganizationForm({ onSubmit, organizations, defaultValue
   const form = useForm<OrganizationInput>({
     defaultValues: defaultValues || {
       name: '',
-      priority: 0,
       parent: undefined,
     },
     resolver: zodResolver(organizationInputSchema),
@@ -65,7 +64,6 @@ export default function OrganizationForm({ onSubmit, organizations, defaultValue
                                 'parent',
                                 currentValue === form.getValues().parent ? undefined : currentValue,
                               );
-                              form.setValue('priority', o.priority + 1);
                               setOpen(false);
                             }}
                           >

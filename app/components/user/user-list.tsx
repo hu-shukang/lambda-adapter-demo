@@ -1,8 +1,6 @@
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { useMemo } from 'react';
 import { dateUtil } from '~/lib/date.util';
-import { OrganizationInfo } from '~/models/organization.model';
-import { UserInfo } from '~/models/user.model';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,18 +13,33 @@ import { Button } from '../ui/button';
 import { MoreHorizontal } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
+import { UserView } from '~/models/user.model';
+import { Organization } from '@prisma/client';
 
 type Props = {
-  data: UserInfo[];
-  organizations: OrganizationInfo[];
-  updateHandler: (pk: string) => void;
-  removeHandler: (info: UserInfo) => void;
+  data: UserView[];
+  organizations: Organization[];
+  updateHandler: (id: string) => void;
+  removeHandler: (info: UserView) => void;
 };
 
-const getColumns = ({ organizations, updateHandler, removeHandler }: Props): ColumnDef<UserInfo>[] => {
-  const organizationMap = new Map<string, OrganizationInfo>();
+type OrganizationInfoProps = {
+  uos: any[];
+};
+
+const OrganizationInfo = ({ uos }: OrganizationInfoProps) => {
+  return uos.map((uo) => (
+    <div key={uo} className="space-x-2">
+      <span>{uo.organization.description}</span>
+      <Badge variant="secondary">{uo.tag.name}</Badge>
+    </div>
+  ));
+};
+
+const getColumns = ({ organizations, updateHandler, removeHandler }: Props): ColumnDef<UserView>[] => {
+  const organizationMap = new Map<string, Organization>();
   organizations.forEach((v) => {
-    organizationMap.set(v.pk, v);
+    organizationMap.set(v.id, v);
   });
 
   const statusType: Record<string, string> = {
@@ -40,16 +53,28 @@ const getColumns = ({ organizations, updateHandler, removeHandler }: Props): Col
       cell: ({ row }) => <div className="text-center">{row.index + 1}</div>,
     },
     {
-      accessorKey: 'employeeNo',
+      accessorKey: 'id',
       meta: { displayName: '社員番号' },
       header: '社員番号',
-      cell: ({ row }) => <div>{row.getValue('employeeNo')}</div>,
+      cell: ({ row }) => <div>{row.getValue('id')}</div>,
     },
     {
       accessorKey: 'name',
       meta: { displayName: 'ユーザ名' },
       header: 'ユーザ名',
       cell: ({ row }) => <div>{row.getValue('name')}</div>,
+    },
+    {
+      accessorKey: 'enterDay',
+      meta: { displayName: '入社日' },
+      header: '入社日',
+      cell: ({ row }) => <div>{dateUtil.formatJP(row.getValue('enterDay'))}</div>,
+    },
+    {
+      accessorKey: 'organizations',
+      meta: { displayName: '組織' },
+      header: '組織',
+      cell: ({ row }) => <OrganizationInfo uos={row.getValue('organizations') as any} />,
     },
     {
       accessorKey: 'email',
@@ -72,23 +97,6 @@ const getColumns = ({ organizations, updateHandler, removeHandler }: Props): Col
       },
     },
     {
-      accessorKey: 'updateUser',
-      meta: { displayName: '更新者' },
-      header: () => <div className="text-left">更新者</div>,
-      cell: ({ row }) => {
-        return <div className="text-left font-medium">{row.getValue('updateUser')}</div>;
-      },
-    },
-    {
-      accessorKey: 'updateTime',
-      meta: { displayName: '更新日時' },
-      header: () => <div className="text-right">更新日時</div>,
-      cell: ({ row }) => {
-        const updateTime = dateUtil.format(row.getValue('updateTime'));
-        return <div className="text-right font-medium">{updateTime}</div>;
-      },
-    },
-    {
       id: 'actions',
       header: () => <div className="text-center">操作</div>,
       cell: ({ row }) => {
@@ -104,7 +112,7 @@ const getColumns = ({ organizations, updateHandler, removeHandler }: Props): Col
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>アクション</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => updateHandler(row.original.pk)}>更新</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => updateHandler(row.original.id)}>更新</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => removeHandler(row.original)}>削除</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -4,6 +4,6 @@ export abstract class CommonService {
   protected prisma: PrismaClient;
 
   constructor() {
-    this.prisma = new PrismaClient({ log: ['query', 'error', 'info', 'warn'] });
+    this.prisma = new PrismaClient({ log: ['query', 'error', 'warn'] });
   }
 }

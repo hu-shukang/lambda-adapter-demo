@@ -11,7 +11,7 @@ import { OrganizationInput } from '~/models/organization.model';
 export const handle = {
   breadcrumb: (match: UIMatch) => ({
     text: '更新',
-    href: `/dashboard/organization/${match.params.pk}/update`,
+    href: `/dashboard/organization/${match.params.id}/update`,
   }),
 };
 

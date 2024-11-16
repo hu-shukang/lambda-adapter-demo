@@ -9,49 +9,56 @@ datasource db {
 }
 
 model Tag {
-  id               String             @id
+  id               String             @id @db.Uuid
   category         String
   name             String
-  updateTime       DateTime
+  updateTime       DateTime           @updatedAt
   updateUser       String
   UserOrganization UserOrganization[]
 
-  @@index([category, updateTime], name: "idx_category_updatetime")
+  @@index([category], name: "idx_category")
 }
 
 model Organization {
-  id            String             @id
-  name          String
-  updateTime    DateTime
-  updateUser    String
-  parent        Organization?      @relation("OrganizationToOrganization", fields: [parentId], references: [id])
-  children      Organization[]     @relation("OrganizationToOrganization")
-  parentId      String?
-  organizations UserOrganization[]
+  id          String             @id @db.Uuid
+  name        String
+  description String
+  updateTime  DateTime           @updatedAt
+  updateUser  String
+  parent      Organization?      @relation("OrganizationToOrganization", fields: [parentId], references: [id])
+  children    Organization[]     @relation("OrganizationToOrganization")
+  parentId    String?            @db.Uuid
+  users       UserOrganization[]
+
+  @@index([name])
 }
 
 model User {
-  id                String             @id
+  id                String             @id @db.Char(6)
   email             String             @unique
   name              String
   status            String
   enterDay          DateTime
   cognitoUserStatus String
-  updateTime        DateTime
+  updateTime        DateTime           @updatedAt
   updateUser        String
   organizations     UserOrganization[]
+
+  @@index([name])
+  @@index([status])
 }
 
 model UserOrganization {
-  user           User         @relation(fields: [userId], references: [id])
-  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String       @db.Char(6)
   organization   Organization @relation(fields: [organizationId], references: [id])
-  organizationId String
-  position       String
-  updateTime     DateTime
+  organizationId String       @db.Uuid
+  position       String       @db.Uuid
+  updateTime     DateTime     @updatedAt
   updateUser     String
   tag            Tag          @relation(fields: [position], references: [id])
 
   @@id([userId, organizationId])
   @@index([organizationId])
+  @@index([position])
 }

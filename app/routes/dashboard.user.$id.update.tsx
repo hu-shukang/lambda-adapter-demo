@@ -8,13 +8,13 @@ import { getFormDataFromObject } from '~/lib/form.util.client';
 import { UserInfoInput } from '~/models/user.model';
 
 export const handle = {
-  breadcrumb: (_match: UIMatch) => ({
-    text: 'ユーザ作成',
-    href: '/dashboard/user/add',
+  breadcrumb: (match: UIMatch) => ({
+    text: 'ユーザ更新',
+    href: `/dashboard/user/${match.params.id}/update`,
   }),
 };
 
-export const action = UserAPI.actions.create;
+export const action = UserAPI.actions.update;
 
 export default function UserAddPage() {
   const loaderData = useRouteLoaderData<LoaderFunction>('routes/dashboard.user');

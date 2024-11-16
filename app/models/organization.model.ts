@@ -1,9 +1,10 @@
 import { z } from 'zod';
-import { UpdateUserAndTime, DBKey, organizationName, pkNullable, pk, Expand } from './common.model';
+import { UpdateUserAndTime, description, organizationName, pkNullable, pk, Expand } from './common.model';
 
 export const organizationInputSchema = z.object({
   name: organizationName,
-  parent: pkNullable,
+  parentId: pkNullable,
+  description: description,
 });
 
 export const organizationOneSchema = z.object({
@@ -13,4 +14,4 @@ export const organizationOneSchema = z.object({
 export type OrganizationInput = z.infer<typeof organizationInputSchema>;
 export type OrganizationOne = z.infer<typeof organizationOneSchema>;
 
-export type OrganizationInfo = Expand<DBKey & OrganizationInput & UpdateUserAndTime>;
+export type OrganizationInfo = Expand<{ id: string } & OrganizationInput & UpdateUserAndTime>;

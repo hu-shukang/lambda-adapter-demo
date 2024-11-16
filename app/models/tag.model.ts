@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DBKey, Expand, name, tagCategory } from './common.model';
+import { Expand, name, tagCategory, UpdateUserAndTime } from './common.model';
 
 export const tagInfoInputSchema = z.object({
   name: name,
@@ -7,4 +7,4 @@ export const tagInfoInputSchema = z.object({
 });
 
 export type TagInfoInput = z.infer<typeof tagInfoInputSchema>;
-export type TagInfo = Expand<DBKey & Omit<TagInfoInput, 'category'> & { updateTime: string }>;
+export type TagInfo = Expand<{ id: string } & TagInfoInput & UpdateUserAndTime>;

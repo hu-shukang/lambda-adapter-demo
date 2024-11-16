@@ -19,16 +19,16 @@ function toTreeNode(
   showed: Set<string>,
 ): TreeNode<OrganizationInfo> {
   const children: Array<TreeNode<OrganizationInfo>> = [];
-  const childOrg = organizations.filter((o) => o.parent === organization.pk);
-  const otherOrg = organizations.filter((o) => o.parent !== organization.pk);
+  const childOrg = organizations.filter((o) => o.parentId === organization.id);
+  const otherOrg = organizations.filter((o) => o.parentId !== organization.id);
   for (let i = 0; i < childOrg.length; i++) {
     const childTreeNode = toTreeNode(otherOrg, childOrg[i], checkHandler, checked, showed);
     children.push(childTreeNode);
   }
   const node: TreeNode<OrganizationInfo> = {
-    id: organization.pk,
-    show: showed.has(organization.pk),
-    checked: organization.pk === checked?.pk,
+    id: organization.id,
+    show: showed.has(organization.id),
+    checked: organization.id === checked?.id,
     origin: organization,
     children: children.length > 0 ? children : undefined,
   };
@@ -42,13 +42,13 @@ function toTree(
   checked: OrganizationInfo | undefined,
   showed: Set<string>,
 ): TreeNode<OrganizationInfo> {
-  const root = organizations.find((o) => o.parent === undefined) as OrganizationInfo;
-  const otherOrg = organizations.filter((o) => o.parent !== undefined);
+  const root = organizations.find((o) => o.parentId === null) as OrganizationInfo;
+  const otherOrg = organizations.filter((o) => o.parentId !== null);
   return toTreeNode(otherOrg, root, checkHandler, checked, showed);
 }
 
 export default function OrganizationTreeView({ organizations, checked, onCheckChanged }: Props) {
-  const [showed, setShowed] = useState<Set<string>>(new Set(organizations.map((o) => o.pk)));
+  const [showed, setShowed] = useState<Set<string>>(new Set(organizations.map((o) => o.id)));
 
   const organizationTree = useMemo(
     () => toTree(organizations, onCheckChanged, checked, showed),
@@ -72,7 +72,7 @@ export default function OrganizationTreeView({ organizations, checked, onCheckCh
     <div className="inline-flex items-center space-x-2">
       <Checkbox
         id={node.id}
-        checked={node.id === checked?.pk}
+        checked={node.id === checked?.id}
         onCheckedChange={(val) => {
           onCheckChanged(val ? node.origin : undefined);
         }}

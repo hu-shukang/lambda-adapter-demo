@@ -14,15 +14,15 @@ function toTreeNode(
   showed: Set<string>,
 ): TreeNode<OrganizationInfo> {
   const children: Array<TreeNode<OrganizationInfo>> = [];
-  const childOrg = organizations.filter((o) => o.parent === organization.pk);
-  const otherOrg = organizations.filter((o) => o.parent !== organization.pk);
+  const childOrg = organizations.filter((o) => o.parentId === organization.id);
+  const otherOrg = organizations.filter((o) => o.parentId !== organization.id);
   for (let i = 0; i < childOrg.length; i++) {
     const childTreeNode = toTreeNode(otherOrg, childOrg[i], showed);
     children.push(childTreeNode);
   }
   const node: TreeNode<OrganizationInfo> = {
-    id: organization.pk,
-    show: showed.has(organization.pk),
+    id: organization.id,
+    show: showed.has(organization.id),
     origin: organization,
     children: children.length > 0 ? children : undefined,
   };
@@ -31,13 +31,13 @@ function toTreeNode(
 }
 
 function toTree(organizations: OrganizationInfo[], showed: Set<string>): TreeNode<OrganizationInfo> {
-  const root = organizations.find((o) => o.parent === undefined) as OrganizationInfo;
-  const otherOrg = organizations.filter((o) => o.parent !== undefined);
+  const root = organizations.find((o) => o.parentId === null) as OrganizationInfo;
+  const otherOrg = organizations.filter((o) => o.parentId !== null);
   return toTreeNode(otherOrg, root, showed);
 }
 
 export default function OrganizationTree({ data }: Props) {
-  const [showed, setShowed] = useState<Set<string>>(new Set(data.map((o) => o.pk)));
+  const [showed, setShowed] = useState<Set<string>>(new Set(data.map((o) => o.id)));
 
   const organizationTree = useMemo(() => toTree(data, showed), [data, showed]);
 

@@ -1,7 +1,6 @@
 import { OrganizationInput } from '~/models/organization.model';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 import { v7 } from 'uuid';
-import { dateUtil } from '~/lib/date.util';
 import {
   OrganizationDeadLockError,
   OrganizationHasChildError,
@@ -21,10 +20,8 @@ class OrganizationService extends CommonService {
   public async create(input: OrganizationInput, payload: CognitoIdTokenPayload) {
     return await this.prisma.organization.create({
       data: {
+        ...input,
         id: v7(),
-        name: input.name,
-        parentId: input.parent,
-        updateTime: dateUtil.utc(),
         updateUser: payload['cognito:username'],
       },
     });
@@ -47,11 +44,11 @@ class OrganizationService extends CommonService {
   }
 
   public async update(id: string, input: OrganizationInput, payload: CognitoIdTokenPayload) {
-    if (id === input.parent) {
+    if (id === input.parentId) {
       throw new OrganizationSelfParentError();
     }
-    if (input.parent) {
-      const item = await this.prisma.organization.findUnique({ where: { id: input.parent } });
+    if (input.parentId) {
+      const item = await this.prisma.organization.findUnique({ where: { id: input.parentId } });
       if (!item) {
         throw new OrganizationNotFoundError();
       }
@@ -63,8 +60,7 @@ class OrganizationService extends CommonService {
       where: { id: id },
       data: {
         name: input.name,
-        parentId: input.parent,
-        updateTime: dateUtil.utc(),
+        parentId: input.parentId,
         updateUser: payload['cognito:username'],
       },
     });

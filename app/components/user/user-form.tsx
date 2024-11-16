@@ -2,42 +2,39 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm, useFieldArray } from 'react-hook-form';
 import { CONST } from '~/lib/const';
 import { OrganizationInfo } from '~/models/organization.model';
-import { UserInfo, UserInfoInput, userInfoInputSchema } from '~/models/user.model';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { UserInfoInput, userInfoInputSchema } from '~/models/user.model';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import { PlusIcon, MinusIcon } from '@radix-ui/react-icons';
+import { PlusIcon, MinusIcon, CalendarIcon } from '@radix-ui/react-icons';
 import OrganizationSelect from '../common/organization-select';
 import { TagInfo } from '~/models/tag.model';
 import TagSelector from '../ui/tag-selector';
 import { useState } from 'react';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { cn } from '~/lib/utils';
+import { Calendar } from '../ui/calendar';
+import { dateUtil } from '~/lib/date.util';
 
 type Props = {
   onSubmit: SubmitHandler<UserInfoInput>;
   organizations: OrganizationInfo[];
   tags: TagInfo[];
-  defaultValues?: UserInfo | undefined;
   submitButtonText?: string | undefined;
   progressing: boolean;
 };
 
-export default function UserForm({
-  onSubmit,
-  organizations,
-  tags,
-  defaultValues,
-  submitButtonText,
-  progressing,
-}: Props) {
+export default function UserForm({ onSubmit, organizations, tags, submitButtonText, progressing }: Props) {
   const [tagList, setTagList] = useState(tags);
   const form = useForm<UserInfoInput>({
     defaultValues: {
       email: '',
-      name: defaultValues?.name || '',
-      employeeNo: defaultValues?.employeeNo || '',
-      organizations: defaultValues?.organizations || [{ organization: '', position: '' }],
-      status: defaultValues?.status || CONST.USER.STATUS.ACTIVE,
+      name: '',
+      employeeNo: '',
+      enterDay: dateUtil.utc(),
+      organizations: [{ organization: '', position: '' }],
+      status: CONST.USER.STATUS.ACTIVE,
     },
     resolver: zodResolver(userInfoInputSchema),
   });
@@ -56,7 +53,6 @@ export default function UserForm({
               <FormControl>
                 <Input placeholder="メールアドレス" {...field} />
               </FormControl>
-              {defaultValues && <FormDescription>元の値：{defaultValues?.pk}</FormDescription>}
               <FormMessage />
             </FormItem>
           )}
@@ -70,7 +66,6 @@ export default function UserForm({
               <FormControl>
                 <Input placeholder="ユーザ名" {...field} />
               </FormControl>
-              {defaultValues && <FormDescription>元の値：{defaultValues?.name}</FormDescription>}
               <FormMessage />
             </FormItem>
           )}
@@ -84,7 +79,38 @@ export default function UserForm({
               <FormControl>
                 <Input placeholder="社員番号" {...field} />
               </FormControl>
-              {defaultValues && <FormDescription>元の値：{defaultValues?.employeeNo}</FormDescription>}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="enterDay"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>入社日</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={'outline'}
+                      className={cn('w-[300px] pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
+                    >
+                      {field.value ? dateUtil.formatJP(field.value) : <span>入社日</span>}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={dateUtil.parseDate(field.value)}
+                    onSelect={field.onChange}
+                    disabled={(date) => date > dateUtil.now().add(1, 'year').toDate() || date < new Date('1900-01-01')}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
               <FormMessage />
             </FormItem>
           )}
@@ -135,9 +161,9 @@ export default function UserForm({
                         <FormControl>
                           <OrganizationSelect
                             organizations={organizations}
-                            selected={organizations.find((o) => o.pk === field.value)}
+                            selected={organizations.find((o) => o.id === field.value)}
                             onSelectChanged={(val) => {
-                              form.setValue(`organizations.${index}.organization`, val?.pk || '');
+                              form.setValue(`organizations.${index}.organization`, val?.id || '');
                             }}
                           />
                         </FormControl>

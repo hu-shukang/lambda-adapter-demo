@@ -43,7 +43,13 @@ export default function TagSelector({ placeholder, tags, value, onChange, onCrea
               <Badge
                 className="cursor-pointer"
                 onClick={() => {
-                  const newTag = { name: inputValue, pk: v7(), sk: CONST.TAG.POSITION, updateTime: dateUtil.utc() };
+                  const newTag = {
+                    name: inputValue,
+                    id: v7(),
+                    category: CONST.TAG.ORGANIZATION,
+                    updateTime: dateUtil.utc(),
+                    updateUser: 'user',
+                  };
                   onCreate(newTag);
                   onChange(newTag);
                   setOpen(false);
@@ -64,7 +70,7 @@ export default function TagSelector({ placeholder, tags, value, onChange, onCrea
                   }}
                 >
                   {tag.name}
-                  <Check className={cn('ml-auto', 'w-4', 'h-4', value?.pk === tag.pk ? 'opacity-100' : 'opacity-0')} />
+                  <Check className={cn('ml-auto', 'w-4', 'h-4', value?.id === tag.id ? 'opacity-100' : 'opacity-0')} />
                 </CommandItem>
               ))}
             </CommandGroup>

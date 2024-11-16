@@ -14,6 +14,10 @@ export const getFormDataFromObject = (
       const value = data[key];
       const formKey = parentKey ? `${parentKey}[${key}]` : key;
 
+      if (value === undefined) {
+        continue;
+      }
+
       if (Array.isArray(value)) {
         // 处理数组：递归添加每个数组项
         value.forEach((item, index) => {

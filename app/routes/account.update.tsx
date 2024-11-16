@@ -2,7 +2,7 @@ import { LoaderFunction } from '@remix-run/node';
 import { UIMatch, useRouteLoaderData } from '@remix-run/react';
 import { SubmitHandler } from 'react-hook-form';
 import AccountForm from '~/components/account/AccountForm';
-import { AccountUpdateInput, UserInfoView } from '~/models/user.model';
+import { AccountUpdateInput, UserView } from '~/models/user.model';
 
 export const handle = {
   breadcrumb: (_match: UIMatch) => ({
@@ -13,9 +13,9 @@ export const handle = {
 
 export default function AccountUpdatePage() {
   const loaderDataForUserInfo = useRouteLoaderData<LoaderFunction>('routes/account');
-  const userInfoView = loaderDataForUserInfo?.data as UserInfoView | undefined;
+  const userView = loaderDataForUserInfo?.data as UserView | undefined;
 
-  if (!userInfoView) {
+  if (!userView) {
     return <div>no user</div>;
   }
 
@@ -24,7 +24,7 @@ export default function AccountUpdatePage() {
   };
   return (
     <div>
-      <AccountForm onSubmit={onSubmit} defaultValues={userInfoView} />
+      <AccountForm onSubmit={onSubmit} defaultValues={userView} />
     </div>
   );
 }

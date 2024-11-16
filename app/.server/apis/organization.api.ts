@@ -51,7 +51,7 @@ const getLoader = RequestWrapper.init(async ({ context, request }) => {
 
 const queryLoader = RequestWrapper.init(async ({ request }) => {
   const organizations = await organizationService.query();
-  const tags = await tagService.query(CONST.TAG.POSITION);
+  const tags = await tagService.query(CONST.TAG.ORGANIZATION);
   return Resp.json(request, { success: true, data: { organizations, tags } });
 }).loader();
 

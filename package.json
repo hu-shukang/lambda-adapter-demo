@@ -4,6 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
+    "prisma:seed": "node --loader ts-node/esm prisma/seed.ts",
     "prisma:studio": "npx prisma studio",
     "prisma:generate": "npx prisma generate",
     "prisma:migrate:init": "npx prisma migrate dev --name init",
@@ -26,6 +27,8 @@
     "@aws-sdk/client-ses": "^3.687.0",
     "@aws-sdk/client-sqs": "^3.682.0",
     "@hookform/resolvers": "^3.9.0",
+    "@prisma/client": "5.22.0",
+    "@prisma/extension-accelerate": "1.2.1",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-checkbox": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.2",
@@ -49,6 +52,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "framer-motion": "^11.11.10",
     "input-otp": "^1.2.4",
@@ -57,6 +61,7 @@
     "lucide-react": "^0.447.0",
     "nodemailer": "^6.9.16",
     "react": "^18.2.0",
+    "react-day-picker": "^8.10.1",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.53.0",
     "sonner": "^1.7.0",
@@ -65,9 +70,7 @@
     "uuid": "^10.0.0",
     "vaul": "^1.1.0",
     "zod": "^3.23.8",
-    "zustand": "^5.0.1",
-    "@prisma/client": "5.22.0",
-    "@prisma/extension-accelerate": "1.2.1"
+    "zustand": "^5.0.1"
   },
   "devDependencies": {
     "@remix-run/dev": "^2.14.0",
@@ -104,5 +107,8 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "prisma": {
+    "seed": "node --loader ts-node/esm prisma/seed.ts"
   }
 }

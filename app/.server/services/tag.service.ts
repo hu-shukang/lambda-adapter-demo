@@ -1,7 +1,6 @@
 import { TagInfoInput } from '~/models/tag.model';
 import { CommonService } from './common.service';
 import { v7 } from 'uuid';
-import { dateUtil } from '~/lib/date.util';
 import { IdTokenPayload } from '~/models/user.model';
 
 class TagService extends CommonService {
@@ -11,7 +10,6 @@ class TagService extends CommonService {
         id: v7(),
         name: input.name,
         category: input.category,
-        updateTime: dateUtil.utc(),
         updateUser: payload['cognito:username'],
       },
     });

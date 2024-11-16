@@ -12,7 +12,6 @@ import {
   password,
   refreshToken,
   rePassword,
-  UpdateUserAndTime,
   username,
   Expand,
   picture,
@@ -21,10 +20,21 @@ import {
   position,
 } from './common.model';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
+import { User } from '@prisma/client';
 
 export const userOrganizationInputSchema = z.object({ organization, position });
 
 export const userInfoInputSchema = z.object({
+  email: email,
+  employeeNo: employeeNo,
+  name: name,
+  status: status,
+  enterDay: z.string().datetime(),
+  organizations: z.array(userOrganizationInputSchema).min(1),
+});
+
+export const userInfoUpdateInputSchema = z.object({
+  id: employeeNo,
   email: email,
   employeeNo: employeeNo,
   name: name,
@@ -44,7 +54,7 @@ export const idSchema = z.object({
 });
 
 export const employeeNoInputSchema = z.object({
-  employeeNo: employeeNo,
+  id: employeeNo,
 });
 
 export const signinInputSchema = z.object({
@@ -99,19 +109,8 @@ export const accountUpdateInputSchema = z.object({
 
 export type UserOrganizationInput = z.infer<typeof userOrganizationInputSchema>;
 export type UserInfoInput = z.infer<typeof userInfoInputSchema>;
-export type UserInfo = Expand<
-  Omit<UserInfoInput, 'username'> &
-    DBKey &
-    UpdateUserAndTime & { sub: string; employeeNo: string; cognitoUserStatus: string }
->;
-export type UserInfoView = Expand<
-  Omit<UserInfo, 'pk' | 'sk' | 'cognitoUserStatus'> & {
-    email: string;
-    picture?: string;
-    provider: string;
-    passwordResetDate?: string;
-  }
->;
+export type UserInfoUpdateInput = z.infer<typeof userInfoUpdateInputSchema>;
+export type UserView = Expand<User & { picture?: string }>;
 
 export type UserQueryInput = z.infer<typeof userQueryInputSchema>;
 export type UserEntity = Expand<DBKey & UserInfoInput>;

@@ -7,7 +7,7 @@ import Title from '~/components/common/title';
 import UserList from '~/components/user/user-list';
 import UserQueryForm from '~/components/user/user-query-form';
 import { getFormDataFromObject, getQueryDataFromObject } from '~/lib/form.util.client';
-import { UserInfo, UserQueryInput } from '~/models/user.model';
+import { UserQueryInput, UserView } from '~/models/user.model';
 
 export const loader = UserAPI.loader.query;
 export const action = UserAPI.actions.delete;
@@ -27,8 +27,8 @@ export default function UserPage() {
     console.log(pk);
   };
 
-  const removeHandler = (info: UserInfo) => {
-    const form = getFormDataFromObject({ employeeNo: info.employeeNo });
+  const removeHandler = (info: UserView) => {
+    const form = getFormDataFromObject({ id: info.id });
     submit(form, { method: 'DELETE' });
   };
 

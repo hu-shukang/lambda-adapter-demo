@@ -7,7 +7,6 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
-import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
@@ -40,84 +39,6 @@ export class LambdaStack extends cdk.Stack {
     const userPoolClientId = cdk.Fn.importValue(`${envs.APP_NAME}-client-${envs.ENV}-id`);
 
     const repository = ecr.Repository.fromRepositoryName(this, `${envs.APP_NAME}-ecr`, envs.APP_NAME);
-
-    // DynamoDB -- userTable
-    const userTable = new dynamodb.Table(this, envs.USER_TBL, {
-      tableName: envs.USER_TBL,
-      partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST, // 按需计费模式
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // 销毁堆栈时销毁表
-    });
-
-    userTable.addGlobalSecondaryIndex({
-      indexName: 'ORGANIZATION_PRIORITY_ORDER',
-      partitionKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'priority', type: dynamodb.AttributeType.NUMBER },
-    });
-
-    userTable.addGlobalSecondaryIndex({
-      indexName: 'ORGANIZATION_PARENT',
-      partitionKey: { name: 'parent', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'updateTime', type: dynamodb.AttributeType.STRING },
-    });
-
-    userTable.addGlobalSecondaryIndex({
-      indexName: 'SK_TIME',
-      partitionKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'updateTime', type: dynamodb.AttributeType.STRING },
-    });
-
-    userTable.addGlobalSecondaryIndex({
-      indexName: 'EMAIL_USER',
-      partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
-    });
-
-    userTable.addGlobalSecondaryIndex({
-      indexName: 'USER_SK',
-      partitionKey: { name: 'employeeNo', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
-    });
-
-    // DynamoDB -- logTable
-    const _logTable = new dynamodb.Table(this, envs.LOG_TBL, {
-      tableName: envs.LOG_TBL,
-      partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'createTime', type: dynamodb.AttributeType.STRING },
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST, // 按需计费模式
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // 销毁堆栈时销毁表
-    });
-
-    // DynamoDB -- tagTable
-    const tagTable = new dynamodb.Table(this, envs.TAG_TBL, {
-      tableName: envs.TAG_TBL,
-      partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST, // 按需计费模式
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // 销毁堆栈时销毁表
-    });
-
-    tagTable.addGlobalSecondaryIndex({
-      indexName: 'SK_TIME',
-      partitionKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'updateTime', type: dynamodb.AttributeType.STRING },
-    });
-
-    // DynamoDB -- permissionTable
-    const permissionTable = new dynamodb.Table(this, envs.PERMISSION_TBL, {
-      tableName: envs.PERMISSION_TBL,
-      partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST, // 按需计费模式
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // 销毁堆栈时销毁表
-    });
-
-    permissionTable.addGlobalSecondaryIndex({
-      indexName: 'SK_TIME',
-      partitionKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'updateTime', type: dynamodb.AttributeType.STRING },
-    });
 
     // 创建SQS队列
     const logQueue = new sqs.Queue(this, envs.LOG_QUEUE, {

@@ -31,7 +31,7 @@ export default function OrganizationAddPage() {
         <Title text="組織を新規作成" />
       </div>
       <div className="w-[300px]">
-        <OrganizationForm onSubmit={onSubmit} organizations={loaderData?.data || []} />
+        <OrganizationForm onSubmit={onSubmit} organizations={loaderData?.data.organizations || []} />
       </div>
     </div>
   );

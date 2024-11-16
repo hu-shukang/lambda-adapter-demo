@@ -21,7 +21,7 @@ type Props = {
   removeHandler: (info: OrganizationInfo) => void;
 };
 
-export const getColumns = ({ data, updateHandler, removeHandler }: Props): ColumnDef<OrganizationInfo>[] => {
+export const getColumns = ({ updateHandler, removeHandler }: Props): ColumnDef<OrganizationInfo>[] => {
   return [
     {
       id: 'idx',
@@ -35,16 +35,10 @@ export const getColumns = ({ data, updateHandler, removeHandler }: Props): Colum
       cell: ({ row }) => <div>{row.getValue('name')}</div>,
     },
     {
-      accessorKey: 'parent',
-      meta: { displayName: '親組織' },
-      header: '親組織',
-      cell: ({ row }) => <div>{data.find((item) => item.pk === row.getValue('parent'))?.name || 'なし'}</div>,
-    },
-    {
-      accessorKey: 'priority',
-      meta: { displayName: '優先度' },
-      header: '優先度',
-      cell: ({ row }) => <div>{row.getValue('priority')}</div>,
+      accessorKey: 'description',
+      meta: { displayName: '詳細' },
+      header: '詳細',
+      cell: ({ row }) => <div>{row.getValue('description')}</div>,
     },
     {
       accessorKey: 'updateUser',
@@ -79,7 +73,7 @@ export const getColumns = ({ data, updateHandler, removeHandler }: Props): Colum
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>アクション</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => updateHandler(row.original.pk)}>更新</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => updateHandler(row.original.id)}>更新</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => removeHandler(row.original)}>削除</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

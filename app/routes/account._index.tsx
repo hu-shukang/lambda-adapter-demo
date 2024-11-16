@@ -1,14 +1,14 @@
 import { LoaderFunction } from '@remix-run/node';
-import { Link, useRouteLoaderData } from '@remix-run/react';
+import { useRouteLoaderData } from '@remix-run/react';
 import Title from '~/components/common/title';
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
-import { UserInfoView } from '~/models/user.model';
+import { UserView } from '~/models/user.model';
 
 export default function AccountPage() {
   const loaderDataForUserInfo = useRouteLoaderData<LoaderFunction>('routes/account');
-  const userInfoView = loaderDataForUserInfo?.data as UserInfoView | undefined;
+  const userInfoView = loaderDataForUserInfo?.data as UserView | undefined;
 
   if (!userInfoView) {
     return <div>no user</div>;
@@ -52,18 +52,6 @@ export default function AccountPage() {
           <div className="space-x-2 h-[35px] leading-[35px]">
             <span className="inline-block font-semibold w-[125px]">メールアドレス</span>
             <span>{userInfoView.email}</span>
-          </div>
-          <div className="space-x-2 h-[35px] leading-[35px]">
-            <span className="inline-block font-semibold w-[125px]">認証方式</span>
-            <span>{userInfoView.provider}</span>
-          </div>
-          <div className="space-x-2 h-[35px] leading-[35px]">
-            <span className="inline-block font-semibold w-[125px]">パスワード</span>
-            <Link to="/account/password">
-              <Button variant="link" className="p-0">
-                {userInfoView.passwordResetDate ? 'パスワード設定' : 'パスワードリセット'}
-              </Button>
-            </Link>
           </div>
           <div className="space-x-2 h-[35px] leading-[35px]">
             <span className="inline-block font-semibold w-[125px]">前回アクセス日時</span>

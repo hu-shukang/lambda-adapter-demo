@@ -1,12 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { AccountUpdateInput, accountUpdateInputSchema, UserInfoView } from '~/models/user.model';
+import { AccountUpdateInput, accountUpdateInputSchema, UserView } from '~/models/user.model';
 import { Form, FormControl, FormItem, FormLabel } from '../ui/form';
 import { Input } from '../ui/input';
 
 type Props = {
   onSubmit: SubmitHandler<AccountUpdateInput>;
-  defaultValues: UserInfoView;
+  defaultValues: UserView;
 };
 
 export default function AccountForm({ onSubmit, defaultValues }: Props) {
@@ -30,13 +30,13 @@ export default function AccountForm({ onSubmit, defaultValues }: Props) {
         <FormItem>
           <FormLabel>社員番号</FormLabel>
           <FormControl>
-            <Input value={defaultValues.employeeNo} disabled={true} />
+            <Input value={defaultValues.id} disabled={true} />
           </FormControl>
         </FormItem>
         <FormItem>
           <FormLabel>組織</FormLabel>
           <FormControl>
-            <Input value={defaultValues.organization} disabled={true} />
+            <Input value="" disabled={true} />
           </FormControl>
         </FormItem>
         <FormItem>

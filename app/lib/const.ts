@@ -33,8 +33,8 @@ export const CONST = {
     PASSWORD: 'PASSWORD',
   },
   TAG: {
-    LIST: ['POSITION'],
-    POSITION: 'POSITION',
+    LIST: ['organization'],
+    ORGANIZATION: 'organization',
   },
   ERROR_CODE: {
     AUTH: {

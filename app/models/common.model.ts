@@ -31,6 +31,7 @@ export const confirmationCode = z.string().regex(/^\d{6}$/, {
   message: '6桁数字は必須',
 });
 export const organizationName = z.string({ required_error: '必須項目です' }).min(1, '必須項目です');
+export const description = z.string();
 export const organizationPriority = z.preprocess(
   (val) => {
     if (typeof val === 'string') {

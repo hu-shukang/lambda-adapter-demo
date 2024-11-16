@@ -22,6 +22,18 @@ class DateUtil {
   public format(date?: dayjs.ConfigType) {
     return dayjs(date).format('YYYY/MM/DD HH:mm:ss');
   }
+
+  public formatJP(date?: dayjs.ConfigType) {
+    return dayjs(date).format('YYYY/MM/DD (ddd)');
+  }
+
+  public parseDate(date?: dayjs.ConfigType) {
+    return dayjs(date).toDate();
+  }
+
+  public now(date?: dayjs.ConfigType) {
+    return dayjs(date);
+  }
 }
 
 export const dateUtil = new DateUtil();
