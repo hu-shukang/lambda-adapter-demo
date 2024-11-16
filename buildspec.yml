@@ -26,6 +26,8 @@ phases:
       - npm ci --omit=dev
       - cd ${CODEBUILD_SRC_DIR}/lambda/prisma-layer/nodejs
       - npm ci --omit=dev
+      - mkdir prisma
+      - cp ${CODEBUILD_SRC_DIR}/prisma/schema.prisma ${CODEBUILD_SRC_DIR}/lambda/prisma-layer/nodejs/prisma/schema.prisma
       - npx prisma db pull
       - npx prisma generate --no-engine
       - cd ${CODEBUILD_SRC_DIR}
