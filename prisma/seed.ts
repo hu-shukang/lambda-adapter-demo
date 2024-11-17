@@ -140,9 +140,10 @@ async function main() {
     ],
   });
 
+  const employeeNoTagId = v7();
   await prisma.tag.createMany({
     data: [
-      { id: v7(), name: '会社員', category: 'organization', updateUser: 'root' },
+      { id: employeeNoTagId, name: '会社員', category: 'organization', updateUser: 'root' },
       { id: v7(), name: '部長', category: 'organization', updateUser: 'root' },
       { id: v7(), name: '副部長', category: 'organization', updateUser: 'root' },
       { id: v7(), name: 'リーダー', category: 'organization', updateUser: 'root' },

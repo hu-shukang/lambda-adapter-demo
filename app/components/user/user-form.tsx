@@ -134,8 +134,8 @@ export default function UserForm({
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={dateUtil.parseDate(field.value)}
-                    onSelect={field.onChange}
+                    selected={field.value ? dateUtil.parseDate(field.value) : undefined}
+                    onSelect={(val) => field.onChange(val ? dateUtil.utc(val) : undefined)}
                     disabled={(date) => date > dateUtil.now().add(1, 'year').toDate() || date < new Date('1900-01-01')}
                     initialFocus
                   />

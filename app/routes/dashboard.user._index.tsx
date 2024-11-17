@@ -1,5 +1,5 @@
 import { ActionFunction, LoaderFunction } from '@remix-run/node';
-import { useActionData, useLoaderData, useRouteLoaderData, useSubmit } from '@remix-run/react';
+import { useActionData, useLoaderData, useNavigate, useRouteLoaderData, useSubmit } from '@remix-run/react';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { UserAPI } from '~/.server/apis/user.api';
@@ -17,14 +17,15 @@ export default function UserPage() {
   const actionData = useActionData<ActionFunction>();
   const queryData = useLoaderData<LoaderFunction>();
   const submit = useSubmit();
+  const navigate = useNavigate();
 
   const querySubmit = async (data: UserQueryInput) => {
     const condition = getQueryDataFromObject(data);
     submit(condition, { method: 'GET' });
   };
 
-  const updateHandler = (pk: string) => {
-    console.log(pk);
+  const updateHandler = (id: string) => {
+    navigate(`/dashboard/user/${id}/update`);
   };
 
   const removeHandler = (info: UserView) => {
@@ -45,7 +46,7 @@ export default function UserPage() {
       <div className="mb-2">
         <Title text="ユーザ一覧" />
       </div>
-      <UserQueryForm onSubmit={querySubmit} />
+      <UserQueryForm onSubmit={querySubmit} organizations={organizationDataLoader?.data.organizations || []} />
       <UserList
         data={queryData.data || []}
         organizations={organizationDataLoader?.data.organizations || []}

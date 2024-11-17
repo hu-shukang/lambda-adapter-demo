@@ -13,7 +13,7 @@ import { Button } from '../ui/button';
 import { MoreHorizontal } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
-import { UserView } from '~/models/user.model';
+import { UserOrganizationView, UserView } from '~/models/user.model';
 import { Organization } from '@prisma/client';
 
 type Props = {
@@ -24,16 +24,20 @@ type Props = {
 };
 
 type OrganizationInfoProps = {
-  uos: any[];
+  uos: UserOrganizationView[];
 };
 
 const OrganizationInfo = ({ uos }: OrganizationInfoProps) => {
-  return uos.map((uo) => (
-    <div key={uo} className="space-x-2">
-      <span>{uo.organization.description}</span>
-      <Badge variant="secondary">{uo.tag.name}</Badge>
+  return (
+    <div className="space-y-1">
+      {uos.map((uo) => (
+        <div key={uo.organization.id} className="space-x-2">
+          <span>{uo.organization.description}</span>
+          <Badge variant="secondary">{uo.tag.name}</Badge>
+        </div>
+      ))}
     </div>
-  ));
+  );
 };
 
 const getColumns = ({ organizations, updateHandler, removeHandler }: Props): ColumnDef<UserView>[] => {

@@ -1,8 +1,6 @@
 import { RequestWrapper } from '../utils/request.util';
 import { Resp } from '../utils/response.util';
 import {
-  EmployeeNoInput,
-  employeeNoInputSchema,
   ID,
   idSchema,
   IdTokenPayload,
@@ -12,7 +10,6 @@ import {
   userQueryInputSchema,
 } from '~/models/user.model';
 import { userService } from '../services/user.service';
-import { CONST } from '~/lib/const';
 
 const createAction = RequestWrapper.init(async ({ context, request }) => {
   const form = context.bodyData as UserInfoInput;
@@ -35,12 +32,12 @@ const updateAction = RequestWrapper.init(async ({ context, request }) => {
   .action();
 
 const deleteAction = RequestWrapper.init(async ({ context, request }) => {
-  const form = context.bodyData as EmployeeNoInput;
+  const form = context.bodyData as ID;
   await userService.delete(form.id, context.payload!);
   return Resp.json(request, { success: true });
 })
   .withLogin()
-  .withBodyValid(employeeNoInputSchema)
+  .withBodyValid(idSchema)
   .action();
 
 const queryLoader = RequestWrapper.init(async ({ context, request }) => {
@@ -50,7 +47,7 @@ const queryLoader = RequestWrapper.init(async ({ context, request }) => {
   return Resp.json(request, { data: result, success: true });
 })
   .withLogin()
-  .withQueryValid(userQueryInputSchema, { sort: CONST.DB.INDEXS.SK_TIME })
+  .withQueryValid(userQueryInputSchema)
   .loader();
 
 const getLoader = RequestWrapper.init(async ({ context, request }) => {

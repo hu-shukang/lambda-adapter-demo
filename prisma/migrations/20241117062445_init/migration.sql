@@ -23,7 +23,7 @@ CREATE TABLE "Organization" (
 
 -- CreateTable
 CREATE TABLE "User" (
-    "id" UUID NOT NULL,
+    "id" CHAR(6) NOT NULL,
     "email" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "status" TEXT NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE "User" (
 
 -- CreateTable
 CREATE TABLE "UserOrganization" (
-    "userId" UUID NOT NULL,
+    "userId" CHAR(6) NOT NULL,
     "organizationId" UUID NOT NULL,
     "position" UUID NOT NULL,
     "updateTime" TIMESTAMP(3) NOT NULL,
@@ -68,10 +68,10 @@ CREATE INDEX "UserOrganization_organizationId_idx" ON "UserOrganization"("organi
 CREATE INDEX "UserOrganization_position_idx" ON "UserOrganization"("position");
 
 -- AddForeignKey
-ALTER TABLE "Organization" ADD CONSTRAINT "Organization_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "Organization"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Organization" ADD CONSTRAINT "Organization_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserOrganization" ADD CONSTRAINT "UserOrganization_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "UserOrganization" ADD CONSTRAINT "UserOrganization_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UserOrganization" ADD CONSTRAINT "UserOrganization_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -18,11 +18,17 @@ const sendHtmlMail = async (to: string[], html: string) => {
 };
 
 const sendTextMail = async (to: string[], text: string) => {
-  return await transporter.sendMail({
-    from: process.env.COGNITO_FROM_EMAIL,
-    to: to,
-    text: text,
-  });
+  try {
+    const result = await transporter.sendMail({
+      from: process.env.COGNITO_FROM_EMAIL,
+      to: to,
+      text: text,
+    });
+    return result;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
 };
 
 export const Mail = {

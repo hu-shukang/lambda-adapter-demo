@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { CONST } from '~/lib/const';
 
 export type Expand<T> = { [K in keyof T]: T[K] };
-export type DBKey = { pk: string; sk: string };
 
 export type UpdateUserAndTime = { updateUser: string; updateTime: string };
 
@@ -12,13 +11,13 @@ export const refreshToken = z.string();
 export const username = z.string({ required_error: '必須項目です' }).min(1, 'ユーザIDは必須');
 export const employeeNo = z.string({ required_error: '必須項目です' }).min(1, '社員番号は必須');
 export const name = z.string({ required_error: '必須項目です' }).min(1, '名前は必須');
+export const nameOptional = z.string().optional();
 export const email = z.string({ required_error: '必須項目です' }).email({ message: 'メール形式不正' });
 export const status = z.enum(CONST.USER.STATUS.LIST, { required_error: '必須項目です' });
+export const statusOptional = z.enum(CONST.USER.STATUS.LIST).optional();
 export const organization = z.string({ required_error: '必須項目です' }).uuid({ message: '組織は必須' });
+export const organizationOptional = z.string().uuid().optional();
 export const position = z.string({ required_error: '必須項目です' }).min(1, '必須項目です');
-export const organizationFilter = z.string().uuid().optional();
-export const statusFilter = z.enum(CONST.USER.STATUS.LIST).optional();
-export const nameFilter = z.string().optional();
 export const password = z
   .string({ required_error: '必須項目です' })
   .min(8, '8文字以上は必須')

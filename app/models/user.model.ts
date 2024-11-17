@@ -1,14 +1,13 @@
 import { z } from 'zod';
 import {
   status,
-  statusFilter,
+  statusOptional,
   name,
   confirmationCode,
-  DBKey,
   email,
   idToken,
-  nameFilter,
-  organizationFilter,
+  nameOptional,
+  organizationOptional,
   password,
   refreshToken,
   rePassword,
@@ -34,16 +33,12 @@ export const userInfoInputSchema = z.object({
 });
 
 export const userQueryInputSchema = z.object({
-  organization: organizationFilter,
-  status: statusFilter,
-  name: nameFilter,
+  organization: organizationOptional,
+  status: statusOptional,
+  name: nameOptional,
 });
 
 export const idSchema = z.object({
-  id: z.string(),
-});
-
-export const employeeNoInputSchema = z.object({
   id: employeeNo,
 });
 
@@ -101,7 +96,6 @@ export type UserOrganizationInput = z.infer<typeof userOrganizationInputSchema>;
 export type UserInfoInput = z.infer<typeof userInfoInputSchema>;
 
 export type UserQueryInput = z.infer<typeof userQueryInputSchema>;
-export type UserEntity = Expand<DBKey & UserInfoInput>;
 export type SigninInput = z.infer<typeof signinInputSchema>;
 export type SignupInput = z.infer<typeof signupInputSchema>;
 export type SignupConfirmInput = z.infer<typeof signupConfirmInputSchema>;
@@ -110,7 +104,6 @@ export type PasswordInput = z.infer<typeof passwordInputSchema>;
 export type ConfirmationCodeInput = z.infer<typeof confirmationCodeInputSchema>;
 export type TokenInput = z.infer<typeof tokenInputSchema>;
 export type AccountUpdateInput = z.infer<typeof accountUpdateInputSchema>;
-export type EmployeeNoInput = z.infer<typeof employeeNoInputSchema>;
 
 export type ID = z.infer<typeof idSchema>;
 
