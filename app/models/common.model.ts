@@ -47,3 +47,4 @@ export const pkNullable = z.string().uuid().optional();
 
 export const picture = z.string().url();
 export const tagCategory = z.enum(CONST.TAG.LIST);
+export const uuid = z.string().uuid();

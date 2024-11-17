@@ -60,3 +60,9 @@ export class DeleteSelfError extends BaseError {
     super('DeleteSelf', 400, 'DeleteSelfError', '自分自身を削除できない');
   }
 }
+
+export class ResourceNotFoundError extends BaseError {
+  constructor() {
+    super('ResourceNotFound', 400, 'ResourceNotFoundError', 'リソースが見つからない');
+  }
+}

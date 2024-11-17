@@ -15,6 +15,7 @@ model Tag {
   updateTime       DateTime           @updatedAt
   updateUser       String
   UserOrganization UserOrganization[]
+  resourceMetadata ResourceMetadata[]
 
   @@index([category], name: "idx_category")
 }
@@ -61,4 +62,18 @@ model UserOrganization {
   @@id([userId, organizationId])
   @@index([organizationId])
   @@index([position])
+}
+
+model ResourceMetadata {
+  tagId       String @db.Uuid
+  fieldName   String
+  label       String
+  description String
+  type        String
+  validation  String
+  options     Json?
+  order       Int
+  tag         Tag    @relation(fields: [tagId], references: [id], onDelete: Restrict)
+
+  @@id([tagId, fieldName])
 }
