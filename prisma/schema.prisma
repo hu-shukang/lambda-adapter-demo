@@ -73,7 +73,7 @@ model ResourceMetadata {
   validation  String
   options     Json?
   order       Int
-  tag         Tag    @relation(fields: [tagId], references: [id], onDelete: Restrict)
+  tag         Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([tagId, fieldName])
 }

@@ -33,7 +33,7 @@ export default function OrganizationPage() {
 
   const deleteAction = (info: OrganizationInfo) => {
     const formData = new FormData();
-    formData.append('pk', info.pk);
+    formData.append('pk', info.id);
     submit(formData, { method: 'POST' });
   };
 

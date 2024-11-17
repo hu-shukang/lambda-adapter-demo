@@ -14,6 +14,9 @@ export default function DashboardPage() {
       <Link to={'/dashboard/user'}>
         <Button>Back to user</Button>
       </Link>
+      <Link to={'/dashboard/resource'}>
+        <Button>Back to resource</Button>
+      </Link>
     </div>
   );
 }

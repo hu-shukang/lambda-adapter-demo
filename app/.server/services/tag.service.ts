@@ -1,4 +1,4 @@
-import { TagInfoInput } from '~/models/tag.model';
+import { TagCategory, TagInfoInput } from '~/models/tag.model';
 import { CommonService } from './common.service';
 import { v7 } from 'uuid';
 import { IdTokenPayload } from '~/models/user.model';
@@ -15,7 +15,7 @@ class TagService extends CommonService {
     });
   }
 
-  public async query(category: string) {
+  public async query(category: TagCategory) {
     return await this.prisma.tag.findMany({
       where: {
         category: category,

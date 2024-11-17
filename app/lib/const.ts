@@ -15,8 +15,9 @@ export const CONST = {
     PASSWORD: 'PASSWORD',
   },
   TAG: {
-    LIST: ['organization'],
+    LIST: ['organization', 'resource'],
     ORGANIZATION: 'organization',
+    RESOURCE: 'resource',
   },
   ERROR_CODE: {
     AUTH: {

@@ -1,12 +1,12 @@
 import { z } from 'zod';
+import { name } from './common.model';
 
 export const optionsSchema = z.object({
   value: z.string().min(1).max(20),
   label: z.string().min(1).max(20),
 });
 
-export const resourceMetadataInputSchema = z.object({
-  tagId: z.string().uuid(),
+export const resourceMetadataItemSchema = z.object({
   fieldName: z
     .string()
     .min(1)
@@ -20,7 +20,10 @@ export const resourceMetadataInputSchema = z.object({
   order: z.number().int().min(0),
 });
 
-export const resourceMetadataListInputSchema = z.array(resourceMetadataInputSchema).min(1);
+export const resourceMetadataInputSchema = z.object({
+  name: name,
+  items: z.array(resourceMetadataItemSchema).min(1),
+});
 
-export type ResourceMetadataListInput = z.infer<typeof resourceMetadataListInputSchema>;
-export type ResourceMetadataView = z.infer<typeof resourceMetadataInputSchema>;
+export type ResourceMetadataInput = z.infer<typeof resourceMetadataInputSchema>;
+export type ResourceMetadataView = z.infer<typeof resourceMetadataItemSchema>;
