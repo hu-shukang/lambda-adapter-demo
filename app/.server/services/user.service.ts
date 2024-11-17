@@ -4,15 +4,41 @@ import { Cognito } from '../utils/cognito.util';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
 import { Mail } from '../utils/mail.util';
 import { UserNotFoundError } from '~/models/error.model';
-import { User } from '@prisma/client';
 import { CONST } from '~/lib/const';
 import { v7 } from 'uuid';
 
 class UserService extends CommonService {
-  public async get(payload: IdTokenPayload): Promise<User | null> {
+  private readonly selectFields = {
+    id: true,
+    name: true,
+    email: true,
+    status: true,
+    enterDay: true,
+    cognitoUserStatus: true,
+    organizations: {
+      select: {
+        tag: {
+          select: {
+            id: true,
+            name: true,
+            category: true,
+          },
+        },
+        organization: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+          },
+        },
+      },
+    },
+  };
+
+  public async get(id: string) {
     return this.prisma.user.findUnique({
-      where: { email: payload.email },
-      include: { organizations: true },
+      where: { id: id },
+      select: this.selectFields,
     });
   }
 
@@ -42,13 +68,13 @@ class UserService extends CommonService {
   }
 
   public async create(userInput: UserInfoInput, payload: CognitoIdTokenPayload) {
-    const { user, initPassword } = await Cognito.Admin.createUser(userInput.employeeNo, userInput.email, {
+    const { user, initPassword } = await Cognito.Admin.createUser(userInput.id, userInput.email, {
       name: userInput.name,
     });
     const tags = await this.getAndUpdateTags(userInput, payload);
     const result = await this.prisma.user.create({
       data: {
-        id: userInput.employeeNo,
+        id: userInput.id,
         name: userInput.name,
         email: userInput.email,
         status: userInput.status,
@@ -85,16 +111,16 @@ class UserService extends CommonService {
     });
   }
 
-  public async update(id: string, userInput: UserInfoInput, payload: IdTokenPayload) {
+  public async update(userInput: UserInfoInput, payload: IdTokenPayload) {
     const user = await this.prisma.user.findUnique({
-      where: { id: id },
+      where: { id: userInput.id },
     });
     if (!user) {
       throw new UserNotFoundError();
     }
     const tags = await this.getAndUpdateTags(userInput, payload);
     const result = await this.prisma.user.update({
-      where: { id: id },
+      where: { id: userInput.id },
       data: {
         name: userInput.name,
         email: userInput.email,
@@ -142,31 +168,7 @@ class UserService extends CommonService {
 
     return await this.prisma.user.findMany({
       where,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        status: true,
-        enterDay: true,
-        cognitoUserStatus: true,
-        organizations: {
-          select: {
-            tag: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-            organization: {
-              select: {
-                id: true,
-                name: true,
-                description: true,
-              },
-            },
-          },
-        },
-      },
+      select: this.selectFields,
       orderBy: {
         id: 'asc',
       },

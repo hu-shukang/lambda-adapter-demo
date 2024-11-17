@@ -1,5 +1,5 @@
 import { LoaderFunction } from '@remix-run/node';
-import { UIMatch, useNavigation, useRouteLoaderData, useSubmit } from '@remix-run/react';
+import { UIMatch, useLoaderData, useNavigation, useRouteLoaderData, useSubmit } from '@remix-run/react';
 import { SubmitHandler } from 'react-hook-form';
 import { UserAPI } from '~/.server/apis/user.api';
 import Title from '~/components/common/title';
@@ -15,9 +15,11 @@ export const handle = {
 };
 
 export const action = UserAPI.actions.update;
+export const loader = UserAPI.loader.get;
 
 export default function UserAddPage() {
-  const loaderData = useRouteLoaderData<LoaderFunction>('routes/dashboard.user');
+  const organizationDataLoader = useRouteLoaderData<LoaderFunction>('routes/dashboard.user');
+  const loaderData = useLoaderData<LoaderFunction>();
   const submit = useSubmit();
   const navigation = useNavigation();
 
@@ -34,9 +36,11 @@ export default function UserAddPage() {
       <div>
         <UserForm
           onSubmit={onSubmit}
-          organizations={loaderData?.data.organizations || []}
-          tags={loaderData?.data.tags || []}
+          organizations={organizationDataLoader?.data.organizations || []}
+          tags={organizationDataLoader?.data.tags || []}
           progressing={navigation.state === 'submitting'}
+          defaultValues={loaderData?.data}
+          disabledFileds={['id']}
         />
       </div>
     </div>

@@ -8,7 +8,7 @@ import { IdTokenPayload, TokenInput, tokenInputSchema } from '~/models/user.mode
 export const action = RequestWrapper.init(async ({ context }) => {
   const { idToken, refreshToken } = context.bodyData as TokenInput;
   const payload = (await Cognito.verifier.verify(idToken)) as IdTokenPayload;
-  const userInfoView = await userService.get(payload);
+  const userInfoView = await userService.get(payload.employeeNo);
   console.log(userInfoView);
   const headers = new Headers();
   headers.append('Set-Cookie', await Cookie.idToken.serialize(idToken));

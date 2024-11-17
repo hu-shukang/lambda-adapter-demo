@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm, useFieldArray } from 'react-hook-form';
 import { CONST } from '~/lib/const';
 import { OrganizationInfo } from '~/models/organization.model';
-import { UserInfoInput, userInfoInputSchema } from '~/models/user.model';
+import { UserInfoInput, userInfoInputSchema, UserView } from '~/models/user.model';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
@@ -23,19 +23,48 @@ type Props = {
   tags: TagInfo[];
   submitButtonText?: string | undefined;
   progressing: boolean;
+  defaultValues?: UserView;
+  disabledFileds?: Array<keyof UserInfoInput>;
 };
 
-export default function UserForm({ onSubmit, organizations, tags, submitButtonText, progressing }: Props) {
+const initValues = {
+  id: '',
+  email: '',
+  name: '',
+  enterDay: dateUtil.utc(),
+  organizations: [{ organization: '', position: '' }],
+  status: CONST.USER.STATUS.ACTIVE,
+};
+
+const getInitValues = (defaultValues?: UserView | undefined) => {
+  if (!defaultValues) {
+    return initValues;
+  }
+  return {
+    id: defaultValues.id,
+    email: defaultValues.email,
+    name: defaultValues.name,
+    enterDay: defaultValues.enterDay,
+    status: defaultValues.status,
+    organizations: defaultValues.organizations.map((o) => ({
+      organization: o.organization.id,
+      position: o.tag.name,
+    })),
+  };
+};
+
+export default function UserForm({
+  onSubmit,
+  organizations,
+  tags,
+  submitButtonText,
+  progressing,
+  defaultValues,
+  disabledFileds,
+}: Props) {
   const [tagList, setTagList] = useState(tags);
   const form = useForm<UserInfoInput>({
-    defaultValues: {
-      email: '',
-      name: '',
-      employeeNo: '',
-      enterDay: dateUtil.utc(),
-      organizations: [{ organization: '', position: '' }],
-      status: CONST.USER.STATUS.ACTIVE,
-    },
+    defaultValues: getInitValues(defaultValues),
     resolver: zodResolver(userInfoInputSchema),
   });
 
@@ -46,12 +75,25 @@ export default function UserForm({ onSubmit, organizations, tags, submitButtonTe
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
+          name="id"
+          render={({ field }) => (
+            <FormItem className="w-[300px]">
+              <FormLabel>社員番号</FormLabel>
+              <FormControl>
+                <Input placeholder="社員番号" {...field} disabled={disabledFileds?.includes('id')} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem className="w-[300px]">
               <FormLabel>メールアドレス</FormLabel>
               <FormControl>
-                <Input placeholder="メールアドレス" {...field} />
+                <Input placeholder="メールアドレス" {...field} disabled={disabledFileds?.includes('email')} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -64,20 +106,7 @@ export default function UserForm({ onSubmit, organizations, tags, submitButtonTe
             <FormItem className="w-[300px]">
               <FormLabel>ユーザ名</FormLabel>
               <FormControl>
-                <Input placeholder="ユーザ名" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="employeeNo"
-          render={({ field }) => (
-            <FormItem className="w-[300px]">
-              <FormLabel>社員番号</FormLabel>
-              <FormControl>
-                <Input placeholder="社員番号" {...field} />
+                <Input placeholder="ユーザ名" {...field} disabled={disabledFileds?.includes('name')} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -95,6 +124,7 @@ export default function UserForm({ onSubmit, organizations, tags, submitButtonTe
                     <Button
                       variant={'outline'}
                       className={cn('w-[300px] pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
+                      disabled={disabledFileds?.includes('enterDay')}
                     >
                       {field.value ? dateUtil.formatJP(field.value) : <span>入社日</span>}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
@@ -126,6 +156,7 @@ export default function UserForm({ onSubmit, organizations, tags, submitButtonTe
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                   className="flex flex-row space-x-1"
+                  disabled={disabledFileds?.includes('status')}
                 >
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>

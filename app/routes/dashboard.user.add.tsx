@@ -25,7 +25,6 @@ export default function UserAddPage() {
   const navigation = useNavigation();
 
   const onSubmit: SubmitHandler<UserInfoInput> = async (data) => {
-    console.dir(data);
     const formData = getFormDataFromObject(data);
     submit(formData, { method: 'POST' });
   };

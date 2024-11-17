@@ -20,23 +20,13 @@ import {
   position,
 } from './common.model';
 import { CognitoIdTokenPayload } from 'aws-jwt-verify/jwt-model';
-import { User } from '@prisma/client';
+import { CONST } from '~/lib/const';
 
 export const userOrganizationInputSchema = z.object({ organization, position });
 
 export const userInfoInputSchema = z.object({
-  email: email,
-  employeeNo: employeeNo,
-  name: name,
-  status: status,
-  enterDay: z.string().datetime(),
-  organizations: z.array(userOrganizationInputSchema).min(1),
-});
-
-export const userInfoUpdateInputSchema = z.object({
   id: employeeNo,
   email: email,
-  employeeNo: employeeNo,
   name: name,
   status: status,
   enterDay: z.string().datetime(),
@@ -109,8 +99,6 @@ export const accountUpdateInputSchema = z.object({
 
 export type UserOrganizationInput = z.infer<typeof userOrganizationInputSchema>;
 export type UserInfoInput = z.infer<typeof userInfoInputSchema>;
-export type UserInfoUpdateInput = z.infer<typeof userInfoUpdateInputSchema>;
-export type UserView = Expand<User & { picture?: string }>;
 
 export type UserQueryInput = z.infer<typeof userQueryInputSchema>;
 export type UserEntity = Expand<DBKey & UserInfoInput>;
@@ -133,3 +121,34 @@ export type IdTokenPayload = Expand<
     picture?: string;
   }
 >;
+
+export type UserStatus = (typeof CONST.USER.STATUS.LIST)[number];
+
+export type TagView = {
+  id: string;
+  name: string;
+  category: string;
+};
+
+export type OrganizationView = {
+  id: string;
+  name: string;
+  parentId: string;
+  description: string;
+};
+
+export type UserOrganizationView = {
+  tag: TagView;
+  organization: OrganizationView;
+};
+
+export type UserView = {
+  id: string;
+  status: UserStatus;
+  email: string;
+  name: string;
+  enterDay: string;
+  picture?: string;
+  cognitoUserStatus: string;
+  organizations: UserOrganizationView[];
+};

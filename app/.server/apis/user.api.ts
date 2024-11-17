@@ -3,11 +3,11 @@ import { Resp } from '../utils/response.util';
 import {
   EmployeeNoInput,
   employeeNoInputSchema,
+  ID,
+  idSchema,
   IdTokenPayload,
   UserInfoInput,
   userInfoInputSchema,
-  UserInfoUpdateInput,
-  userInfoUpdateInputSchema,
   UserQueryInput,
   userQueryInputSchema,
 } from '~/models/user.model';
@@ -25,14 +25,13 @@ const createAction = RequestWrapper.init(async ({ context, request }) => {
   .action();
 
 const updateAction = RequestWrapper.init(async ({ context, request }) => {
-  const form = context.bodyData as UserInfoUpdateInput;
+  const form = context.bodyData as UserInfoInput;
   const payload = context.payload as IdTokenPayload;
-  const { id, ...data } = form;
-  await userService.update(id, data, payload);
+  await userService.update(form, payload);
   return Resp.redirect(request, '/dashboard/user');
 })
   .withLogin()
-  .withBodyValid(userInfoUpdateInputSchema)
+  .withBodyValid(userInfoInputSchema)
   .action();
 
 const deleteAction = RequestWrapper.init(async ({ context, request }) => {
@@ -47,6 +46,7 @@ const deleteAction = RequestWrapper.init(async ({ context, request }) => {
 const queryLoader = RequestWrapper.init(async ({ context, request }) => {
   const query = context.queryData as UserQueryInput;
   const result = await userService.query(query);
+  console.log(JSON.stringify(result));
   return Resp.json(request, { data: result, success: true });
 })
   .withLogin()
@@ -54,10 +54,12 @@ const queryLoader = RequestWrapper.init(async ({ context, request }) => {
   .loader();
 
 const getLoader = RequestWrapper.init(async ({ context, request }) => {
-  const data = await userService.get(context.payload!);
+  const { id } = context.paramsData as ID;
+  const data = await userService.get(id);
   return Resp.json(request, { data: data, success: true });
 })
   .withLogin()
+  .withParamsValid(idSchema)
   .loader();
 
 export const UserAPI = {
