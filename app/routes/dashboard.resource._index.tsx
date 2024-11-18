@@ -1,8 +1,9 @@
-import { useLoaderData } from '@remix-run/react';
+import { Link, useLoaderData } from '@remix-run/react';
 import { useCallback } from 'react';
 import { ResourceAPI } from '~/.server/apis/resource.api';
 import Title from '~/components/common/title';
 import ResourceList from '~/components/resource/resource-list';
+import { Button } from '~/components/ui/button';
 import { TagView } from '~/models/user.model';
 
 export const loader = ResourceAPI.loader.query;
@@ -20,8 +21,11 @@ export default function ResourcePage() {
 
   return (
     <div className="page-container">
-      <div className="mb-2">
+      <div className="flex justify-between items-center mb-2">
         <Title text="リソース一覧" />
+        <Link to="/dashboard/resource/add">
+          <Button>新規作成</Button>
+        </Link>
       </div>
       <ResourceList data={dataLoader?.data || []} updateHandler={updateHandler} removeHandler={removeHandler} />
     </div>

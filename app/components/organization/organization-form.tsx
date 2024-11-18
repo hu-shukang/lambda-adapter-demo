@@ -22,7 +22,7 @@ export default function OrganizationForm({ onSubmit, organizations, defaultValue
   const form = useForm<OrganizationInput>({
     defaultValues: defaultValues || {
       name: '',
-      parent: undefined,
+      parentId: undefined,
     },
     resolver: zodResolver(organizationInputSchema),
   });
@@ -32,7 +32,7 @@ export default function OrganizationForm({ onSubmit, organizations, defaultValue
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="parent"
+          name="parentId"
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>親組織</FormLabel>
@@ -44,7 +44,7 @@ export default function OrganizationForm({ onSubmit, organizations, defaultValue
                       role="combobox"
                       className={cn('justify-between', !field.value && 'text-muted-foreground')}
                     >
-                      {field.value ? organizations.find((o) => o.pk === field.value)?.name : '親組織選択'}
+                      {field.value ? organizations.find((o) => o.id === field.value)?.name : '親組織選択'}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </FormControl>
@@ -57,17 +57,17 @@ export default function OrganizationForm({ onSubmit, organizations, defaultValue
                       <CommandGroup>
                         {organizations.map((o) => (
                           <CommandItem
-                            value={o.pk}
-                            key={o.pk}
+                            value={o.id}
+                            key={o.id}
                             onSelect={(currentValue) => {
                               form.setValue(
-                                'parent',
-                                currentValue === form.getValues().parent ? undefined : currentValue,
+                                'parentId',
+                                currentValue === form.getValues().parentId ? undefined : currentValue,
                               );
                               setOpen(false);
                             }}
                           >
-                            <Check className={cn('mr-2 h-4 w-4', o.pk === field.value ? 'opacity-100' : 'opacity-0')} />
+                            <Check className={cn('mr-2 h-4 w-4', o.id === field.value ? 'opacity-100' : 'opacity-0')} />
                             {o.name}
                           </CommandItem>
                         ))}
@@ -78,7 +78,7 @@ export default function OrganizationForm({ onSubmit, organizations, defaultValue
               </Popover>
               {defaultValues && (
                 <FormDescription>
-                  元の値：{organizations.find((o) => o.pk === defaultValues?.parent)?.name || 'なし'}
+                  元の値：{organizations.find((o) => o.id === defaultValues?.parentId)?.name || 'なし'}
                 </FormDescription>
               )}
               <FormMessage />

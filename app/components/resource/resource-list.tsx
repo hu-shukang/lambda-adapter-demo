@@ -28,16 +28,16 @@ export const getColumns = ({ updateHandler, removeHandler }: Props): ColumnDef<T
       cell: ({ row }) => <div className="text-center">{row.index + 1}</div>,
     },
     {
-      accessorKey: 'name',
-      meta: { displayName: '名前' },
-      header: '名前',
-      cell: ({ row }) => <div>{row.getValue('name')}</div>,
-    },
-    {
       accessorKey: 'category',
       meta: { displayName: 'カテゴリー' },
       header: 'カテゴリー',
       cell: ({ row }) => <div>{row.getValue('category')}</div>,
+    },
+    {
+      accessorKey: 'name',
+      meta: { displayName: '名前' },
+      header: '名前',
+      cell: ({ row }) => <div>{row.getValue('name')}</div>,
     },
     {
       accessorKey: 'color',
