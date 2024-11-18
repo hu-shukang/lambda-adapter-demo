@@ -26,4 +26,5 @@ export const resourceMetadataInputSchema = z.object({
 });
 
 export type ResourceMetadataInput = z.infer<typeof resourceMetadataInputSchema>;
-export type ResourceMetadataView = z.infer<typeof resourceMetadataItemSchema>;
+export type ResourceMetadataItemView = z.infer<typeof resourceMetadataItemSchema>;
+export type ResourceMetadataView = ResourceMetadataInput;

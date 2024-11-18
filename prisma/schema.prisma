@@ -12,6 +12,7 @@ model Tag {
   id               String             @id @db.Uuid
   category         String
   name             String
+  color            String             @default("#000000") @db.Char(7)
   updateTime       DateTime           @updatedAt
   updateUser       String
   UserOrganization UserOrganization[]

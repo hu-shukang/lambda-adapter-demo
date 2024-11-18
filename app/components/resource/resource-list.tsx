@@ -1,0 +1,123 @@
+import * as React from 'react';
+import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { MoreHorizontal } from 'lucide-react';
+
+import { Button } from '~/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table';
+import { TagView } from '~/models/user.model';
+
+type Props = {
+  data: TagView[];
+  updateHandler: (info: TagView) => void;
+  removeHandler: (info: TagView) => void;
+};
+
+export const getColumns = ({ updateHandler, removeHandler }: Props): ColumnDef<TagView>[] => {
+  return [
+    {
+      id: 'idx',
+      header: () => <div className="text-center">No.</div>,
+      cell: ({ row }) => <div className="text-center">{row.index + 1}</div>,
+    },
+    {
+      accessorKey: 'name',
+      meta: { displayName: '名前' },
+      header: '名前',
+      cell: ({ row }) => <div>{row.getValue('name')}</div>,
+    },
+    {
+      accessorKey: 'category',
+      meta: { displayName: 'カテゴリー' },
+      header: 'カテゴリー',
+      cell: ({ row }) => <div>{row.getValue('category')}</div>,
+    },
+    {
+      accessorKey: 'color',
+      meta: { displayName: 'カラー' },
+      header: 'カラー',
+      cell: ({ row }) => <div>{row.getValue('color')}</div>,
+    },
+    {
+      id: 'actions',
+      header: () => <div className="text-center">操作</div>,
+      cell: ({ row }) => {
+        return (
+          <div className="text-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>アクション</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => updateHandler(row.original)}>更新</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => removeHandler(row.original)}>削除</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    },
+  ];
+};
+
+export default function ResourceList(props: Props) {
+  const { data } = props;
+  const columns = React.useMemo(() => getColumns(props), [props]);
+
+  const table = useReactTable({
+    data,
+    columns: columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <div className="w-full">
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getAllCells().map((cell) => (
+                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
