@@ -9,7 +9,7 @@ export const optionsSchema = z.object({
 /**
  * text: required, min, max, email, url, pattern
  * number: required, min, max, integer
- * date: required, min, max
+ * date: required, range
  * boolean: required
  * select: required, options
  * textarea: required, min, max
