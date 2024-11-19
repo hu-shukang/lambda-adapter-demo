@@ -26,7 +26,6 @@ export const resourceMetadataItemSchema = z.object({
   description: z.string().min(1).max(255),
   type: typeSchema,
   validation: z.string().min(1).max(255),
-  options: z.array(optionsSchema).optional(),
   order: z.number().int().min(0),
 });
 
@@ -53,19 +52,29 @@ const checkRegex = (pattern: string | undefined) => {
  * select: required, options
  * textarea: required, min, max
  */
-export const validationInputSchema = z.object({
-  type: typeSchema,
-  required: z.boolean(),
-  min: z.number().int().optional(),
-  max: z.number().int().optional(),
-  email: z.boolean().optional(),
-  url: z.boolean().optional(),
-  pattern: z.string().optional().refine(checkRegex, {
-    message: 'Invalid regular expression pattern',
-  }),
-  integer: z.boolean().optional(),
-  options: z.array(optionsSchema).optional(),
-});
+export const validationInputSchema = z
+  .object({
+    type: typeSchema,
+    required: z.boolean(),
+    min: z.number().int().optional(),
+    max: z.number().int().optional(),
+    email: z.boolean().optional(),
+    url: z.boolean().optional(),
+    pattern: z.string().optional().refine(checkRegex, {
+      message: 'Invalid regular expression pattern',
+    }),
+    integer: z.boolean().optional(),
+    options: z.array(optionsSchema).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.min !== undefined && data.max !== undefined && data.min > data.max) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Min value must be less than max value',
+        path: ['min'],
+      });
+    }
+  });
 
 export type TypeEnum = z.infer<typeof typeSchema>;
 export type ResourceMetadataInput = z.infer<typeof resourceMetadataInputSchema>;

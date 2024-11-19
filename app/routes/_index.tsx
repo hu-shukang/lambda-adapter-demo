@@ -1,5 +1,5 @@
 import { Link } from '@remix-run/react';
-import ValidationFields from '~/components/resource/validation-fields';
+import ResourceForm from '~/components/resource/resource-form';
 import { Button } from '~/components/ui/button';
 
 export default function Index() {
@@ -12,8 +12,12 @@ export default function Index() {
       <Link to={'/account'}>
         <Button>Go to account</Button>
       </Link>
-      <div>
-        <ValidationFields type="number" />
+      <div className="w-[1200px] mt-4 mx-auto">
+        <ResourceForm
+          onSubmit={(data) => {
+            console.log(data);
+          }}
+        />
       </div>
     </div>
   );

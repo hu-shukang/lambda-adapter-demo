@@ -1,14 +1,5 @@
-/**
- * text: required, min, max, email, url, pattern
- * number: required, min, max, integer
- * date: required, min, max
- * boolean: required
- * select: required, options
- * textarea: required, min, max
- */
-
 import { SubmitHandler, useFieldArray, useForm, UseFormReturn } from 'react-hook-form';
-import { ValidationInput, TypeEnum } from '~/models/resource.model';
+import { ValidationInput, TypeEnum, validationInputSchema } from '~/models/resource.model';
 import { Form, FormControl, FormDescription, FormField, FormItem } from '../ui/form';
 import { Switch } from '../ui/switch';
 import { Input } from '../ui/input';
@@ -18,21 +9,10 @@ import { cn } from '~/lib/utils';
 import { dateUtil } from '~/lib/date.util';
 import { CalendarIcon, MinusIcon, PlusIcon } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 type Props = {
   type: TypeEnum;
-};
-
-const defaultValues: ValidationInput = {
-  type: 'text',
-  required: false,
-  min: undefined,
-  max: undefined,
-  email: false,
-  url: false,
-  pattern: undefined,
-  integer: false,
-  options: [{ value: '', label: '' }],
 };
 
 type SettingsProps = {
@@ -164,6 +144,12 @@ const DateLengthSettings = ({ type, form }: SettingsProps) => {
           </FormItem>
         )}
       />
+      {form.formState.errors.min && (
+        <div className="text-[0.8rem] text-red-400">{form.formState.errors.min.message}</div>
+      )}
+      {form.formState.errors.max && (
+        <div className="text-[0.8rem] text-red-400">{form.formState.errors.max.message}</div>
+      )}
     </div>
   );
 };
@@ -180,7 +166,16 @@ const NumberLengthSettings = ({ type, form }: SettingsProps) => {
           <FormItem className="flex items-center justify-between space-y-0">
             <FormDescription>最小値</FormDescription>
             <FormControl className="w-[200px]">
-              <Input type="number" {...field} min={0} />
+              <Input
+                type="number"
+                {...field}
+                min={0}
+                value={field.value !== undefined ? field.value : ''}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? undefined : Number(e.target.value);
+                  field.onChange(value);
+                }}
+              />
             </FormControl>
           </FormItem>
         )}
@@ -192,7 +187,16 @@ const NumberLengthSettings = ({ type, form }: SettingsProps) => {
           <FormItem className="flex items-center justify-between space-y-0">
             <FormDescription>最大値</FormDescription>
             <FormControl className="w-[200px]">
-              <Input type="number" {...field} min={0} />
+              <Input
+                type="number"
+                {...field}
+                min={0}
+                value={field.value !== undefined ? field.value : ''}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? undefined : Number(e.target.value);
+                  field.onChange(value);
+                }}
+              />
             </FormControl>
           </FormItem>
         )}
@@ -209,6 +213,12 @@ const NumberLengthSettings = ({ type, form }: SettingsProps) => {
           </FormItem>
         )}
       />
+      {form.formState.errors.min && (
+        <div className="text-[0.8rem] text-red-400">{form.formState.errors.min.message}</div>
+      )}
+      {form.formState.errors.max && (
+        <div className="text-[0.8rem] text-red-400">{form.formState.errors.max.message}</div>
+      )}
     </div>
   );
 };
@@ -225,7 +235,16 @@ const TextLengthSettings = ({ type, form }: SettingsProps) => {
           <FormItem className="flex items-center justify-between space-y-0">
             <FormDescription>最小文字数</FormDescription>
             <FormControl className="w-[200px]">
-              <Input type="number" {...field} min={0} />
+              <Input
+                type="number"
+                {...field}
+                min={0}
+                value={field.value !== undefined ? field.value : ''}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? undefined : Number(e.target.value);
+                  field.onChange(value);
+                }}
+              />
             </FormControl>
           </FormItem>
         )}
@@ -237,11 +256,26 @@ const TextLengthSettings = ({ type, form }: SettingsProps) => {
           <FormItem className="flex items-center justify-between space-y-0">
             <FormDescription>最大文字数</FormDescription>
             <FormControl className="w-[200px]">
-              <Input type="number" {...field} min={0} />
+              <Input
+                type="number"
+                {...field}
+                min={0}
+                value={field.value !== undefined ? field.value : ''}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? undefined : Number(e.target.value);
+                  field.onChange(value);
+                }}
+              />
             </FormControl>
           </FormItem>
         )}
       />
+      {form.formState.errors.min && (
+        <div className="text-[0.8rem] text-red-400">{form.formState.errors.min.message}</div>
+      )}
+      {form.formState.errors.max && (
+        <div className="text-[0.8rem] text-red-400">{form.formState.errors.max.message}</div>
+      )}
     </div>
   );
 };
@@ -262,6 +296,8 @@ const TextPatternSettings = ({ type, form }: SettingsProps) => {
                 checked={field.value}
                 onCheckedChange={(checked) => {
                   field.onChange(checked);
+                  form.setValue('url', false);
+                  form.setValue('pattern', '');
                 }}
               />
             </FormControl>
@@ -279,6 +315,8 @@ const TextPatternSettings = ({ type, form }: SettingsProps) => {
                 checked={field.value}
                 onCheckedChange={(checked) => {
                   field.onChange(checked);
+                  form.setValue('email', false);
+                  form.setValue('pattern', '');
                 }}
               />
             </FormControl>
@@ -304,16 +342,35 @@ const TextPatternSettings = ({ type, form }: SettingsProps) => {
           </FormItem>
         )}
       />
+      {form.formState.errors.pattern && (
+        <div className="text-[0.8rem] text-red-400">{form.formState.errors.pattern.message}</div>
+      )}
     </div>
   );
 };
 
+const getDefaultValues = (type: TypeEnum): ValidationInput => {
+  const defaultValues: ValidationInput = {
+    type: type,
+    required: false,
+    min: undefined,
+    max: undefined,
+    email: false,
+    url: false,
+    pattern: '',
+    integer: false,
+  };
+  if (type === 'select') {
+    defaultValues.options = [{ label: '', value: '' }];
+  }
+  return defaultValues;
+};
+
 export default function ValidationFields({ type }: Props) {
+  const defaultValue = getDefaultValues(type);
   const form = useForm<ValidationInput>({
-    defaultValues: {
-      ...defaultValues,
-      type: type,
-    },
+    defaultValues: defaultValue,
+    resolver: zodResolver(validationInputSchema),
   });
 
   const onSubmit: SubmitHandler<ValidationInput> = (data) => {
@@ -344,10 +401,8 @@ export default function ValidationFields({ type }: Props) {
           <DateLengthSettings type={type} form={form} />
           <TextPatternSettings type={type} form={form} />
           <SelectOptionsSettings type={type} form={form} />
+          <Button type="submit">設定</Button>
         </form>
-        <Button className="mt-4" type="submit">
-          設定
-        </Button>
       </Form>
     </div>
   );

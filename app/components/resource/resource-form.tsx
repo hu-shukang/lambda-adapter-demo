@@ -1,9 +1,9 @@
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
-import { ResourceMetadataInput, ResourceMetadataView, typeValues } from '~/models/resource.model';
+import { ResourceMetadataInput, ResourceMetadataView } from '~/models/resource.model';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import ColorPicker from '../ui/color-picker';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import ItemTable from './item-table';
 
 type Props = {
   onSubmit: SubmitHandler<ResourceMetadataInput>;
@@ -15,20 +15,10 @@ export default function ResourceForm({ onSubmit, defaultValues }: Props) {
     defaultValues: defaultValues || {
       name: '',
       color: '#0094ff',
-      items: [
-        {
-          fieldName: '',
-          label: '',
-          description: '',
-          type: 'text',
-          validation: '',
-          options: [],
-          order: 0,
-        },
-      ],
+      items: [],
     },
   });
-  const { fields, append, remove } = useFieldArray({ control: form.control, name: 'items' });
+  const { append, remove, update, replace } = useFieldArray({ control: form.control, name: 'items' });
 
   return (
     <Form {...form}>
@@ -62,89 +52,8 @@ export default function ResourceForm({ onSubmit, defaultValues }: Props) {
         <FormField
           control={form.control}
           name="items"
-          render={() => (
-            <FormItem className="space-y-2">
-              <FormLabel>項目</FormLabel>
-              <div>
-                {fields.map((field, index) => (
-                  <div key={field.id}>
-                    <FormField
-                      control={form.control}
-                      name={`items.${index}.fieldName`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input placeholder="フィールド名" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`items.${index}.label`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input placeholder="ラベル" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`items.${index}.description`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input placeholder="説明" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`items.${index}.type`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <SelectTrigger className="w-[300px]">
-                                <SelectValue placeholder="Select a Type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  {typeValues.map((type) => (
-                                    <SelectItem key={type} value={type}>
-                                      {type}
-                                    </SelectItem>
-                                  ))}
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`items.${index}.validation`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input placeholder="バリデーション" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                ))}
-              </div>
-            </FormItem>
+          render={({ field }) => (
+            <ItemTable items={field.value} remove={remove} append={append} update={update} replace={replace} />
           )}
         />
       </form>
