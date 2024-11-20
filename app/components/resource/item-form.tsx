@@ -1,6 +1,15 @@
-import { SubmitHandler, useFieldArray, useForm, UseFormReturn } from 'react-hook-form';
+import {
+  FieldArrayPath,
+  FieldErrors,
+  Merge,
+  Path,
+  SubmitHandler,
+  useFieldArray,
+  useForm,
+  UseFormReturn,
+} from 'react-hook-form';
 import { resourceMetadataItemSchema, ResourceMetadataItemView, TypeEnum, typeValues } from '~/models/resource.model';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormMessage } from '../ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem } from '../ui/form';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Button } from '../ui/button';
@@ -12,6 +21,7 @@ import { cn } from '~/lib/utils';
 import { dateUtil } from '~/lib/date.util';
 import { Calendar } from '../ui/calendar';
 import { Switch } from '../ui/switch';
+import { get } from 'lodash';
 
 type Props = {
   onSubmit: SubmitHandler<ResourceMetadataItemView>;
@@ -355,6 +365,17 @@ const TextPatternSettings = ({ type, form }: SettingsProps) => {
   );
 };
 
+type ErrorMessageProps = {
+  form: UseFormReturn<ResourceMetadataItemView, any, undefined>;
+  fieldPath: Path<ResourceMetadataItemView>;
+};
+
+function ErrorMessage({ form, fieldPath }: ErrorMessageProps) {
+  const error = get(form.formState.errors, fieldPath);
+  if (!error) return null;
+  return <div className="error">{error.message}</div>;
+}
+
 export default function ItemForm({ defaultValues, order, onSubmit }: Props) {
   const initValue = useMemo(() => {
     return (
@@ -414,7 +435,6 @@ export default function ItemForm({ defaultValues, order, onSubmit }: Props) {
                 <FormControl className="w-[300px]">
                   <Input placeholder="項目名" {...field} />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -427,7 +447,6 @@ export default function ItemForm({ defaultValues, order, onSubmit }: Props) {
                 <FormControl className="w-[300px]">
                   <Input placeholder="ラベル" {...field} />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -453,7 +472,6 @@ export default function ItemForm({ defaultValues, order, onSubmit }: Props) {
                     </SelectContent>
                   </Select>
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -466,11 +484,14 @@ export default function ItemForm({ defaultValues, order, onSubmit }: Props) {
                 <FormControl className="w-[300px]">
                   <Input placeholder="説明" {...field} />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
           {form.formState.errors.fieldName && <div className="error">{form.formState.errors.fieldName.message}</div>}
+          {form.formState.errors.label && <div className="error">{form.formState.errors.label.message}</div>}
+          {form.formState.errors.description && (
+            <div className="error">{form.formState.errors.description.message}</div>
+          )}
         </div>
 
         <div className="category">
@@ -493,6 +514,9 @@ export default function ItemForm({ defaultValues, order, onSubmit }: Props) {
         <DateLengthSettings type={type} form={form} />
         <TextPatternSettings type={type} form={form} />
         <SelectOptionsSettings type={type} form={form} />
+        <div className="text-right">
+          <Button type="submit">保存</Button>
+        </div>
       </form>
     </Form>
   );

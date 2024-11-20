@@ -45,11 +45,20 @@ export const validationInputSchema = z
 export const resourceMetadataItemSchema = z.object({
   fieldName: z
     .string()
-    .min(1)
-    .max(50)
-    .regex(/^[a-z][a-zA-Z]*$/, 'Field name must be in camelCase format (e.g. firstName, lastName)'),
-  label: z.string().min(1).max(20),
-  description: z.string().min(1).max(255),
+    .min(1, '項目の物理名: 1文字〜50文字でご入力ください')
+    .max(50, '項目の物理名: 1文字〜50文字でご入力ください')
+    .regex(
+      /^[a-z][a-zA-Z]*$/,
+      '項目の物理名: キャメルケース形式でアルファベットをご入力ください。(例. firstName, lastName)',
+    ),
+  label: z
+    .string()
+    .min(1, '項目ラベル: 1文字〜20文字でご入力ください')
+    .max(20, '項目ラベル: 1文字〜20文字でご入力ください'),
+  description: z
+    .string()
+    .min(1, '項目に対する説明: 1文字〜500文字でご入力ください')
+    .max(500, '項目に対する説明: 1文字〜500文字でご入力ください'),
   type: typeSchema,
   validation: validationInputSchema,
   order: z.number().int().min(0),
