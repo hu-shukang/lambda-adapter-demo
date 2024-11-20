@@ -1,8 +1,9 @@
 import { ResourceMetadataInput, ResourceMetadataItemView } from '~/models/resource.model';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Button } from '../ui/button';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { UseFieldArrayAppend, UseFieldArrayRemove, UseFieldArrayReplace, UseFieldArrayUpdate } from 'react-hook-form';
+import ItemFormDrawer from './item-form';
 
 type Props = {
   items: ResourceMetadataItemView[];
@@ -12,10 +13,20 @@ type Props = {
   replace: UseFieldArrayReplace<ResourceMetadataInput, 'items'>;
 };
 
-export default function ItemTable({ items, remove }: Props) {
+export default function ItemTable({ items, remove, append }: Props) {
+  const [openItemForm, setOpenItemForm] = useState(false);
+
   const edit = useCallback((item: ResourceMetadataItemView) => {
     console.log(item);
   }, []);
+
+  const submitHandler = useCallback(
+    (data: ResourceMetadataItemView) => {
+      append(data);
+      setOpenItemForm(false);
+    },
+    [append],
+  );
 
   return (
     <div className="space-y-2">
@@ -49,14 +60,16 @@ export default function ItemTable({ items, remove }: Props) {
                   </TableCell>
                 </TableRow>
               ))}
+
             <TableRow>
               <TableCell colSpan={8} className="h-24 text-center">
-                <Button>項目追加</Button>
+                <Button onClick={() => setOpenItemForm(true)}>項目追加</Button>
               </TableCell>
             </TableRow>
           </TableBody>
         </Table>
       </div>
+      <ItemFormDrawer open={openItemForm} setOpen={setOpenItemForm} onSubmit={submitHandler} order={items.length + 1} />
     </div>
   );
 }
