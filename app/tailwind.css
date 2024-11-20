@@ -125,15 +125,35 @@ body {
   .tree .tree-node:nth-last-child(1)::before {
     bottom: calc(var(--node-item-height) / 2);
   }
-}
 
-.toast[data-type='error'] {
-  --border: 0 96.3% 89.4%;
-  --background: 0 93.3% 94.1%;
-  --foreground: 0 84.2% 60.2%;
-}
+  .toast[data-type='error'] {
+    --border: 0 96.3% 89.4%;
+    --background: 0 93.3% 94.1%;
+    --foreground: 0 84.2% 60.2%;
+  }
 
-.toast[data-type='error'] button[data-close-button] {
-  background: hsl(var(--background));
-  border-color: hsl(var(--border));
+  .toast[data-type='error'] button[data-close-button] {
+    background: hsl(var(--background));
+    border-color: hsl(var(--border));
+  }
+
+  .resource-item-form {
+    @apply space-y-4 p-6;
+  }
+
+  .resource-item-form .category {
+    @apply flex flex-col gap-2 rounded-lg border p-4;
+  }
+
+  .resource-item-form .category .category-label {
+    @apply font-medium text-base h-[36px] flex items-center justify-between;
+  }
+
+  .resource-item-form .category .form-item {
+    @apply flex items-center justify-between space-y-0 h-[36px];
+  }
+
+  .resource-item-form .category .error {
+    @apply text-[0.8rem] text-red-400;
+  }
 }
