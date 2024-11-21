@@ -12,7 +12,7 @@ export default function Index() {
       <Link to={'/account'}>
         <Button>Go to account</Button>
       </Link>
-      <div className="w-[800px] mt-4 mx-auto">
+      <div className="w-[1000px] mt-4 mx-auto">
         <ResourceForm onSubmit={(data) => console.log(data)} />
       </div>
     </div>

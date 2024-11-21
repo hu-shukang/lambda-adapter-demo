@@ -4,7 +4,6 @@ import { Button } from '../ui/button';
 import { useCallback, useState } from 'react';
 import { UseFieldArrayAppend, UseFieldArrayRemove, UseFieldArrayReplace, UseFieldArrayUpdate } from 'react-hook-form';
 import ItemFormDialog from './item-form-dialog';
-import { Badge } from '../ui/badge';
 
 type Props = {
   items: ResourceMetadataItemView[];
@@ -16,7 +15,17 @@ type Props = {
 
 function ValidationView({ validation }: { validation: ValidationInput }) {
   if (!validation) return null;
-  return <div>{validation.required && <Badge variant="required">必須</Badge>}</div>;
+  return (
+    <div>
+      {validation.required && <div>必須</div>}
+      {validation.max && <div>最大値: {validation.max}</div>}
+      {validation.min && <div>最小値: {validation.min}</div>}
+      {validation.email && <div>形式: メールアドレス</div>}
+      {validation.url && <div>形式: URL</div>}
+      {validation.pattern && <div>形式: {validation.pattern}</div>}
+      {validation.integer && <div>形式: 整数のみ</div>}
+    </div>
+  );
 }
 
 export default function ItemTable({ items, remove, append }: Props) {
@@ -45,7 +54,7 @@ export default function ItemTable({ items, remove, append }: Props) {
               <TableHead className="w-[100px]">項目名</TableHead>
               <TableHead className="w-[100px]">ラベル</TableHead>
               <TableHead className="w-[100px]">タイプ</TableHead>
-              <TableHead className="w-[150px]">説明</TableHead>
+              <TableHead>説明</TableHead>
               <TableHead>入力規則</TableHead>
               <TableHead className="w-[150px]">アクション</TableHead>
             </TableRow>
