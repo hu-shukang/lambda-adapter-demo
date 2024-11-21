@@ -1,13 +1,4 @@
-import {
-  FieldArrayPath,
-  FieldErrors,
-  Merge,
-  Path,
-  SubmitHandler,
-  useFieldArray,
-  useForm,
-  UseFormReturn,
-} from 'react-hook-form';
+import { Path, SubmitHandler, useFieldArray, useForm, UseFormReturn } from 'react-hook-form';
 import { resourceMetadataItemSchema, ResourceMetadataItemView, TypeEnum, typeValues } from '~/models/resource.model';
 import { Form, FormControl, FormDescription, FormField, FormItem } from '../ui/form';
 import { Input } from '../ui/input';
@@ -160,12 +151,7 @@ const DateLengthSettings = ({ type, form }: SettingsProps) => {
           </FormItem>
         )}
       />
-      {form.formState.errors.validation?.min && (
-        <div className="error">{form.formState.errors.validation?.min.message}</div>
-      )}
-      {form.formState.errors.validation?.max && (
-        <div className="error">{form.formState.errors.validation?.max.message}</div>
-      )}
+      <ErrorMessageList form={form} fieldPaths={['validation.min', 'validation.max']} />
     </div>
   );
 };
@@ -229,12 +215,7 @@ const NumberLengthSettings = ({ type, form }: SettingsProps) => {
           </FormItem>
         )}
       />
-      {form.formState.errors.validation?.min && (
-        <div className="error">{form.formState.errors.validation.min.message}</div>
-      )}
-      {form.formState.errors.validation?.max && (
-        <div className="error">{form.formState.errors.validation.max.message}</div>
-      )}
+      <ErrorMessageList form={form} fieldPaths={['validation.min', 'validation.max']} />
     </div>
   );
 };
@@ -286,12 +267,7 @@ const TextLengthSettings = ({ type, form }: SettingsProps) => {
           </FormItem>
         )}
       />
-      {form.formState.errors.validation?.min && (
-        <div className="error">{form.formState.errors.validation.min.message}</div>
-      )}
-      {form.formState.errors.validation?.max && (
-        <div className="error">{form.formState.errors.validation.max.message}</div>
-      )}
+      <ErrorMessageList form={form} fieldPaths={['validation.min', 'validation.max']} />
     </div>
   );
 };
@@ -358,9 +334,7 @@ const TextPatternSettings = ({ type, form }: SettingsProps) => {
           </FormItem>
         )}
       />
-      {form.formState.errors.validation?.pattern && (
-        <div className="error">{form.formState.errors.validation.pattern.message}</div>
-      )}
+      <ErrorMessageList form={form} fieldPaths={['validation.pattern']} />
     </div>
   );
 };
@@ -374,6 +348,15 @@ function ErrorMessage({ form, fieldPath }: ErrorMessageProps) {
   const error = get(form.formState.errors, fieldPath);
   if (!error) return null;
   return <div className="error">{error.message}</div>;
+}
+
+type ErrorMessageListProps = {
+  form: UseFormReturn<ResourceMetadataItemView, any, undefined>;
+  fieldPaths: Array<Path<ResourceMetadataItemView>>;
+};
+
+function ErrorMessageList({ form, fieldPaths }: ErrorMessageListProps) {
+  return fieldPaths.map((fieldPath) => <ErrorMessage key={fieldPath.join('.')} form={form} fieldPath={fieldPath} />);
 }
 
 export default function ItemForm({ defaultValues, order, onSubmit }: Props) {
@@ -487,11 +470,7 @@ export default function ItemForm({ defaultValues, order, onSubmit }: Props) {
               </FormItem>
             )}
           />
-          {form.formState.errors.fieldName && <div className="error">{form.formState.errors.fieldName.message}</div>}
-          {form.formState.errors.label && <div className="error">{form.formState.errors.label.message}</div>}
-          {form.formState.errors.description && (
-            <div className="error">{form.formState.errors.description.message}</div>
-          )}
+          <ErrorMessageList form={form} fieldPaths={['fieldName', 'label', 'description']} />
         </div>
 
         <div className="category">
