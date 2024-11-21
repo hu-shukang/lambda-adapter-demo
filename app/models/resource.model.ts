@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { color, name } from './common.model';
+import lodash from 'lodash';
 
 const checkRegex = (pattern: string | undefined) => {
   if (!pattern) return true; // Allow empty for optional
@@ -26,9 +27,7 @@ export const validationInputSchema = z
     max: z.number().int().optional(),
     email: z.boolean().optional(),
     url: z.boolean().optional(),
-    pattern: z.string().optional().refine(checkRegex, {
-      message: 'Invalid regular expression pattern',
-    }),
+    pattern: z.string().optional(),
     integer: z.boolean().optional(),
     options: z.array(optionsSchema).optional(),
   })
@@ -36,33 +35,50 @@ export const validationInputSchema = z
     if (data.min !== undefined && data.max !== undefined && data.min > data.max) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Min value must be less than max value',
+        message: '最小値は最大値以下である必要があります',
         path: ['min'],
+      });
+    }
+    if (data.pattern && !checkRegex(data.pattern)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: '正規表現のパターンが正しくありません',
+        path: ['pattern'],
       });
     }
   });
 
-export const resourceMetadataItemSchema = z.object({
-  fieldName: z
-    .string()
-    .min(1, '項目の物理名: 1文字〜50文字でご入力ください')
-    .max(50, '項目の物理名: 1文字〜50文字でご入力ください')
-    .regex(
-      /^[a-z][a-zA-Z]*$/,
-      '項目の物理名: キャメルケース形式でアルファベットをご入力ください。(例. firstName, lastName)',
-    ),
-  label: z
-    .string()
-    .min(1, '項目ラベル: 1文字〜20文字でご入力ください')
-    .max(20, '項目ラベル: 1文字〜20文字でご入力ください'),
-  description: z
-    .string()
-    .min(1, '項目に対する説明: 1文字〜500文字でご入力ください')
-    .max(500, '項目に対する説明: 1文字〜500文字でご入力ください'),
-  type: typeSchema,
-  validation: validationInputSchema,
-  order: z.number().int().min(0),
-});
+export const resourceMetadataItemSchema = z
+  .object({
+    fieldName: z
+      .string()
+      .min(1, '項目の物理名: 1文字〜50文字でご入力ください')
+      .max(50, '項目の物理名: 1文字〜50文字でご入力ください')
+      .regex(
+        /^[a-z][a-zA-Z]*$/,
+        '項目の物理名: キャメルケース形式でアルファベットをご入力ください。(例. firstName, lastName)',
+      ),
+    label: z
+      .string()
+      .min(1, '項目ラベル: 1文字〜20文字でご入力ください')
+      .max(20, '項目ラベル: 1文字〜20文字でご入力ください'),
+    description: z
+      .string()
+      .min(1, '項目に対する説明: 1文字〜500文字でご入力ください')
+      .max(500, '項目に対する説明: 1文字〜500文字でご入力ください'),
+    type: typeSchema,
+    validation: validationInputSchema,
+    order: z.number().int().min(0),
+  })
+  .superRefine((data, ctx) => {
+    if (['select'].includes(data.type) && lodash.isEmpty(data.validation.options)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: '選択肢が必要です',
+        path: ['validation', 'options'],
+      });
+    }
+  });
 
 export const resourceMetadataInputSchema = z.object({
   name: name,

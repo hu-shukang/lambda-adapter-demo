@@ -1,5 +1,5 @@
 import { Link } from '@remix-run/react';
-import ItemForm from '~/components/resource/item-form';
+import ResourceForm from '~/components/resource/resource-form';
 import { Button } from '~/components/ui/button';
 
 export default function Index() {
@@ -13,12 +13,7 @@ export default function Index() {
         <Button>Go to account</Button>
       </Link>
       <div className="w-[800px] mt-4 mx-auto">
-        <ItemForm
-          onSubmit={(data) => {
-            console.log(data);
-          }}
-          order={1}
-        />
+        <ResourceForm onSubmit={(data) => console.log(data)} />
       </div>
     </div>
   );

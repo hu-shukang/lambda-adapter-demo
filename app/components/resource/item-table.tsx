@@ -1,9 +1,10 @@
-import { ResourceMetadataInput, ResourceMetadataItemView } from '~/models/resource.model';
+import { ResourceMetadataInput, ResourceMetadataItemView, ValidationInput } from '~/models/resource.model';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Button } from '../ui/button';
 import { useCallback, useState } from 'react';
 import { UseFieldArrayAppend, UseFieldArrayRemove, UseFieldArrayReplace, UseFieldArrayUpdate } from 'react-hook-form';
-import ItemFormDrawer from './item-form';
+import ItemFormDialog from './item-form-dialog';
+import { Badge } from '../ui/badge';
 
 type Props = {
   items: ResourceMetadataItemView[];
@@ -12,6 +13,11 @@ type Props = {
   update: UseFieldArrayUpdate<ResourceMetadataInput, 'items'>;
   replace: UseFieldArrayReplace<ResourceMetadataInput, 'items'>;
 };
+
+function ValidationView({ validation }: { validation: ValidationInput }) {
+  if (!validation) return null;
+  return <div>{validation.required && <Badge variant="required">必須</Badge>}</div>;
+}
 
 export default function ItemTable({ items, remove, append }: Props) {
   const [openItemForm, setOpenItemForm] = useState(false);
@@ -53,7 +59,9 @@ export default function ItemTable({ items, remove, append }: Props) {
                   <TableCell>{item.label}</TableCell>
                   <TableCell>{item.type}</TableCell>
                   <TableCell>{item.description}</TableCell>
-                  <TableCell>{item.validation}</TableCell>
+                  <TableCell>
+                    <ValidationView validation={item.validation} />
+                  </TableCell>
                   <TableCell>
                     <Button onClick={() => remove(index)}>削除</Button>
                     <Button onClick={() => edit(item)}>編集</Button>
@@ -69,7 +77,7 @@ export default function ItemTable({ items, remove, append }: Props) {
           </TableBody>
         </Table>
       </div>
-      <ItemFormDrawer open={openItemForm} setOpen={setOpenItemForm} onSubmit={submitHandler} order={items.length + 1} />
+      <ItemFormDialog open={openItemForm} setOpen={setOpenItemForm} onSubmit={submitHandler} order={items.length + 1} />
     </div>
   );
 }

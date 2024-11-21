@@ -12,12 +12,16 @@ import { cn } from '~/lib/utils';
 import { dateUtil } from '~/lib/date.util';
 import { Calendar } from '../ui/calendar';
 import { Switch } from '../ui/switch';
-import { get } from 'lodash';
+import lodash from 'lodash';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
+import { ScrollArea } from '../ui/scroll-area';
 
 type Props = {
   onSubmit: SubmitHandler<ResourceMetadataItemView>;
   defaultValues?: ResourceMetadataItemView;
   order: number;
+  open: boolean;
+  setOpen: (open: boolean) => void;
 };
 
 type SettingsProps = {
@@ -82,6 +86,7 @@ const SelectOptionsSettings = ({ type, form }: SettingsProps) => {
           </Button>
         </div>
       ))}
+      <ErrorMessageList form={form} fieldPaths={['validation.options']} />
     </div>
   );
 };
@@ -345,7 +350,7 @@ type ErrorMessageProps = {
 };
 
 function ErrorMessage({ form, fieldPath }: ErrorMessageProps) {
-  const error = get(form.formState.errors, fieldPath);
+  const error = lodash.get(form.formState.errors, fieldPath);
   if (!error) return null;
   return <div className="error">{error.message}</div>;
 }
@@ -356,10 +361,10 @@ type ErrorMessageListProps = {
 };
 
 function ErrorMessageList({ form, fieldPaths }: ErrorMessageListProps) {
-  return fieldPaths.map((fieldPath) => <ErrorMessage key={fieldPath.join('.')} form={form} fieldPath={fieldPath} />);
+  return fieldPaths.map((fieldPath) => <ErrorMessage key={fieldPath} form={form} fieldPath={fieldPath} />);
 }
 
-export default function ItemForm({ defaultValues, order, onSubmit }: Props) {
+export default function ItemFormDialog({ defaultValues, order, onSubmit, open, setOpen }: Props) {
   const initValue = useMemo(() => {
     return (
       defaultValues || {
@@ -368,7 +373,7 @@ export default function ItemForm({ defaultValues, order, onSubmit }: Props) {
         label: '',
         type: 'text' as TypeEnum,
         description: '',
-        validation: { required: false, options: [{ value: '', label: '' }] },
+        validation: { required: false, options: [], pattern: '' },
       }
     );
   }, [defaultValues, order]);
@@ -393,110 +398,127 @@ export default function ItemForm({ defaultValues, order, onSubmit }: Props) {
   }, [form, initValue]);
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="resource-item-form">
-        <div className="category">
-          <div className="category-label">基本設定</div>
-          <FormField
-            control={form.control}
-            name="order"
-            render={({ field }) => (
-              <FormItem className="form-item">
-                <FormDescription>表示順</FormDescription>
-                <FormControl className="w-[300px]">
-                  <Input {...field} readOnly={true} disabled={true} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="fieldName"
-            render={({ field }) => (
-              <FormItem className="form-item">
-                <FormDescription>項目の物理名(英語のみ許可)</FormDescription>
-                <FormControl className="w-[300px]">
-                  <Input placeholder="項目名" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="label"
-            render={({ field }) => (
-              <FormItem className="form-item">
-                <FormDescription>項目ラベル(日本語入力可)</FormDescription>
-                <FormControl className="w-[300px]">
-                  <Input placeholder="ラベル" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem className="form-item">
-                <FormDescription>タイプ</FormDescription>
-                <FormControl>
-                  <Select onValueChange={typeChangeHandler} defaultValue={field.value}>
-                    <SelectTrigger className="w-[300px]">
-                      <SelectValue placeholder="type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {typeValues.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem className="form-item">
-                <FormDescription>項目に対する説明</FormDescription>
-                <FormControl className="w-[300px]">
-                  <Input placeholder="説明" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <ErrorMessageList form={form} fieldPaths={['fieldName', 'label', 'description']} />
-        </div>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="w-[800px] h-[90vh] max-w-full grid-rows-[68px_1fr_60px]">
+        <DialogHeader>
+          <DialogTitle>項目設定</DialogTitle>
+          <DialogDescription>下記の設定値を入れてください。</DialogDescription>
+        </DialogHeader>
+        <ScrollArea className="w-full border-y">
+          <Form {...form}>
+            <form className="resource-item-form">
+              <div className="category">
+                <div className="category-label">基本設定</div>
+                <FormField
+                  control={form.control}
+                  name="order"
+                  render={({ field }) => (
+                    <FormItem className="form-item">
+                      <FormDescription>表示順</FormDescription>
+                      <FormControl className="w-[300px]">
+                        <Input {...field} readOnly={true} disabled={true} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="fieldName"
+                  render={({ field }) => (
+                    <FormItem className="form-item">
+                      <FormDescription>項目の物理名(英語のみ許可)</FormDescription>
+                      <FormControl className="w-[300px]">
+                        <Input placeholder="項目名" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="label"
+                  render={({ field }) => (
+                    <FormItem className="form-item">
+                      <FormDescription>項目ラベル(日本語入力可)</FormDescription>
+                      <FormControl className="w-[300px]">
+                        <Input placeholder="ラベル" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem className="form-item">
+                      <FormDescription>タイプ</FormDescription>
+                      <FormControl>
+                        <Select onValueChange={typeChangeHandler} defaultValue={field.value}>
+                          <SelectTrigger className="w-[300px]">
+                            <SelectValue placeholder="type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {typeValues.map((type) => (
+                                <SelectItem key={type} value={type}>
+                                  {type}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem className="form-item">
+                      <FormDescription>項目に対する説明</FormDescription>
+                      <FormControl className="w-[300px]">
+                        <Input placeholder="説明" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <ErrorMessageList form={form} fieldPaths={['fieldName', 'label', 'description']} />
+              </div>
 
-        <div className="category">
-          <div className="category-label">必須設定</div>
-          <FormField
-            control={form.control}
-            name="validation.required"
-            render={({ field }) => (
-              <FormItem className="form-item">
-                <FormDescription>この項目は必須入力ですか</FormDescription>
-                <FormControl>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </div>
-        <TextLengthSettings type={type} form={form} />
-        <NumberLengthSettings type={type} form={form} />
-        <DateLengthSettings type={type} form={form} />
-        <TextPatternSettings type={type} form={form} />
-        <SelectOptionsSettings type={type} form={form} />
-        <div className="text-right">
-          <Button type="submit">保存</Button>
-        </div>
-      </form>
-    </Form>
+              <div className="category">
+                <div className="category-label">必須設定</div>
+                <FormField
+                  control={form.control}
+                  name="validation.required"
+                  render={({ field }) => (
+                    <FormItem className="form-item">
+                      <FormDescription>この項目は必須入力ですか</FormDescription>
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <TextLengthSettings type={type} form={form} />
+              <NumberLengthSettings type={type} form={form} />
+              <DateLengthSettings type={type} form={form} />
+              <TextPatternSettings type={type} form={form} />
+              <SelectOptionsSettings type={type} form={form} />
+            </form>
+          </Form>
+        </ScrollArea>
+        <DialogFooter>
+          <Button
+            type="button"
+            onClick={() => {
+              form.handleSubmit(onSubmit)();
+            }}
+          >
+            保存
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
