@@ -1,5 +1,5 @@
 import * as React from 'react';
-
+import { motion, MotionProps } from 'framer-motion';
 import { cn } from '~/lib/utils';
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
@@ -30,15 +30,32 @@ const TableFooter = React.forwardRef<HTMLTableSectionElement, React.HTMLAttribut
 );
 TableFooter.displayName = 'TableFooter';
 
-const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(
-  ({ className, ...props }, ref) => (
-    <tr
-      ref={ref}
-      className={cn('border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted', className)}
-      {...props}
-    />
-  ),
-);
+type TableRowProps = React.HTMLAttributes<HTMLTableRowElement>;
+
+const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(({ className, ...props }, ref) => {
+  if (props.draggable) {
+    return (
+      <motion.tr
+        ref={ref}
+        className={cn('border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted', className)}
+        {...(props as MotionProps)}
+        layout
+        initial={{ opacity: 0, y: 20 }} // 初始进入动画
+        animate={{ opacity: 1, y: 0 }} // 平滑移动动画
+        exit={{ opacity: 0, y: -20 }} // 退出动画
+        transition={{ duration: 0.3 }} // 动画持续时间
+      />
+    );
+  } else {
+    return (
+      <tr
+        ref={ref}
+        className={cn('border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted', className)}
+        {...props}
+      />
+    );
+  }
+});
 TableRow.displayName = 'TableRow';
 
 const TableHead = React.forwardRef<HTMLTableCellElement, React.ThHTMLAttributes<HTMLTableCellElement>>(
