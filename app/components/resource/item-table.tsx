@@ -1,4 +1,4 @@
-import { ResourceMetadataInput, ResourceMetadataItemView, ValidationInput } from '~/models/resource.model';
+import { ResourceMetadataInput, ResourceMetadataItemView, TypeEnum, ValidationInput } from '~/models/resource.model';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Button } from '../ui/button';
 import { useCallback, useState } from 'react';
@@ -35,19 +35,39 @@ function ValidationView({ validation }: { validation: ValidationInput }) {
   );
 }
 
-export default function ItemTable({ items, remove, append, replace }: Props) {
-  const [openItemForm, setOpenItemForm] = useState(false);
+const initFormValue: ResourceMetadataItemView = {
+  order: 1,
+  fieldName: '',
+  label: '',
+  type: 'text' as TypeEnum,
+  description: '',
+  validation: { required: false, options: [], pattern: '' },
+};
 
-  const edit = useCallback((item: ResourceMetadataItemView) => {
-    console.log(item);
+export default function ItemTable({ items, remove, append, replace, update }: Props) {
+  const [openItemForm, setOpenItemForm] = useState(false);
+  const [defaultFormValue, setDefaultFormValue] = useState<ResourceMetadataItemView>(initFormValue);
+
+  const editHandler = useCallback((item: ResourceMetadataItemView) => {
+    setDefaultFormValue(item);
+    setOpenItemForm(true);
   }, []);
+
+  const appendHandler = useCallback(() => {
+    setDefaultFormValue({ ...initFormValue, order: items.length + 1 });
+    setOpenItemForm(true);
+  }, [items.length]);
 
   const submitHandler = useCallback(
     (data: ResourceMetadataItemView) => {
-      append(data);
+      if (data.order < items.length) {
+        update(data.order, data);
+      } else {
+        append(data);
+      }
       setOpenItemForm(false);
     },
-    [append],
+    [append, items, update],
   );
 
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -117,7 +137,7 @@ export default function ItemTable({ items, remove, append, replace }: Props) {
                     <Button onClick={() => remove(index)} size="icon" variant="outline">
                       <TrashIcon />
                     </Button>
-                    <Button onClick={() => edit({ ...item, order: index })} size="icon" variant="outline">
+                    <Button onClick={() => editHandler({ ...item, order: index })} size="icon" variant="outline">
                       <Pencil1Icon />
                     </Button>
                   </TableCell>
@@ -126,7 +146,7 @@ export default function ItemTable({ items, remove, append, replace }: Props) {
 
             <TableRow>
               <TableCell colSpan={8} className="h-24 text-center">
-                <Button onClick={() => setOpenItemForm(true)} variant="outline">
+                <Button onClick={appendHandler} variant="outline">
                   <PlusIcon />
                   <span className="ml-2">項目追加</span>
                 </Button>
@@ -135,7 +155,12 @@ export default function ItemTable({ items, remove, append, replace }: Props) {
           </TableBody>
         </Table>
       </div>
-      <ItemFormDialog open={openItemForm} setOpen={setOpenItemForm} onSubmit={submitHandler} order={items.length + 1} />
+      <ItemFormDialog
+        open={openItemForm}
+        setOpen={setOpenItemForm}
+        onSubmit={submitHandler}
+        defaultValues={defaultFormValue}
+      />
     </div>
   );
 }

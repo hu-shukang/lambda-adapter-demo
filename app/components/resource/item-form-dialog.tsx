@@ -5,7 +5,7 @@ import { Input } from '../ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Button } from '../ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { CalendarIcon, MinusIcon, PlusIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { cn } from '~/lib/utils';
@@ -18,8 +18,7 @@ import { ScrollArea } from '../ui/scroll-area';
 
 type Props = {
   onSubmit: SubmitHandler<ResourceMetadataItemView>;
-  defaultValues?: ResourceMetadataItemView;
-  order: number;
+  defaultValues: ResourceMetadataItemView;
   open: boolean;
   setOpen: (open: boolean) => void;
 };
@@ -364,24 +363,11 @@ function ErrorMessageList({ form, fieldPaths }: ErrorMessageListProps) {
   return fieldPaths.map((fieldPath) => <ErrorMessage key={fieldPath} form={form} fieldPath={fieldPath} />);
 }
 
-export default function ItemFormDialog({ defaultValues, order, onSubmit, open, setOpen }: Props) {
-  const initValue = useMemo(() => {
-    return (
-      defaultValues || {
-        order: order,
-        fieldName: '',
-        label: '',
-        type: 'text' as TypeEnum,
-        description: '',
-        validation: { required: false, options: [], pattern: '' },
-      }
-    );
-  }, [defaultValues, order]);
-
-  const [type, setType] = useState<TypeEnum>(initValue.type);
+export default function ItemFormDialog({ defaultValues, onSubmit, open, setOpen }: Props) {
+  const [type, setType] = useState<TypeEnum>(defaultValues.type);
 
   const form = useForm<ResourceMetadataItemView>({
-    defaultValues: initValue,
+    defaultValues: defaultValues,
     resolver: zodResolver(resourceMetadataItemSchema),
   });
 
@@ -394,8 +380,8 @@ export default function ItemFormDialog({ defaultValues, order, onSubmit, open, s
   );
 
   useEffect(() => {
-    form.reset(initValue);
-  }, [form, initValue]);
+    form.reset(defaultValues);
+  }, [form, defaultValues]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
